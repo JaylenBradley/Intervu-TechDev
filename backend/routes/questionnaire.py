@@ -1,0 +1,6 @@
+career_goal = input()
+major = input()
+education_level = input()
+passions = input()
+institution = input()
+target_companies = input()
