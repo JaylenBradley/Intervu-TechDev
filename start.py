@@ -1,14 +1,14 @@
 import os
 from questionnaire import questionnaire, get_roadmap
-from resume import save_parsed_data_to_db, extract_text_from_pdf, ai_parse_resume_with_gemini, ai_improve_resume_with_gemini, save_text_as_pdf
-
+from resume import get_latest_resume_content, init_db, ai_give_specific_feedback, save_parsed_data_to_db, extract_text_from_pdf, ai_parse_resume_with_gemini, ai_improve_resume_with_gemini, save_text_as_pdf
 def main_menu():
     print("\nWelcome to Navia Career Navigator")
     print("-----------------------------------")
     print("Choose an option:")
     print("1. Fill out Career Questionnaire")
-    print("2. Parse Resume PDF")
-    print("3. Improve Resume and Save as PDF")
+    print("2. Add Resume to database")
+    print("3. Generate a new improved Resume and Save as PDF")
+    print("4. Give feedback and alternatives to resume")
     print("0. Exit")
 
 def run_questionnaire():
@@ -23,18 +23,17 @@ def parse_resume():
     if not os.path.exists(file_path):
         print("File not found.")
         return
-    raw_text = extract_text_from_pdf(file_path)
+    raw_text = extract_text_from_pdf(user_id, file_path)
     parsed_json = ai_parse_resume_with_gemini(raw_text)
     save_parsed_data_to_db(parsed_json, db_url="sqlite:///career_prep_data.db")
-    print("\nParsed Resume (JSON format):\n")
-    print(parsed_json)
+    print("Resume added succesfully\n")
 
 def improve_resume():
-    file_path = input("Enter full file path to your resume PDF: ").strip()
-    if not os.path.exists(file_path):
-        print("File not found.")
+    raw_text = get_latest_resume_content(user_id)
+    if not raw_text:
+        print("No resume found in database. Please add one first with option 2.")
         return
-    raw_text = extract_text_from_pdf(file_path)
+    
     improved = ai_improve_resume_with_gemini(raw_text)
     print("\nImproved Resume:\n")
     print(improved)
@@ -42,7 +41,19 @@ def improve_resume():
     save_text_as_pdf(improved, save_path)
     print(f"Resume saved as PDF to {save_path}")
 
+def resume_feedback():
+    raw_text = get_latest_resume_content(user_id)
+    if not raw_text:
+        print("No resume found in database. Please add one first with option 2.")
+        return
+    feedback = ai_give_specific_feedback(raw_text)
+    print(feedback)
+
 if __name__ == "__main__":
+    init_db()
+    user_id = 3
+
+
     while True:
         main_menu()
         choice = input("Enter your choice: ").strip()
@@ -52,6 +63,8 @@ if __name__ == "__main__":
             parse_resume()
         elif choice == "3":
             improve_resume()
+        elif choice == '4':
+            resume_feedback()
         elif choice == "0":
             print("Goodbye!")
             break
