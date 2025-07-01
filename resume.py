@@ -99,6 +99,7 @@ def extract_text_from_pdf(user_id, file_path, db_url=DB_PATH):
     conn.close()
     return text
 
+# queries your resume from the database
 def get_latest_resume_content(user_id):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
