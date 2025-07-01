@@ -1,6 +1,6 @@
 import os
 from questionnaire import questionnaire, get_roadmap
-from resume import extract_text_from_pdf, ai_parse_resume_with_gemini, ai_improve_resume_with_gemini, save_text_as_pdf
+from resume import save_parsed_data_to_db, extract_text_from_pdf, ai_parse_resume_with_gemini, ai_improve_resume_with_gemini, save_text_as_pdf
 
 def main_menu():
     print("\nWelcome to Navia Career Navigator")
@@ -25,6 +25,7 @@ def parse_resume():
         return
     raw_text = extract_text_from_pdf(file_path)
     parsed_json = ai_parse_resume_with_gemini(raw_text)
+    save_parsed_data_to_db(parsed_json, db_url="sqlite:///career_prep_data.db")
     print("\nParsed Resume (JSON format):\n")
     print(parsed_json)
 
