@@ -96,15 +96,15 @@ def save_text_as_pdf(text, output_path):
     
     pdf.output(output_path)
 
-if __name__ == "__main__":
-    file_path = r"C:\Users\saman\Desktop\coso\mock_resume.pdf"
-    #raw_text = extract_text_from_pdf(file_path)
-    improved = improve_pdf_resume(file_path)
-    print(improved)
-    # parsed = ai_parse_resume_with_gemini(raw_text)
-    #df = save_parsed_data_to_db(mock2)
-    #print(df)
+# if __name__ == "__main__":
+#     file_path = r"C:\Users\saman\Desktop\coso\mock_resume.pdf"
+#     #aw_text = extract_text_from_pdf(file_path)
+#     improved = improve_pdf_resume(file_path)
+#     print(improved)
+#     parsed = ai_parse_resume_with_gemini(raw_text)
+#     df = save_parsed_data_to_db(mock2)
+#     print(df)
 
-    output_pdf = r"C:/Users/saman/Desktop/coso/improved_resume.pdf"
-    save_text_as_pdf(improved, output_pdf)
-    print(f"Improved resume written to {output_pdf}")
+#     output_pdf = r"C:/Users/saman/Desktop/coso/improved_resume.pdf"
+#     save_text_as_pdf(improved, output_pdf)
+#     print(f"Improved resume written to {output_pdf}")
