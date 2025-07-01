@@ -1,5 +1,6 @@
 import os
-from questionnaire import questionnaire, get_roadmap
+from questionnaire import questionnaire
+from gemini import get_roadmap
 from resume import save_parsed_data_to_db, extract_text_from_pdf, ai_parse_resume_with_gemini, ai_improve_resume_with_gemini, save_text_as_pdf
 
 def main_menu():
@@ -15,7 +16,7 @@ def run_questionnaire():
     print("\n--- Career Questionnaire ---")
     answers = questionnaire()
     roadmap = get_roadmap(answers)
-    print("\n Roadmap based on your answers:\n")
+    print("\nRoadmap based on your answers:\n")
     print(roadmap.text)
 
 def parse_resume():
