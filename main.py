@@ -20,6 +20,7 @@ def run_questionnaire():
     roadmap = get_roadmap(answers)
     print("\nRoadmap based on your answers:\n")
     print(roadmap.text)
+    print('\n')
 
 def parse_resume():
     file_path = input("Enter full file path to your resume PDF: ").strip()
@@ -30,6 +31,7 @@ def parse_resume():
     parsed_json = ai_parse_resume_with_gemini(raw_text)
     save_parsed_data_to_db(parsed_json, db_url="sqlite:///career_prep_data.db")
     print("Resume added succesfully\n")
+    print('\n')
 
 def improve_resume():
     raw_text = get_latest_resume_content(user_id)
@@ -43,11 +45,13 @@ def improve_resume():
     save_path = input("Enter output path for PDF (e.g. improved_resume.pdf): ").strip()
     save_text_as_pdf(improved, save_path)
     print(f"Resume saved as PDF to {save_path}")
+    print('\n')
 
 def resume_feedback():
     raw_text = get_latest_resume_content(user_id)
     if not raw_text:
         print("No resume found in database. Please add one first with option 2.")
+        print('\n')
         return
     feedback = ai_give_specific_feedback(raw_text)
     print(feedback)
