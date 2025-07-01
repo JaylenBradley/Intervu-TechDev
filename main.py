@@ -3,8 +3,12 @@ from questionnaire import questionnaire
 from get_roadmap import get_roadmap
 from get_relevant_videos import get_videos
 from resume import get_latest_resume_content, init_db, ai_give_specific_feedback, save_parsed_data_to_db, extract_text_from_pdf, ai_parse_resume_with_gemini, ai_improve_resume_with_gemini, save_text_as_pdf
+
 def main_menu():
-    print("\nWelcome to Navia Career Navigator")
+    print("\nWelcome to Navia Career Navigator:")
+    print("Your AI-powered assistant for exploring careers, "
+          "improving your resume, and finding resources to boost your professional journey."
+          )
     print("-----------------------------------")
     print("Choose an option:")
     print("1. Fill out Career Questionnaire")
@@ -17,10 +21,14 @@ def main_menu():
 def run_questionnaire():
     print("\n--- Career Questionnaire ---")
     answers = questionnaire()
-    roadmap = get_roadmap(answers)
-    print("\nRoadmap based on your answers:\n")
-    print(roadmap.text)
-    print('\n')
+    if not answers:
+        main_menu()
+    else:
+        print("Generating your roadmap...")
+        roadmap = get_roadmap(answers)
+        print("\nRoadmap based on your answers:\n")
+        print(roadmap.text)
+        print('\n')
 
 def parse_resume():
     file_path = input("Enter full file path to your resume PDF: ").strip()
@@ -77,7 +85,6 @@ def video_recommendations():
 if __name__ == "__main__":
     init_db()
     user_id = 3
-
 
     while True:
         main_menu()
