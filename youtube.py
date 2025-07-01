@@ -1,9 +1,12 @@
+import os
+from dotenv import load_dotenv
+import requests
 import sqlalchemy as db
 import pandas as pd
-import requests
 
+load_dotenv()
 url = 'https://www.googleapis.com/youtube/v3/search'
-api_key = 'AIzaSyACnusZfvY90QomZMRJ2LOnHmJurskYkZI'
+api_key = os.getenv('YOUTUBE_API_KEY')
 
 params = {
     'part': 'snippet',

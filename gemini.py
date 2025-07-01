@@ -1,8 +1,8 @@
 import os
 from dotenv import load_dotenv
+import json
 from google import genai
 from google.genai import types
-import json
 
 load_dotenv()
 api_key = os.getenv('GENAI_API_KEY')
