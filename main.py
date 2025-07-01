@@ -1,6 +1,7 @@
 import os
 from questionnaire import questionnaire
 from get_roadmap import get_roadmap
+from get_relevant_videos import get_videos
 from resume import get_latest_resume_content, init_db, ai_give_specific_feedback, save_parsed_data_to_db, extract_text_from_pdf, ai_parse_resume_with_gemini, ai_improve_resume_with_gemini, save_text_as_pdf
 def main_menu():
     print("\nWelcome to Navia Career Navigator")
@@ -10,6 +11,7 @@ def main_menu():
     print("2. Add Resume to database")
     print("3. Generate a new improved Resume and Save as PDF")
     print("4. Give feedback and alternatives to resume")
+    print("5. Get YouTube video recommendations")
     print("0. Exit")
 
 def run_questionnaire():
@@ -50,6 +52,24 @@ def resume_feedback():
     feedback = ai_give_specific_feedback(raw_text)
     print(feedback)
 
+def video_recommendations():
+    print("\n--- YouTube Video Recommendations ---")
+    query = input("Enter topic to search: ").strip()
+    print("Duration options: any, short, medium, long")
+    valid_durations = ('any', 'short', 'medium', 'long')
+    while True:
+        duration_input = input("Choose a duration filter (default 'any'): ").strip().lower()
+        if duration_input == "":
+            duration = "any"
+            break
+        if duration_input in valid_durations:
+            duration = duration_input
+            break
+        print(f"Invalid duration '{duration_input}'. Please enter one of: {', '.join(valid_durations)}")
+    
+    get_videos(query, duration)
+
+
 if __name__ == "__main__":
     init_db()
     user_id = 3
@@ -66,8 +86,10 @@ if __name__ == "__main__":
             improve_resume()
         elif choice == '4':
             resume_feedback()
+        elif choice == "5":
+            video_recommendations()
         elif choice == "0":
             print("Goodbye!")
             break
         else:
-            print("Invalid input. Please enter 1, 2, 3, or 0.")
+            print("Invalid input. Please enter 1, 2, 3, 4, 5 or 0.")
