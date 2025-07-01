@@ -1,6 +1,6 @@
 import os
 from questionnaire import questionnaire
-from gemini import get_roadmap
+from get_roadmap import get_roadmap
 from resume import save_parsed_data_to_db, extract_text_from_pdf, ai_parse_resume_with_gemini, ai_improve_resume_with_gemini, save_text_as_pdf
 
 def main_menu():
