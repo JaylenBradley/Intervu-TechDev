@@ -1,0 +1,110 @@
+import os
+import json
+from google import genai
+from google.genai import types
+from PyPDF2 import PdfReader
+import pandas as pd
+import sqlalchemy as db
+from dotenv import load_dotenv
+from fpdf import FPDF
+load_dotenv()
+
+mock2 = {'education': 'Bachelor of Science, Computer Science , Minor in Business | Expected May 2027\nUniversity of Kansas | Lawrence, KS\n• GPA: 4.0 | Member of the Honors Program , University Scholar, Undergraduate Research Fellow', 'experience': 'Open Source Developer | May 2024 – Sep 2024\nGoogle Summer of Code – Lappis | Remote\n• Selected among top 3% of 43,984 applicants for GSoC, receiving mentorship to develop a data integration \nframework between Empurrando Juntas (EJ) and Decidim .\n• Optimized clustering and platform speed by integrating Celery and RabbitMQ for asynchronous task management. \n• Cut execution time by 35% through parallelization and refactoring data handling with Joblib, NumPy. \n\nResearch Technician | Oct 2023 – Jun 2024\nWispr AI | Lawrence, KS\n• Enhanced neuromuscular data collection accuracy by 15% using surface EMG sensors during speech tasks. \n• Produced detailed lab reports by interpreting and storing biophysiological data from 100 + research sessions. \n• Managed session scheduling, communications, and payments for research participants. \n\nUndergraduate Research Assistant | Sep 2023 – Present\nCenter for Remote Sensing and Integrated Systems (CReSIS) | Lawrence, KS\n• Optimized data visualization and user interaction in the OPS Geoportal website, improving geospatial data access \nfor climate change researchers. \n• Collaborate d with a team to apply supervised learning models to identify glacier layers from echogram images. \n• Debugged JavaScript features, including Antarctic/Artic transitions, and echogram image browser issues.', 'skills': '• Programming Languages: Python, C, C++, SQL, JavaScript, Type Scrip t, HTML/CSS \n• Tools: Git, Linux, Docker, Azure , AWS , TensorFlow, Scikit -Learn , Figma \n• Certifications: Machine Learning Specialization (University of Washington), HTML, CSS, and JavaScript for Web \nDevelopers (Johns Hopkins University)', 'projects': 'KU Parking app | React Native, Typescript, Firebase, Goo gle Map s API \n• Developed a mobile app that recommends optimal parking locations based on user -reported availability, permit \ntype, and distance. \n\nReflect ly | JavaScript, Node.js, Express.js, MongoDB, Passport.js \n• Developed a responsive and user -friendly journaling app , applying UX design principles to enhance the note -taking \nexperience. Implemented secure authentication with Passport.js and built a scalable backend using Node.js, \nExpress.js, and MongoDB to efficiently manage user data.'}
+
+# Configure Gemini
+genai.api_key = os.getenv('GENAI_API_KEY')
+client = genai.Client(api_key=genai.api_key)
+
+# Utility to extract raw text from the PDF
+def extract_text_from_pdf(file_path):
+    reader = PdfReader(file_path)
+    text = ""
+    for page in reader.pages:
+        text += (page.extract_text() or "") + "\n"
+    return text
+
+# Use Gemini to turn raw text into structured JSON
+def ai_parse_resume_with_gemini(resume_text):
+    prompt = f"""
+You are a resume parser. Given the following resume text, output ONLY text that is in the form of valid JSON **do not include markdown back-ticks actual json format, just normal text that would be valid as json. also dont include newline symbols
+- education: string
+- experience: string
+- skills: string
+- projects: string
+Resume text:
+{resume_text}
+"""
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        config=types.GenerateContentConfig(temperature=0.0),
+        contents=prompt
+    )
+    print(json.loads(response.text))
+    return json.loads(response.text)
+
+# Saves the data to SQL
+def save_parsed_data_to_db(data, db_url="sqlite:///career_prep_data.db"):
+    df = pd.DataFrame.from_dict([data])
+    engine = db.create_engine(db_url)
+    df.to_sql("resumes", con=engine, if_exists="replace", index=False)
+    return df
+
+# Prompt to optimize resume
+def ai_improve_resume_with_gemini(resume_text):
+    prompt = f"""
+You are a senior professional resume coach. Here is a candidate’s raw resume text. Rewrite the entire resume to:
+
+- Use concise bullet points under clear section headings, and maintain important information such as date, location.
+- Lead with strong action verbs.  
+- Quantify every achievement (e.g., “Improved X by 35%,” “Managed a team of 5,” “Reduced runtime from 10s to 3s”).  
+- Keep it to 1 page max and maintain a clean, ATS-friendly format.  
+
+Return only the fully rewritten resume in plain text (no markdown fences, no JSON, no commentary).  
+
+Raw resume text:
+{resume_text}
+"""
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        config=types.GenerateContentConfig(temperature=0.3),
+        contents=prompt
+    )
+    return response.text
+
+# Extracts text from a pdf and returns an improved resume text
+def improve_pdf_resume(file_path):
+    raw = extract_text_from_pdf(file_path)
+    improved = ai_improve_resume_with_gemini(raw)
+    return improved
+
+# Convert the text from the improved resume to a pdf
+def save_text_as_pdf(text, output_path):
+    sanitize_map = {
+        '–': '-',  '—': '-',  
+        '“': '"',  '”': '"',  
+        '‘': "'",  '’': "'",
+        '•': '-',  '…': '...',
+    }
+    for uni, ascii_char in sanitize_map.items():
+        text = text.replace(uni, ascii_char)
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    pdf.set_font("Arial", size=10)
+    for line in text.split('\n'):
+        pdf.multi_cell(0, 8, line)
+    
+    pdf.output(output_path)
+
+if __name__ == "__main__":
+    file_path = r"C:\Users\saman\Desktop\coso\mock_resume.pdf"
+    raw_text = extract_text_from_pdf(file_path)
+    improved = improve_pdf_resume(file_path)
+    print(improved)
+    parsed = ai_parse_resume_with_gemini(raw_text)
+    df = save_parsed_data_to_db(parsed)
+    #print(df)
+
+    output_pdf = r"C:/Users/saman/Desktop/coso/improved_resume.pdf"
+    save_text_as_pdf(improved, output_pdf)
+    print(f"Improved resume written to {output_pdf}")
