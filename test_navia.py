@@ -54,8 +54,7 @@ class TestResumeFunctions(unittest.TestCase):
             "projects": "Resume Parser"
         }
         #:memory is an in-memory database that only exists when the code runs
-        df = save_parsed_data_to_db(sample, db_url="sqlite:///:memory:")
-
+        df = save_parsed_data_to_db(sample, db_url=":memory:")
         self.assertIsInstance(df, pd.DataFrame)
         self.assertEqual(len(df), 1)
         self.assertCountEqual(df.columns.tolist(), sample.keys())
