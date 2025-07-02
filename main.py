@@ -82,7 +82,7 @@ def resume_feedback():
     print("-" * 80)
 
 def video_recommendations(query):
-    print("--- YouTube Video Recommendations ---")
+    print("--- YouTube Video Queried Recommendations ---")
 
     if not query:
         print("No YouTube search terms found in your roadmap.")
