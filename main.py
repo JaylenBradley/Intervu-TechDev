@@ -45,7 +45,7 @@ def parse_resume():
         print("Loading...")
         raw_text = extract_text_from_pdf(user_id, file_path)
         parsed_json = ai_parse_resume_with_gemini(raw_text)
-        save_parsed_data_to_db(parsed_json, db_url="sqlite:///career_prep_data.db")
+        save_parsed_data_to_db(parsed_json)
         print("Resume added succesfully\n")
         print("-" * 80)
         print()

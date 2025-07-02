@@ -25,7 +25,8 @@ Create a `.env` file in the project root with the following content:
 
 ```bash
 YOUTUBE_API_KEY=your_youtube_api_key
-GEMINI_API_KEY=your_gemini_api_key
+GENAI_API_KEY=your_gemini_api_key
+DB_PATH=career_prep_data.db
 ```
 
 > The application uses [`python-dotenv`](https://pypi.org/project/python-dotenv/) 
