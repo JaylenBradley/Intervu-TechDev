@@ -16,7 +16,6 @@ def main_menu():
     print("-" * 80)
     print()
 
-
 def run_questionnaire():
     print("--- Career Questionnaire ---")
     answers = questionnaire(user_id)
@@ -67,7 +66,6 @@ def improve_resume():
     print(f"Resume saved as PDF to {save_path}")
     print("-" * 80)
     print()
-
 
 def resume_feedback():
     print("--- Resume Feedback & Alternatives ---")
