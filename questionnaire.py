@@ -1,3 +1,6 @@
+import sqlalchemy as db
+import pandas as pd
+
 def get_valid_input(prompt, valid_options=None, allow_none=False):
     while True:
         response = input(prompt).strip().lower()
@@ -86,7 +89,30 @@ def questionnaire():
         "available_hours_per_week": available_hours,
     }
 
+    #adds to database
+    cleaned = {}
+    for key, value in answers.items():
+        if isinstance(value, list):
+            cleaned[key] = (',').join(value)
+        elif value is None:
+            cleaned[key] = ''
+        else:
+            cleaned[key] = value
+
+    df = pd.DataFrame.from_dict([cleaned])
+    engine = db.create_engine('sqlite:///career_prep_data.db')
+    df.to_sql("questionnaire", con=engine, if_exists="replace", index=False)
+
     return answers
+
+# mock = {'career_goal': 'international super model', 'major': 'fashion', 'education_level': 'professional', 'passions': ['clothes'], 'institution': 'harvard', 'target_companies': ['dior'], 'skills': [], 'certifications': [], 'projects': None, 'internships': None, 'timeline': '1 day', 'learning_preference': 'classes', 'available_hours_per_week': '10 days'}
+# import sqlite3
+# conn = sqlite3.connect('career_prep_data.db')
+# c = conn.cursor()
+# c.execute("SELECT * from resumes;")
+# print(c.fetchall())
+# conn.close()
+
 
 # Modify questionnaire
 # Ask the user where they go to school (uni)
