@@ -116,6 +116,7 @@ def questionnaire(user_id):
     save_questionnaire(user_id, cleaned)
     return answers
 
+
 # mock = {'career_goal': 'international super model', 'major': 'fashion', 'education_level': 'professional', 'passions': ['clothes'], 'institution': 'harvard', 'target_companies': ['dior'], 'skills': [], 'certifications': [], 'projects': None, 'internships': None, 'timeline': '1 day', 'learning_preference': 'classes', 'available_hours_per_week': '10 days'}
 # import sqlite3
 # conn = sqlite3.connect('career_prep_data.db')
@@ -123,7 +124,6 @@ def questionnaire(user_id):
 # c.execute("SELECT * from questionnaire;")
 # print(c.fetchall())
 # conn.close()
-
 
 
 # Modify questionnaire
