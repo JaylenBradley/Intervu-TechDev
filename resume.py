@@ -11,96 +11,12 @@ from fpdf import FPDF
 load_dotenv()
 import re
 
-mock2 = {'education': 'Bachelor of Science, Computer Science , Minor in Business | Expected May 2027\nUniversity of Kansas | Lawrence, KS\n• GPA: 4.0 | Member of the Honors Program , University Scholar, Undergraduate Research Fellow', 'experience': 'Open Source Developer | May 2024 – Sep 2024\nGoogle Summer of Code – Lappis | Remote\n• Selected among top 3% of 43,984 applicants for GSoC, receiving mentorship to develop a data integration \nframework between Empurrando Juntas (EJ) and Decidim .\n• Optimized clustering and platform speed by integrating Celery and RabbitMQ for asynchronous task management. \n• Cut execution time by 35% through parallelization and refactoring data handling with Joblib, NumPy. \n\nResearch Technician | Oct 2023 – Jun 2024\nWispr AI | Lawrence, KS\n• Enhanced neuromuscular data collection accuracy by 15% using surface EMG sensors during speech tasks. \n• Produced detailed lab reports by interpreting and storing biophysiological data from 100 + research sessions. \n• Managed session scheduling, communications, and payments for research participants. \n\nUndergraduate Research Assistant | Sep 2023 – Present\nCenter for Remote Sensing and Integrated Systems (CReSIS) | Lawrence, KS\n• Optimized data visualization and user interaction in the OPS Geoportal website, improving geospatial data access \nfor climate change researchers. \n• Collaborate d with a team to apply supervised learning models to identify glacier layers from echogram images. \n• Debugged JavaScript features, including Antarctic/Artic transitions, and echogram image browser issues.', 'skills': '• Programming Languages: Python, C, C++, SQL, JavaScript, Type Scrip t, HTML/CSS \n• Tools: Git, Linux, Docker, Azure , AWS , TensorFlow, Scikit -Learn , Figma \n• Certifications: Machine Learning Specialization (University of Washington), HTML, CSS, and JavaScript for Web \nDevelopers (Johns Hopkins University)', 'projects': 'KU Parking app | React Native, Typescript, Firebase, Goo gle Map s API \n• Developed a mobile app that recommends optimal parking locations based on user -reported availability, permit \ntype, and distance. \n\nReflect ly | JavaScript, Node.js, Express.js, MongoDB, Passport.js \n• Developed a responsive and user -friendly journaling app , applying UX design principles to enhance the note -taking \nexperience. Implemented secure authentication with Passport.js and built a scalable backend using Node.js, \nExpress.js, and MongoDB to efficiently manage user data.'}
-mock_resume = """Helena Galeano
-Lawrence, KS | helena.galeano@gmail.com | 785-917-8588 | linkedin.com/in/helena-galeano
-
-EDUCATION
-**University of Kansas** – Lawrence, KS
-Bachelor of Science in Computer Science, Minor in Business | Expected May 2027
-* GPA: 4.0/4.0 | Honors Program Member, University Scholar, Undergraduate Research Fellow
-
-TECHNICAL SKILLS
-* **Programming Languages:** Python, C, C++, JavaScript, TypeScript, HTML/CSS
-* **Tools:** Git, Linux, Docker, Azure, Figma
-* **Certifications:** Machine Learning Specialization (University of Washington), HTML, CSS, and JavaScript for Web Developers (Johns Hopkins University)
-
-EXPERIENCE
-**Intern** | RiskIQ | Remote
-May 2024 – September 2024
-* Developed 3+ product integrations for key clients using RiskIQ APIs, AWS Lambda, and Python, enhancing data flow.
-* Engineered 5+ microservices to optimize data ingestion and access for various applications, improving retrieval efficiency by 20%.
-* Built 2+ RESTful APIs using Spring MVC to facilitate secure data exchange between internal systems.
-
-**Research Technician** | Wispr AI | Lawrence, KS
-October 2023 – June 2024
-* Enhanced neuromuscular data collection accuracy by 15% using surface EMG sensors during speech tasks.
-* Analyzed and documented biophysiological data from over 100 research sessions, producing detailed lab reports.
-* Coordinated logistics for 50+ research participants, including scheduling, communications, and payment processing.
-
-**Undergraduate Research Assistant** | Center for Remote Sensing and Integrated Systems (CReSIS) | Lawrence, KS 
-September 2023 – Present
-* Optimized data visualization and user interaction for the OPS Geoportal website, improving geospatial data access for 100+ climate change researchers.
-* Collaborated with a 3-person team to apply supervised learning models, achieving 90% accuracy in identifying glacier layers from 1000+ echogram images.
-* Resolved 10+ critical JavaScript bugs, including Antarctic/Arctic transitions and echogram image browser issues, enhancing user experience and system stability.
-
-PROJECTS
-**KU Parking App** | React Native, TypeScript, Firebase, Google Maps API
-* Developed a mobile application recommending optimal parking locations based on user-reported availability, permit type, and distance, potentially saving users 15+ minutes per search.
-
-**Reflectly** | JavaScript, Node.js, Express.js, MongoDB, Passport.js
-* Engineered a responsive journaling application, integrating 5+ UX design principles to enhance user experience.
-* Implemented secure authentication via Passport.js and built a scalable backend capable of managing data for 1000+ users.
-
-LEADERSHIP
-**Logistics Chair, Expo Chair** | Women in Computing | Lawrence, KS
-September 2023 – Present
-* Managed a $20,000 budget and organized travel, lodging, and meetings for 15 students attending the Grace Hopper Conference.
-* Led a 5-person team to organize a project for the KU Engineering Fair, engaging 3,000+ students and promoting technology.
-
-**Resident Assistant** | University of Kansas | Lawrence, KS
-August 2024 – Present
-* Supported and guided 50+ residents by enforcing policies, resolving conflicts, and organizing 10+ community events to foster a safe and welcoming living environment."""
-mock2 = {'education': 'Bachelor of Science, Computer Science , Minor in Business | Expected May 2027\nUniversity of Kansas | Lawrence, KS\n• GPA: 4.0 | Member of the Honors Program , University Scholar, Undergraduate Research Fellow', 'experience': 'Open Source Developer | May 2024 – Sep 2024\nGoogle Summer of Code – Lappis | Remote\n• Selected among top 3% of 43,984 applicants for GSoC, receiving mentorship to develop a data integration \nframework between Empurrando Juntas (EJ) and Decidim .\n• Optimized clustering and platform speed by integrating Celery and RabbitMQ for asynchronous task management. \n• Cut execution time by 35% through parallelization and refactoring data handling with Joblib, NumPy, and Pandas. \n\nResearch Technician | Oct 2023 – Jun 2024\nWispr AI | Lawrence, KS\n• Enhanced neuromuscular data collection accuracy by 15% using surface EMG sensors during speech tasks. \n• Produced detailed lab reports by interpreting and storing biophysiological data from 100 + research sessions. \n• Managed session scheduling, communications, and payments for research participants. \n\nUndergraduate Research Assistant | Sep 2023 – Present\nCenter for Remote Sensing and Integrated Systems (CReSIS) | Lawrence, KS\n• Optimized data visualization and user interaction in the OPS Geoportal website, improving geospatial data access \nfor climate change researchers. \n• Collaborate d with a team to apply supervised learning models to identify glacier layers from echogram images. \n• Debugged JavaScript features, including Antarctic/Artic transitions, and echogram image browser issues.', 'skills': '• Programming Languages: Python, C, C++, SQL, JavaScript, Type Scrip t, HTML/CSS \n• Tools: Git, Linux, Docker, Azure , AWS , TensorFlow, Scikit -Learn , Figma \n• Certifications: Machine Learning Specialization (University of Washington), HTML, CSS, and JavaScript for Web \nDevelopers (Johns Hopkins University)', 'projects': 'KU Parking app | React Native, Typescript, Firebase, Goo gle Map s API \n• Developed a mobile app that recommends optimal parking locations based on user -reported availability, permit \ntype, and distance. \n\nReflect ly | JavaScript, Node.js, Express.js, MongoDB, Passport.js \n• Developed a responsive and user -friendly journaling app , applying UX design principles to enhance the note -taking \nexperience. Implemented secure authentication with Passport.js and built a scalable backend using Node.js, \nExpress.js, and MongoDB to efficiently manage user data.'}
-
 # Configure Gemini
 genai.api_key = os.getenv('GENAI_API_KEY')
 client = genai.Client(api_key=genai.api_key)
 
 # Database
-DB_PATH = 'career_prep_data.db'
-def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("""
-      CREATE TABLE IF NOT EXISTS raw_resume (
-        id INTEGER PRIMARY KEY,
-        file_path TEXT NOT NULL,
-        content TEXT NOT NULL
-      )
-    """)
-    conn.commit()
-    #creates table for questionnaire too
-    c.execute("""
-      CREATE TABLE IF NOT EXISTS questionnaire (
-        user_id                TEXT    PRIMARY KEY,
-        career_goal            TEXT,
-        major                  TEXT,
-        education_level        TEXT,
-        passions               TEXT,
-        institution            TEXT,
-        target_companies       TEXT,
-        skills                 TEXT,
-        certifications         TEXT,
-        projects               TEXT,
-        internships            TEXT,
-        timeline               TEXT,
-        learning_preference    TEXT,
-        available_hours_per_week TEXT
-      )
-    """)
-    conn.commit()
-    conn.close()
+DB_PATH = os.getenv('DB_PATH')
 
 # Utility to extract raw text from the PDF
 def extract_text_from_pdf(user_id, file_path, db_url=DB_PATH):
