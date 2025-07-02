@@ -21,6 +21,7 @@ Here is the user's profile data:
 
 Instructions for formatting:
 - Use only hyphens (-) or incrementing numbers (1., 2., etc.) for bullet points to keep formatting clean.
+- Do NOT use lettered lists (a., b., c., etc.) anywhere in the output.
 - When using numbered lists, restart numbering for each new section — do not repeat the same number across sections.
 - Avoid using Markdown formatting entirely: do not use asterisks (*) or hash symbols (#) at all in your output, don't bother using "**" to make words bold either.
 - Section titles must be a single line in ALL CAPS, followed by a colon.
@@ -35,11 +36,21 @@ For SPECIFIC GOALS:
 - Do not mix numbered lists and SPECIFIC GOALS lists in the same section.
 
 For YOUTUBE SEARCH TERMS:
-- Begin the section with the heading exactly as:  
+- Begin the section with the heading exactly as:
   YOUTUBE SEARCH TERMS:
-- Then provide a clean, plain list of suggested search terms, each on its own line with a hyphen (-).  
-- Do not include quotation marks, JSON arrays, or any formatting other than a vertical hyphenated list. 
-    
+- Each item should include the label [YouTube] followed by a dash, a descriptive video/course title, and the full direct URL to the YouTube video or playlist.
+- STRICT INSTRUCTIONS, FOLLOW THIS EXAMPLE PERFECTLY:
+  YOUTUBE SEARCH TERMS:
+  - [YouTube] Machine Learning Roadmap for Beginners – https://www.youtube.com/playlist?list=PL-osiE80TeTt2d9bfVyTiXJA-UTHn6WwU
+  - [YouTube] Deep Learning Explained Visually – https://www.youtube.com/watch?v=aircAruvnKk
+  - [YouTube] PyTorch Tutorial for Machine Learning Engineers – https://www.youtube.com/watch?v=GIsg-ZUy0MY
+  - [YouTube] AWS SageMaker Tutorial – https://www.youtube.com/watch?v=J8tLF3FOgtE
+  - [YouTube] FAANG Machine Learning Interview Questions – https://www.youtube.com/watch?v=Z0qXt78xY_w
+- Present the search terms as a plain-text list, using ONLY a hyphen (-) at the start of each line.
+- Do NOT use brackets ([]), quotation marks ("") or format the terms as a Python list, JSON array, or any other code-like structure.
+- Each link should be a valid direct URL to the resource on YouTube.
+- Limit the list to around 10–15 items.
+
 For RESOURCE LINKS:
 - When recommending any course or book, include the **full direct URL** to that course or book (e.g., Coursera, edX, or Amazon).
 - Label the resource appropriately as “Book” or “Course” and format them in a separate RESOURCE LINKS section:
@@ -95,6 +106,3 @@ def get_roadmap(questionnaire_res, current_date = datetime.datetime.now().strfti
     )
 
     return res
-
-# In the prompt, include books, and or coursera courses
-# Need to provide specific links for resources (i.e coursera courses)
