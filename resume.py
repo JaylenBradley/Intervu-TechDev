@@ -64,8 +64,9 @@ Resume text:
 
 # Saves the data to SQL
 def save_parsed_data_to_db(data, db_url=DB_PATH):
+    sql_alchemy_url = "sqlite:///" + db_url
     df = pd.DataFrame.from_dict([data])
-    engine = db.create_engine(db_url)
+    engine = db.create_engine(sql_alchemy_url)
     df.to_sql("resumes", con=engine, if_exists="replace", index=False)
     return df
 
