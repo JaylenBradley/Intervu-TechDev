@@ -5,7 +5,7 @@ from get_relevant_videos import get_videos
 from resume import get_latest_resume_content, init_db, ai_give_specific_feedback, save_parsed_data_to_db, extract_text_from_pdf, ai_parse_resume_with_gemini, ai_improve_resume_with_gemini, save_text_as_pdf
 
 def main_menu():
-    print("\n---- Main Menu ----")
+    print("---- Main Menu ----")
     print("Choose an option:")
     print("1. Fill out Career Questionnaire")
     print("2. Add Resume to database")
@@ -30,7 +30,6 @@ def run_questionnaire():
         print("\nYour Career Roadmap:\n")
         print(roadmap.text)
         print("-" * 80)
-        print()
 
 def parse_resume():
     print("--- Add Resume to Database ---")
