@@ -16,7 +16,7 @@ def get_valid_input(prompt, valid_options=None, allow_none=False):
 
 def questionnaire():
     print("Welcome to Navia Career Questionnaire!\nPlease answer the following questions:")
-    print('To exit the questionnaire, please enter "0"\n')
+    print('To go back to the main menu, please enter "0"\n')
 
     career_goal = get_valid_input("1. What is your target job title or role? ")
     if not career_goal:
