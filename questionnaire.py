@@ -1,5 +1,4 @@
-import sqlalchemy as db
-import pandas as pd
+import sqlite3
 
 def get_valid_input(prompt, valid_options=None, allow_none=False):
     while True:
@@ -17,7 +16,22 @@ def get_valid_input(prompt, valid_options=None, allow_none=False):
                 return response
             print("Input cannot be empty, please try again.")
 
-def questionnaire():
+def save_questionnaire(user_id, answers_dict):
+    cols = ['user_id'] + list(answers_dict.keys())
+    placeholders = ','.join('?' for _ in cols)
+    sql = f"""
+      INSERT OR REPLACE INTO questionnaire ({','.join(cols)}) VALUES ({placeholders})
+    """
+    values = [user_id] + [answers_dict[k] for k in answers_dict]
+
+    conn = sqlite3.connect('career_prep_data.db')
+    c = conn.cursor()
+    c.execute(sql, values)
+    conn.commit()
+    conn.close()
+
+
+def questionnaire(user_id):
     print("Welcome to Navia Career Questionnaire!\nPlease answer the following questions:")
     print('To go back to the main menu, please enter "0"\n')
 
@@ -99,19 +113,17 @@ def questionnaire():
         else:
             cleaned[key] = value
 
-    df = pd.DataFrame.from_dict([cleaned])
-    engine = db.create_engine('sqlite:///career_prep_data.db')
-    df.to_sql("questionnaire", con=engine, if_exists="replace", index=False)
-
+    save_questionnaire(user_id, cleaned)
     return answers
 
 # mock = {'career_goal': 'international super model', 'major': 'fashion', 'education_level': 'professional', 'passions': ['clothes'], 'institution': 'harvard', 'target_companies': ['dior'], 'skills': [], 'certifications': [], 'projects': None, 'internships': None, 'timeline': '1 day', 'learning_preference': 'classes', 'available_hours_per_week': '10 days'}
 # import sqlite3
 # conn = sqlite3.connect('career_prep_data.db')
 # c = conn.cursor()
-# c.execute("SELECT * from resumes;")
+# c.execute("SELECT * from questionnaire;")
 # print(c.fetchall())
 # conn.close()
+
 
 
 # Modify questionnaire
