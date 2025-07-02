@@ -1,20 +1,25 @@
 import os
 from dotenv import load_dotenv
 import requests
+import re
 
 load_dotenv()
 url = 'https://www.googleapis.com/youtube/v3/search'
 api_key = os.getenv('YOUTUBE_API_KEY')
 
-def get_videos(query, vid_duration):
+def extract_youtube_search_terms(gemini_output):
+    pattern = re.compile(r'^\s*-\s*\[YouTube\]\s*(.+)$', re.MULTILINE | re.IGNORECASE)
+    return pattern.findall(gemini_output)
+
+def get_videos(query, vid_duration, language='en', num_videos=1):
     params = {
         'part': 'snippet',
         'q': query,
         'type': 'video',
-        'order': 'title',
         'safeSearch': 'moderate',
         'videoDuration': vid_duration,
-        'maxResults': 5,
+        'relevanceLanguage': language,
+        'maxResults': num_videos,
         'key': api_key
     }
 
@@ -24,7 +29,7 @@ def get_videos(query, vid_duration):
     videos = data.get('items', [])
     if not videos:
         print("No videos found.")
-        exit()
+        return
     else:
         print("Here are a few videos you might find helpful based on you're questionnaire")
         print("-" * 50)
