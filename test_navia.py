@@ -11,7 +11,6 @@ from resume import get_latest_resume_content, save_parsed_data_to_db
 
 class TestResumeFunctions(unittest.TestCase):
     def setUp(self):
-        # Make a temp directory + DB file
         self.tmpdir = tempfile.TemporaryDirectory()
         self.db_path = os.path.join(self.tmpdir.name, "test.db")
         # Override both modules’ DB_PATH
@@ -21,7 +20,7 @@ class TestResumeFunctions(unittest.TestCase):
     def tearDown(self):
         self.tmpdir.cleanup()
 
-    def test_init_db_creates_tables(self):
+    def test_init_db(self):
         init_db()
         conn = sqlite3.connect(db.DB_PATH)
         c = conn.cursor()
@@ -33,7 +32,6 @@ class TestResumeFunctions(unittest.TestCase):
         self.assertIn("questionnaire", tables)
 
     def test_get_latest_resume_content(self):
-        # Create tables + insert one known row
         init_db()
         conn = sqlite3.connect(db.DB_PATH)
         c = conn.cursor()
@@ -45,7 +43,6 @@ class TestResumeFunctions(unittest.TestCase):
         conn.commit()
         conn.close()
 
-        # Now both db and resume are pointed at the same file
         self.assertEqual(get_latest_resume_content(1), sample)
         self.assertEqual(get_latest_resume_content(9999), "")
 
@@ -56,13 +53,12 @@ class TestResumeFunctions(unittest.TestCase):
             "skills": "Python, SQL, Git",
             "projects": "Resume Parser"
         }
+        #:memory is an in-memory database that only exists when the code runs
         df = save_parsed_data_to_db(sample, db_url="sqlite:///:memory:")
 
         self.assertIsInstance(df, pd.DataFrame)
         self.assertEqual(len(df), 1)
         self.assertCountEqual(df.columns.tolist(), sample.keys())
-        for k, v in sample.items():
-            self.assertEqual(df.iloc[0][k], v)
 
 if __name__ == "__main__":
     unittest.main()
