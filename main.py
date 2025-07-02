@@ -1,7 +1,7 @@
 import os
 from questionnaire import questionnaire
 from get_roadmap import get_roadmap
-from get_relevant_videos import get_videos
+from get_relevant_videos import get_videos, extract_youtube_search_terms
 from resume import get_latest_resume_content, ai_give_specific_feedback, save_parsed_data_to_db, extract_text_from_pdf, ai_parse_resume_with_gemini, ai_improve_resume_with_gemini, save_text_as_pdf
 from db import init_db
 
@@ -28,9 +28,11 @@ def run_questionnaire():
         print()
 
         roadmap = get_roadmap(answers)
+        roadmap_text = roadmap.text
         print("\nYour Career Roadmap:\n")
-        print(roadmap.text)
+        print(roadmap_text)
         print("-" * 80)
+        return roadmap_text
 
 def parse_resume():
     print("--- Add Resume to Database ---")
@@ -48,7 +50,6 @@ def parse_resume():
         save_parsed_data_to_db(parsed_json)
         print("Resume added succesfully\n")
         print("-" * 80)
-        print()
 
 def improve_resume():
     print("--- Improve & Save Resume ---")
@@ -65,7 +66,6 @@ def improve_resume():
     save_text_as_pdf(improved, save_path)
     print(f"Resume saved as PDF to {save_path}")
     print("-" * 80)
-    print()
 
 def resume_feedback():
     print("--- Resume Feedback & Alternatives ---")
@@ -79,37 +79,101 @@ def resume_feedback():
     print("\nFeedback:\n")
     print(feedback)
     print("-" * 80)
+
+def video_recommendations(query):
+    print("--- YouTube Video Recommendations ---")
+
+    if not query:
+        print("No YouTube search terms found in your roadmap.")
+        return
+
+    print("Available search queries based on your roadmap:")
+    for i, q in enumerate(query, 1):
+        print(f"{i}. {q}")
     print()
 
-def video_recommendations():
-    print("--- YouTube Video Recommendations ---")
-    print('To go back to the main menu, please enter "0"\n')
-
-    query = input("Enter topic to search: ").strip()
-    if query == '0':
-        return
-    print("Duration options: any, short, medium, long")
-    valid_durations = ('any', 'short', 'medium', 'long')
     while True:
-        duration_input = input("Choose a duration filter (default 'any'): ").strip().lower()
-        if duration_input == "":
-            duration = "any"
+        user_choice = input(f"Enter the number of the topic to search (1-{len(queries)}), or '0' to return to the main menu: ").strip()
+        if user_choice == '0':
+            return
+        if user_choice.isdigit() and 1 <= int(user_choice) <= len(queries):
+            selected_query = queries[int(user_choice) - 1]
             break
+        print("Invalid input. Please enter a valid number or 0 to return to the main menu.")
+
+    valid_durations = ('any', 'short', 'medium', 'long')
+    print("Duration options: 'any', 'short' (< 4 min), 'medium' (4–20 min), or 'long' (> 20 min)")
+    while True:
+        duration_input = input("Choose a duration filter (default 'any') or enter '0' to return to the main menu: ").strip().lower()
         if duration_input == '0':
             return
-        if duration_input in valid_durations:
+        elif duration_input == "":
+            duration = "any"
+            break
+        elif duration_input in valid_durations:
             duration = duration_input
             break
-        print(f"Invalid duration '{duration_input}'. Please enter one of: {', '.join(valid_durations)}")
-    
-    get_videos(query, duration)
-    print("-" * 80)
-    print()
+        else:
+            print(f"Invalid duration '{duration_input}'. Please enter one of: {', '.join(valid_durations)} or '0' to return to the main menu")
 
+    valid_languages = {
+        'english': 'en',
+        'spanish': 'es',
+        'french': 'fr',
+        'german': 'de',
+        'hindi': 'hi',
+        'chinese': 'zh',
+        'japanese': 'ja',
+        'korean': 'ko',
+        'portuguese': 'pt',
+        'russian': 'ru',
+        'arabic': 'ar',
+        'italian': 'it',
+        'dutch': 'nl',
+        'turkish': 'tr',
+        'vietnamese': 'vi'
+    }
+
+    print("Language options: " + ", ".join(valid_languages.keys()))
+    while True:
+        language_input = input("Choose a language for the videos (default 'english') or enter '0' to return to the main menu: ").strip().lower()
+        if language_input == "0":
+            return
+        elif language_input == "":
+            language = None
+            break
+        elif language_input in valid_languages:
+            language = valid_languages[language_input]
+            break
+        else:
+            print("Invalid language. Please choose from: " + ", ".join(
+                valid_languages.keys()) + " or enter '0' to return to the main menu")
+
+    while True:
+        num_videos_input = input("How many recommendations would you like? \nPlease enter a number from 1 - 10 (default 1) or 0 to return to the main menu: ").strip().lower()
+        if num_videos_input == "0":
+            return
+        elif num_videos_input == "":
+            num_videos = None
+            break
+        elif num_videos_input.isdigit():
+            num = int(num_videos_input)
+            if num in range(1, 11):
+                num_videos = num
+                break
+            else:
+                print("Invalid number. Please enter a number from 1 - 10 or 0 to return to the main menu.")
+        else:
+            print("Invalid input. Please choose enter a number from 1 - 10 or 0 to return to the main menu.")
+
+    get_videos(selected_query, duration, language=language, num_videos=num_videos)
+    print("-" * 80)
 
 if __name__ == "__main__":
     init_db()
     user_id = 2
+    roadmap_text = None
+
     title = r"""
     _____  ___        __  ___      ___  __          __    
     (\"   \|"  \      /""\|"  \    /"  ||" \        /""\     
@@ -128,7 +192,7 @@ if __name__ == "__main__":
         main_menu()
         choice = input("Enter your choice: ").strip()
         if choice == "1":
-            run_questionnaire()
+            roadmap_text = run_questionnaire()
         elif choice == "2":
             parse_resume()
         elif choice == "3":
@@ -136,7 +200,11 @@ if __name__ == "__main__":
         elif choice == '4':
             resume_feedback()
         elif choice == "5":
-            video_recommendations()
+            if not roadmap_text:
+                print("Please complete the questionnaire before getting recommendations\n")
+            else:
+                queries = extract_youtube_search_terms(roadmap_text)
+                video_recommendations(queries)
         elif choice == "0":
             print("Goodbye!")
             break
