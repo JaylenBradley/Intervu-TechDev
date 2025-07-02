@@ -6,6 +6,7 @@ from resume import get_latest_resume_content, ai_give_specific_feedback, save_pa
 from db import init_db
 
 def main_menu():
+    print("-" * 80)
     print("---- Main Menu ----")
     print("Choose an option:")
     print("1. Fill out Career Questionnaire")
@@ -186,7 +187,6 @@ if __name__ == "__main__":
     print(title)
     print("Navia Career Navigator is your AI-powered career advisor and coach.")
     print("Explore career paths, refine your resume, and access curated resources \nto accelerate your professional journey.")
-    print("-" * 80)
 
     while True:
         main_menu()
