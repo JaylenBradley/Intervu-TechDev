@@ -1,6 +1,6 @@
-# TechDevProject
+# Navia
 
-TechDevProject is a Python-based application designed to help users navigate career development in technology. It features an interactive questionnaire and generates personalized roadmaps based on user input.
+Navia is a Python-based application designed to help users navigate career development in technology. It features an interactive questionnaire and generates personalized roadmaps based on user input.
 
 ## Features
 
@@ -33,11 +33,13 @@ source venv/bin/activate
 ```
 
 ### 3. Install Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ### 4. Run the Application
+
 ```bash
 python main.py
 ```
