@@ -77,7 +77,7 @@ You are a senior professional resume coach. Here is a candidate’s raw resume t
 
 - Use concise bullet points under clear section headings, and maintain important information such as date, location.
 - Lead with strong action verbs.  
-- Quantify every achievement (e.g., “Improved X by 35%,” “Managed a team of 5,” “Reduced runtime from 10s to 3s”).  
+- Quantify every achievement (e.g., “Improved X by 35%,” “Managed a team of 5,” “Reduced runtime from 10s to 3s”). dont make up numbers though, if you dont know numbers put X  
 - Keep it to 1 page max and maintain a clean, ATS-friendly format.  
 
 Return only the fully rewritten resume in plain text (no markdown fences, no JSON, no commentary).  
