@@ -19,7 +19,7 @@ def main_menu():
 
 def run_questionnaire():
     print("*** Career Questionnaire ***")
-    answers = questionnaire()
+    answers = questionnaire(user_id)
     if not answers:
         main_menu()
     else:
@@ -112,7 +112,7 @@ def video_recommendations():
 
 if __name__ == "__main__":
     init_db()
-    user_id = 3
+    user_id = 2
     ascii = """
     _____  ___        __  ___      ___  __          __    
     (\"   \|"  \      /""\|"  \    /"  ||" \        /""\     
