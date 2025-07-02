@@ -41,14 +41,13 @@ For YOUTUBE SEARCH TERMS:
 - Each item should include the label [YouTube] followed by a dash, a descriptive video/course title, and the full direct URL to the YouTube video or playlist.
 - STRICT INSTRUCTIONS, FOLLOW THIS EXAMPLE PERFECTLY:
   YOUTUBE SEARCH TERMS:
-  - [YouTube] Machine Learning Roadmap for Beginners – https://www.youtube.com/playlist?list=PL-osiE80TeTt2d9bfVyTiXJA-UTHn6WwU
-  - [YouTube] Deep Learning Explained Visually – https://www.youtube.com/watch?v=aircAruvnKk
-  - [YouTube] PyTorch Tutorial for Machine Learning Engineers – https://www.youtube.com/watch?v=GIsg-ZUy0MY
-  - [YouTube] AWS SageMaker Tutorial – https://www.youtube.com/watch?v=J8tLF3FOgtE
-  - [YouTube] FAANG Machine Learning Interview Questions – https://www.youtube.com/watch?v=Z0qXt78xY_w
+  - [YouTube] Machine Learning Roadmap for Beginners 
+  - [YouTube] Deep Learning Explained Visually 
+  - [YouTube] PyTorch Tutorial for Machine Learning Engineers 
+  - [YouTube] AWS SageMaker Tutorial 
+  - [YouTube] FAANG Machine Learning Interview Questions 
 - Present the search terms as a plain-text list, using ONLY a hyphen (-) at the start of each line.
 - Do NOT use brackets ([]), quotation marks ("") or format the terms as a Python list, JSON array, or any other code-like structure.
-- Each link should be a valid direct URL to the resource on YouTube.
 - Limit the list to around 10–15 items.
 
 For RESOURCE LINKS:
@@ -68,9 +67,6 @@ Timeline Clarification:
 
 - Do not use inline lists inside paragraphs; always place bullet or numbered lists on separate lines.
 - Do not include any text outside of clearly labeled sections.
-- For the list of YouTube search terms, provide them as a JSON array only, like:
-    ["search term 1", "search term 2", "search term 3"]
-    This array should appear under the section titled YOUTUBE SEARCH TERMS.
   
 Keep all formatting simple, plain-text, and consistent.
 
