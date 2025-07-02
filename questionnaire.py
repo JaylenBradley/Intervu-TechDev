@@ -39,48 +39,48 @@ def questionnaire(user_id):
     if not career_goal:
         return None
 
-    major = get_valid_input("2. What is/are your current major(s) or field of study? (Separate with commas) ")
-    if not major:
-        return None
-
-    education_level = get_valid_input("3. What is your current education level? (e.g., High School, College Sophomore, Professional) ")
+    education_level = get_valid_input("2. What is your current education level? (e.g., High School, College Sophomore, Professional) ")
     if not education_level:
         return None
 
-    passions = get_valid_input("4. What are your main passions or interests related to your career? (Separate with commas) ")
-    if not passions:
-        return None
-
-    institution = get_valid_input("5. What school, university, or institution do you or did you attend? ")
+    institution = get_valid_input("3. What school, university, or institution do you or did you attend? ")
     if not institution:
         return None
 
-    target_companies = get_valid_input("6. List companies or industries you want to work for (Separate with commas): ")
+    major = get_valid_input("4. What is/are your current major(s) or field of study? (Separate with commas) ")
+    if not major:
+        return None
+
+    target_companies = get_valid_input("5. List companies or industries you want to work for (Separate with commas): ")
     if not target_companies:
         return None
 
-    skills = get_valid_input("7. List your current technical skills or programming languages you know (Separate with commas, or type 'none'): ", allow_none=True)
+    skills = get_valid_input("6. List your current technical skills or programming languages you know (Separate with commas, or type 'none'): ", allow_none=True)
     if not skills:
         return None
 
-    certifications = get_valid_input("8. Do you have any certifications? Please list them (Separate with commas, or type 'none'): ", allow_none=True)
-    if not certifications:
+    passions = get_valid_input("7. What are your main passions or interests related to your career? (Separate with commas) ")
+    if not passions:
         return None
 
-    projects = get_valid_input("9. Describe any relevant personal or school projects you have worked on (or type 'none'): ", allow_none=True)
+    projects = get_valid_input("8. Describe any relevant personal or school projects you have worked on (or type 'none'): ", allow_none=True)
     if not projects:
+        return None
+
+    certifications = get_valid_input("9. Do you have any certifications? Please list them (Separate with commas, or type 'none'): ", allow_none=True)
+    if not certifications:
         return None
 
     internships = get_valid_input("10. Do you have any internship or job experience related to your career goals? Please describe (or type 'none'): ", allow_none=True)
     if not internships:
         return None
 
-    timeline = get_valid_input("11. What is your desired timeline to achieve your career goals? (e.g., 6 months, 1 year): ")
-    if not timeline:
+    learning_pref = get_valid_input("11. How do you prefer to learn? (videos, articles, projects, classes): ")
+    if not learning_pref:
         return None
 
-    learning_pref = get_valid_input("12. How do you prefer to learn? (videos, articles, projects, classes): ")
-    if not learning_pref:
+    timeline = get_valid_input("12. What is your desired timeline to achieve your career goals? (e.g., 6 months, 1 year): ")
+    if not timeline:
         return None
 
     available_hours = get_valid_input("13. How many hours per week can you dedicate to learning and career prep?: ")
@@ -103,7 +103,7 @@ def questionnaire(user_id):
         "available_hours_per_week": available_hours,
     }
 
-    #adds to database
+    #Adds to database
     cleaned = {}
     for key, value in answers.items():
         if isinstance(value, list):
