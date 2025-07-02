@@ -2,7 +2,6 @@ import os
 import sqlite3
 from dotenv import load_dotenv
 load_dotenv()
-
 # Database
 DB_PATH = os.getenv('DB_PATH')
 def init_db():
