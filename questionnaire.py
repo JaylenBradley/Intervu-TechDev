@@ -71,8 +71,8 @@ def questionnaire(user_id):
     if not projects:
         return None
 
-    internships = get_valid_input("10. Do you have any internship or job experience related to your career goals? Please describe (or type 'none'): ", allow_none=True)
-    if not internships:
+    experience = get_valid_input("10. Do you have any internship or job experience related to your career goals? Please describe (or type 'none'): ", allow_none=True)
+    if not experience:
         return None
 
     timeline = get_valid_input("11. What is your desired timeline to achieve your career goals? (e.g., 6 months, 1 year): ")
@@ -97,7 +97,7 @@ def questionnaire(user_id):
         "skills": [] if skills == "none" else [s.strip() for s in skills.split(",")],
         "certifications": [] if certifications == "none" else [c.strip() for c in certifications.split(",")],
         "projects": None if projects == "none" else projects,
-        "internships": None if internships == "none" else internships,
+        "experience": None if experience == "none" else experience,
         "timeline": timeline,
         "learning_preference": learning_pref,
         "available_hours_per_week": available_hours,
@@ -121,7 +121,7 @@ def questionnaire(user_id):
 # import sqlite3
 # conn = sqlite3.connect('career_prep_data.db')
 # c = conn.cursor()
-# c.execute("SELECT * from questionnaire;")
+# c.execute("SELECT * FROM  questionnaire;")
 # print(c.fetchall())
 # conn.close()
 

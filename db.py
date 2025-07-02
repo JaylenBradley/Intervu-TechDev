@@ -28,7 +28,7 @@ def init_db():
         skills                 TEXT,
         certifications         TEXT,
         projects               TEXT,
-        internships            TEXT,
+        experience             TEXT,
         timeline               TEXT,
         learning_preference    TEXT,
         available_hours_per_week TEXT
