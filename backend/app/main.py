@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from app.api import roadmap, videos
+from app.core.database import Base, engine
 
 # Create FastAPI app
 app = FastAPI(
@@ -20,8 +19,16 @@ app.add_middleware(
 )
 
 # Include routers
+from app.api import roadmap, videos, questionnaire
+
 app.include_router(roadmap.router, prefix="/api", tags=["Roadmap"])
 app.include_router(videos.router, prefix="/api", tags=["Videos"])
+app.include_router(questionnaire.router, prefix="/api", tags=["Questionnaire"])
+
+# Create tables at startup
+@app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 async def root():
