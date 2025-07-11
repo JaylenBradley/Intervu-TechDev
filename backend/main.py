@@ -1,9 +1,9 @@
 import os
 from questionnaire import questionnaire
-from get_roadmap import get_roadmap
-from get_relevant_videos import get_videos, extract_youtube_search_terms
+from backend.get_roadmap import get_roadmap
+from backend.get_relevant_videos import get_videos, extract_youtube_search_terms
 from resume import get_latest_resume_content, ai_give_specific_feedback, save_parsed_data_to_db, extract_text_from_pdf, ai_parse_resume_with_gemini, ai_improve_resume_with_gemini, save_text_as_pdf
-from db import init_db
+from backend.db import init_db
 
 def main_menu():
     print("-" * 80)

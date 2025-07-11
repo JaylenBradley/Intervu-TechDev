@@ -4,10 +4,9 @@ import tempfile
 import unittest
 import pandas as pd
 
-import db
-import resume
-from db import init_db
-from resume import get_latest_resume_content, save_parsed_data_to_db
+from backend import db, resume
+from backend.db import init_db
+from backend.resume import get_latest_resume_content, save_parsed_data_to_db
 
 class TestResumeFunctions(unittest.TestCase):
     def setUp(self):
