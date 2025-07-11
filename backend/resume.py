@@ -77,7 +77,7 @@ You are a senior professional resume coach. Here is a candidate’s raw resume t
 
 - Use concise bullet points under clear section headings, and maintain important information such as date, location.
 - Lead with strong action verbs.  
-- Quantify every achievement (e.g., “Improved X by 35%,” “Managed a team of 5,” “Reduced runtime from 10s to 3s”).  
+- Quantify every achievement (e.g., “Improved X by 35%,” “Managed a team of 5,” “Reduced runtime from 10s to 3s”). dont make up numbers though, if you dont know numbers put X  
 - Keep it to 1 page max and maintain a clean, ATS-friendly format.  
 
 Return only the fully rewritten resume in plain text (no markdown fences, no JSON, no commentary).  
@@ -93,14 +93,14 @@ Raw resume text:
     return response.text
 
 # Extracts text from a pdf and returns an improved resume text
-def improve_pdf_resume(file_path):
-    raw = extract_text_from_pdf(file_path)
-    improved = ai_improve_resume_with_gemini(raw)
-    return improved
+# def improve_pdf_resume(file_path):
+#     raw = extract_text_from_pdf(file_path)
+#     improved = ai_improve_resume_with_gemini(raw)
+#     return improved
 
 # Convert the text from the improved resume to a pdf
 def save_text_as_pdf(text, output_path):
-    BOLD_RE = re.compile(r'(\*\*.+?\*\*)')
+    BOLD_RE = re.compile(r'(\*\*.+\*\*)')
     sanitize_map = {
         '–': '-',  '—': '-',
         '“': '"',  '”': '"',
@@ -135,18 +135,23 @@ def save_text_as_pdf(text, output_path):
             pdf.cell(6)                  
             pdf.cell(4, 8, '-')            
             parts = BOLD_RE.split(bullet_text)
-            for part in parts:
-                if part.startswith('**') and part.endswith('**'):
-                    pdf.set_font("Arial", style='B', size=10)
-                    pdf.write(8, part[2:-2])
-                else:
-                    pdf.set_font("Arial", size=10)
-                    pdf.write(8, part)
+            if len(parts) > 1:
+                for part in parts:
+                    if part.startswith('**') and part.endswith('**'):
+                        pdf.set_font("Arial", style='B', size=10)
+                        pdf.write(8, part[2:-2])
+                    else:
+                        pdf.set_font("Arial", size=10)
+                        pdf.write(8, part)
+            else:
+                pdf.set_font("Arial", size=10)
+                pdf.write(8, bullet_text)
+
             pdf.ln(8)
             continue
 
         # INLINE BOLD
-        parts = re.split(r'(\*\*.+?\*\*)', line)
+        parts = BOLD_RE.split(line)
         if len(parts) > 1:
             for part in parts:
                 if part.startswith('**') and part.endswith('**'):
