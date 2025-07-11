@@ -45,39 +45,59 @@ const AuthForm = ({ isSignUp }) => {
         <div className="min-h-screen flex items-center justify-center">
             <div className="bg-white p-8">
                 <form className="flex flex-col">
-                    <label>Username</label>
+                    <label>Email</label>
                     <input
                         type="text"
-                        value={username}
-                        onChange={e => setUsername(e.target.value)}
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
                     />
 
-                    {isSignUp &&
+                     {isSignUp && (
                         <>
-                            <label>Email</label>
+                            <label>Username</label>
                             <input
                                 type="text"
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}
+                                value={username}
+                                onChange={e => setUsername(e.target.value)}
                             />
                         </>
-                    }
+                     )}
 
                     <label>Password</label>
                     <input
-                        type="text"
+                        type="password"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                     />
 
-                    {isSignUp &&
-                        <label>Confirm Password</label>
-                        <input
-                            type="text"
-                            value={confirmedPassword}
-                            onChange={e => setConfirmedPassword(e.target.value)}
-                        />
-                    }
+                    {isSignUp && (
+                        <>
+                            <label>Confirm Password</label>
+                            <input
+                                type="password"
+                                value={confirmedPassword}
+                                onChange={e => setConfirmedPassword(e.target.value)}
+                            />
+                        </>
+                    )}
+
+                    <div className="flex flex-row items-center gap-4">
+                        <button
+                            type="button"
+                            onClick={isSignUp ? handleSignUp : handleSignIn }
+                            className="bg-blue-400 mt-2"
+                        >
+                            {isSignUp ? "Sign up" : "Sign in"}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleSignWithGoogle}
+                            className="bg-red-500 mt-2"
+                        >
+                            {isSignUp ? "Sign up with Google" : "Sign in with Google"}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
