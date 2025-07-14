@@ -14,6 +14,7 @@ const App = () => {
     });
     return () => unsubscribe();
   }, []);
+
   return (
     <Router>
       <Routes>
