@@ -51,8 +51,8 @@ def read_questionnaire(user_id: str, db: Session = Depends(get_db)):
         available_hours_per_week=db_obj.available_hours_per_week,
     )
 
-@router.put("/questionnaire/{user_id}", response_model=QuestionnaireResponse)
-def update_questionnaire_endpoint(user_id: str, data: QuestionnaireCreate, db: Session = Depends(get_db)):
+@router.patch("/questionnaire/{user_id}", response_model=QuestionnaireResponse)
+def patch_questionnaire_endpoint(user_id: str, data: QuestionnaireCreate, db: Session = Depends(get_db)):
     db_obj = update_questionnaire(db, user_id, data)
     if not db_obj:
         raise HTTPException(status_code=404, detail="Questionnaire not found")

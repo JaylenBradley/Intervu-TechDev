@@ -8,7 +8,6 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     firebase_id: str
-    password: str
 
 class UserResponse(UserBase):
     id: int

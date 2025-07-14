@@ -7,7 +7,6 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     firebase_id = Column(String, unique=True, index=True)
     username = Column(String, unique=True, index=True, nullable=False)
-    password = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     login_method = Column(String, nullable=False)
     career_goal = Column(String, nullable=True)
