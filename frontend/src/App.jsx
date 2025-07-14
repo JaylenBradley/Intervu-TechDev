@@ -4,6 +4,7 @@ import { auth } from "./services/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import Home from "./pages/Home.jsx";
 import AuthForm from "./containers/AuthForm.jsx";
+import JobDashboard from "./pages/JobDashboard.jsx";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/" element={<Home/>}/>
         <Route path="/signup" element={<AuthForm isSignUp={true}/>}/>
         <Route path="/signin" element={<AuthForm isSignUp={false}/>}/>
+        <Route path="/dashboard" element={<JobDashboard/>}/>
         {/*<Route path="*" element={<ErrorPage/>}/>*/}
       </Routes>
     </Router>

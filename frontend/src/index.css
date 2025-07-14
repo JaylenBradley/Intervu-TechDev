@@ -29,6 +29,10 @@ body {
   border-color: var(--primary);
 }
 
+.bg-app-primary {
+  background-color: var(--primary);
+}
+
 .text-app-primary {
   color: var(--primary);
 }

@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import NavButton from "./NavButton.jsx";
 
 const homeIcon = "https://img.icons8.com/ios-filled/50/1F2937/home.png";
-const aboutIcon = "https://img.icons8.com/ios-filled/50/1F2937/info.png";
+const dashboardIcon = "https://img.icons8.com/ios-filled/50/1F2937/dashboard.png";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handler = (e) => {
@@ -21,13 +23,16 @@ const Navbar = () => {
   return (
     <nav className="flex items-center justify-between px-6 py-3 shadow bg-app-background">
       <div className="flex items-center">
-        <span className="text-4xl font-bold text-app-primary">
+        <span 
+          className="text-4xl font-bold text-app-primary cursor-pointer"
+          onClick={() => navigate("/")}
+        >
           Intervu
         </span>
       </div>
       <div className="flex items-center gap-2 relative" ref={menuRef}>
-        <NavButton icon={homeIcon} alt="Home" onClick={() => alert("Home!")} />
-        <NavButton icon={aboutIcon} alt="About" onClick={() => alert("About!")} />
+        <NavButton icon={homeIcon} alt="Home" onClick={() => navigate("/")} />
+        <NavButton icon={dashboardIcon} alt="Dashboard" onClick={() => navigate("/dashboard")} />
         <button
           className="w-10 h-10 rounded-full border-2 border-app-primary flex items-center justify-center focus:outline-none bg-app-accent ml-2"
           onClick={() => setMenuOpen((v) => !v)}
