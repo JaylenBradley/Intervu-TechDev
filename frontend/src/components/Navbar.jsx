@@ -4,6 +4,7 @@ import NavButton from "./NavButton.jsx";
 
 const homeIcon = "https://img.icons8.com/ios-filled/50/1F2937/home.png";
 const dashboardIcon = "https://img.icons8.com/ios-filled/50/1F2937/dashboard.png";
+const aboutIcon = "https://img.icons8.com/ios-filled/50/1F2937/about.png";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -31,7 +32,13 @@ const Navbar = () => {
         </span>
       </div>
       <div className="flex items-center gap-2 relative" ref={menuRef}>
-        <NavButton icon={homeIcon} alt="Home" onClick={() => navigate("/")} />
+        <NavButton icon={homeIcon} alt="Home" onClick={() => navigate('/')} />
+        <NavButton icon={dashboardIcon} alt="Dashboard" onClick={() => navigate('/dashboard')} />
+        <NavButton icon={aboutIcon} alt="Resume" onClick={() => navigate('/health')} />
+        <NavButton icon={aboutIcon} alt="Questionnaire" onClick={() => navigate('/health')} />
+        <NavButton icon={aboutIcon} alt="Roadmap" onClick={() => navigate('/health')} />
+        <NavButton icon={aboutIcon} alt="Tech Prep" onClick={() => navigate('/health')} />
+        <NavButton icon={aboutIcon} alt="AI-Interviewer" onClick={() => navigate('/health')} />
         <button
           className="w-10 h-10 rounded-full border-2 border-app-primary flex items-center justify-center focus:outline-none bg-app-accent ml-2"
           onClick={() => setMenuOpen((v) => !v)}
