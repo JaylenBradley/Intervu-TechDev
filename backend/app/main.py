@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api import questionnaire, user
+from app.api import questionnaire, user, resume
 from app.core.database import Base, engine
 
 app = FastAPI(
@@ -11,6 +11,7 @@ app = FastAPI(
 # Register routers
 app.include_router(questionnaire.router, prefix="/api", tags=["questionnaire"])
 app.include_router(user.router, prefix="/api", tags=["user"])
+app.include_router(resume.router, prefix="/api", tags=["resume"])
 
 # Create tables at startup
 @app.on_event("startup")

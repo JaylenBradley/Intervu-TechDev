@@ -1,4 +1,5 @@
 .env
 
 old_questionnaire.py
+old_resume.py
 app/old_main.py
