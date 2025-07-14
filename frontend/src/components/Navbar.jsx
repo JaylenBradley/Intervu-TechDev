@@ -32,7 +32,6 @@ const Navbar = () => {
       </div>
       <div className="flex items-center gap-2 relative" ref={menuRef}>
         <NavButton icon={homeIcon} alt="Home" onClick={() => navigate("/")} />
-        <NavButton icon={dashboardIcon} alt="Dashboard" onClick={() => navigate("/dashboard")} />
         <button
           className="w-10 h-10 rounded-full border-2 border-app-primary flex items-center justify-center focus:outline-none bg-app-accent ml-2"
           onClick={() => setMenuOpen((v) => !v)}
