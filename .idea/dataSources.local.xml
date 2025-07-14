@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="dataSourceStorageLocal" created-in="PY-251.26927.90">
-    <data-source name="youtube_test.db" uuid="53ad23d6-cd10-4e60-bbe9-a77954df961d">
-      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="SQLITE" />
-      <schema-mapping />
-    </data-source>
-  </component>
-</project>
