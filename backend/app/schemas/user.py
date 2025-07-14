@@ -4,6 +4,7 @@ class UserBase(BaseModel):
     username: str
     email: EmailStr
     login_method: str
+    career_goal: str | None = None
 
 class UserCreate(UserBase):
     firebase_id: str

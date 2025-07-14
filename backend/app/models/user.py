@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String
+from sqlalchemy import Column, String, Integer
 from app.core.database import Base
 
 class User(Base):
@@ -10,3 +10,4 @@ class User(Base):
     password = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     login_method = Column(String, nullable=False)
+    career_goal = Column(String, nullable=True)
