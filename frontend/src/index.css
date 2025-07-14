@@ -2,9 +2,36 @@
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-
+  --text: #1F2937;
+  --background: #fff8dc;
+  --primary: #06B6D4;
+  --secondary: #929292;
+  --accent: #ffffff;
 }
 
 body {
-  background-color: royalblue;
+  background-color: #fff8dc;
+}
+
+.bg-app-background {
+  background-color: var(--background);
+}
+
+.bg-app-accent {
+  background-color: var(--accent);
+}
+
+.bg-app-secondary {
+  background-color: var(--secondary);
+}
+
+.border-app-primary {
+  border-color: var(--primary);
+}
+
+.text-app-primary {
+  color: var(--primary);
+}
+.text-app-text {
+  color: var(--text);
 }
