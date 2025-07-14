@@ -60,7 +60,7 @@ pip install -r requirements.txt
 ### 4. Run the Application
 
 ```bash
-python main.py
+python old_main.py
 ```
 
 ## Usage
