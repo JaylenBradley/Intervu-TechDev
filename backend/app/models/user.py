@@ -10,4 +10,7 @@ class User(Base):
     password = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     login_method = Column(String, nullable=False)
+<<<<<<< HEAD
     career_goal = Column(String, nullable=True)
+=======
+>>>>>>> 8a1cf5ad29a66954c473bf180408282888c2e607
