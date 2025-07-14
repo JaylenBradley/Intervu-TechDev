@@ -35,3 +35,14 @@ body {
 .text-app-text {
   color: var(--text);
 }
+
+.btn {
+  background-color: var(--accent);
+  color: var(--text);
+  border: 1px solid var(--primary);
+  transition: background 0.2s, color 0.2s;
+}
+.btn:hover {
+  background-color: var(--secondary);
+  color: var(--primary);
+}
