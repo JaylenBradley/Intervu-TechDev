@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { auth } from "../services/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import { getUserJobs, createJobApplication, updateJobApplication, deleteJobApplication } from "../services/jobServices";
+import axios from "axios";
 
 const JobDashboard = () => {
   const [jobs, setJobs] = useState([]);
@@ -9,6 +11,7 @@ const JobDashboard = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingJob, setEditingJob] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [user, setUser] = useState(undefined); // undefined = loading, null = not signed in
   const [formData, setFormData] = useState({
     company_name: "",
     job_title: "",
@@ -20,9 +23,16 @@ const JobDashboard = () => {
     status: "applied"
   });
 
+  // Listen for Firebase auth state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
   // Get current user ID from Firebase
   const getCurrentUserId = () => {
-    const user = auth.currentUser;
     return user ? user.uid : null;
   };
 
@@ -48,12 +58,16 @@ const JobDashboard = () => {
     }
   };
 
-  // Always fetch jobs on mount
+  // Fetch jobs only after user is loaded
   useEffect(() => {
-    loadJobs();
-    // Optionally, return a cleanup function to clear jobs on unmount
-    // return () => setJobs([]);
-  }, []);
+    if (user === undefined) return; // Wait for auth state
+    if (user) {
+      loadJobs();
+    } else {
+      setJobs([]);
+      setLoading(false);
+    }
+  }, [user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -171,6 +185,40 @@ const JobDashboard = () => {
     return icons[status] || "📝";
   };
 
+  // Export to CSV handler
+  const handleExportCSV = async () => {
+    const userId = getCurrentUserId();
+    if (!userId) {
+      alert("Please sign in to export your job applications.");
+      return;
+    }
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/jobs/${userId}/export`,
+        { responseType: "blob" }
+      );
+      // Create a link and trigger download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `job_applications_${userId}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      alert("Failed to export job applications. Please try again.");
+    }
+  };
+
+  // Calculate stats
+  const stats = {
+    applied: jobs.filter(j => j.status === 'applied').length,
+    interviewing: jobs.filter(j => j.status === 'interviewing').length,
+    offer: jobs.filter(j => j.status === 'offer').length,
+    rejected: jobs.filter(j => j.status === 'rejected').length,
+    total: jobs.length
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-app-background">
@@ -191,13 +239,22 @@ const JobDashboard = () => {
             <h1 className="text-3xl font-bold text-app-primary">Job Tracker Dashboard</h1>
             <p className="text-app-text mt-2">Track your job applications and interview progress</p>
           </div>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="bg-app-primary text-white px-6 py-3 rounded-lg hover:bg-app-primary/90 transition-colors flex items-center gap-2"
-          >
-            <span className="text-white">+</span>
-            <span className="text-white">Add Application</span>
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleExportCSV}
+              className="bg-app-primary text-white px-6 py-3 rounded-lg hover:bg-app-primary/90 transition-colors flex items-center gap-2"
+            >
+              <span>⬇️</span>
+              <span>Export to CSV</span>
+            </button>
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="bg-app-primary text-white px-6 py-3 rounded-lg hover:bg-app-primary/90 transition-colors flex items-center gap-2"
+            >
+              <span className="text-white">+</span>
+              <span className="text-white">Add Application</span>
+            </button>
+          </div>
         </div>
 
         {/* Error Message */}
@@ -215,16 +272,13 @@ const JobDashboard = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-          {Object.entries({
-            applied: jobs.filter(j => j.status === 'applied').length,
-            interviewing: jobs.filter(j => j.status === 'interviewing').length,
-            offer: jobs.filter(j => j.status === 'offer').length,
-            rejected: jobs.filter(j => j.status === 'rejected').length,
-            total: jobs.length
-          }).map(([status, count]) => (
+          {Object.entries(stats).map(([status, count]) => (
             <div key={status} className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
               <div className="text-2xl font-bold text-app-primary">{count}</div>
               <div className="text-sm text-app-text capitalize">{status}</div>
+              {status === 'interviewing' && stats.total > 0 && (
+                <div className="text-xs text-app-primary mt-1">{Math.round((count / stats.total) * 100)}% of total</div>
+              )}
             </div>
           ))}
         </div>
