@@ -19,6 +19,16 @@ def create_user_endpoint(user: UserCreate, db: Session = Depends(get_db)):
     db_user = create_user(db, user)
     return db_user
 
+@router.post("/user/{id}/questionnaire-complete")
+def set_questionnaire_complete(id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.questionnaire_completed = True
+    db.commit()
+    db.refresh(user)
+    return {"completed": True}
+
 @router.get("/users", response_model=list[UserResponse])
 def read_users(db: Session = Depends(get_db)):
     users = db.query(User).all()
@@ -37,6 +47,13 @@ def read_user_by_firebase_id(firebase_id: str, db: Session = Depends(get_db)):
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
+
+@router.get("/user/{id}/questionnaire-status")
+def get_questionnaire_status(id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"completed": user.questionnaire_completed}
 
 @router.patch("/user/{id}", response_model=UserResponse)
 def patch_user_endpoint(id: int, user: UserCreate, db: Session = Depends(get_db)):

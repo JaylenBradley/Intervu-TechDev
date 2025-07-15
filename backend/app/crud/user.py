@@ -22,6 +22,18 @@ def update_user(db: Session, id: int, user: UserCreate):
     db.refresh(db_user)
     return db_user
 
+def get_questionnaire_status(db: Session, uid: str) -> bool:
+    user = db.query(User).filter(User.uid == uid).first()
+    return user.questionnaire_completed if user else False
+
+def set_questionnaire_completed(db: Session, uid: str):
+    user = db.query(User).filter(User.uid == uid).first()
+    if user:
+        user.questionnaire_completed = True
+        db.commit()
+        db.refresh(user)
+    return user
+
 def delete_user(db: Session, id: int):
     db_user = db.query(User).filter(User.id == id).first()
     if not db_user:

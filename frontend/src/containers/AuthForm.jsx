@@ -193,6 +193,15 @@ const AuthForm = ({ isSignUp }) => {
                             <FcGoogle/>
                             {isSignUp ? "Sign up with Google" : "Sign in with Google"}
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => navigate(isSignUp ? "/signin" : "/signup")}
+                            className="w-full mt-2 font-semibold text-base py-1 rounded-lg btn"
+                        >
+                            {isSignUp
+                                ? "Already have an account? Sign In"
+                                : "Don't have an account? Sign Up"}
+                        </button>
                     </div>
                 </form>
             </div>
