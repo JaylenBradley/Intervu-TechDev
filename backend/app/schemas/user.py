@@ -5,6 +5,7 @@ class UserBase(BaseModel):
     email: EmailStr
     login_method: str
     career_goal: str | None = None
+    questionnaire_completed: bool = False
 
 class UserCreate(UserBase):
     firebase_id: str

@@ -11,6 +11,13 @@ export async function createUser(userData) {
   return response.json();
 };
 
+// Mark questionnaire as complete
+export async function completeQuestionnaire(userId) {
+  const res = await fetch(`/api/user/${userId}/questionnaire-complete`, { method: "POST" });
+  if (!res.ok) throw new Error("Failed to complete questionnaire");
+  return res.json();
+}
+
 // Get all users
 export async function getAllUsers() {
   const response = await fetch(`${BASE_URL}/users`);
@@ -29,6 +36,13 @@ export async function getUserByFirebaseId(firebaseId) {
   const response = await fetch(`${BASE_URL}/user/firebase/${firebaseId}`);
   if (!response.ok) throw new Error("User not found");
   return response.json();
+}
+
+// Fetch questionnaire status
+export async function fetchQuestionnaireStatus(userId) {
+  const res = await fetch(`/api/user/${userId}/questionnaire-status`);
+  if (!res.ok) throw new Error("Failed to fetch status");
+  return res.json();
 }
 
 // Update a user by ID

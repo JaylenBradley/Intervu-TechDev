@@ -10,7 +10,7 @@ class QuestionnaireBase(BaseModel):
     institution: str
     target_companies: List[str]
     skills: List[str]
-    certifications: List[str]
+    certifications: Option[List[str]] = None
     projects: Optional[str] = None
     experience: Optional[str] = None
     timeline: str
