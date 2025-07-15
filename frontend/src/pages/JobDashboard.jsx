@@ -42,16 +42,17 @@ const JobDashboard = () => {
       const jobsData = await getUserJobs(userId);
       setJobs(jobsData);
     } catch (err) {
-      console.error("Error loading jobs:", err);
       setError("Failed to load job applications. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Load jobs on component mount
+  // Always fetch jobs on mount
   useEffect(() => {
     loadJobs();
+    // Optionally, return a cleanup function to clear jobs on unmount
+    // return () => setJobs([]);
   }, []);
 
   const handleInputChange = (e) => {
@@ -104,7 +105,6 @@ const JobDashboard = () => {
       setShowAddForm(false);
       setError(null);
     } catch (err) {
-      console.error("Error saving job:", err);
       setError("Failed to save job application. Please try again.");
     } finally {
       setSubmitting(false);
@@ -118,7 +118,6 @@ const JobDashboard = () => {
         job.id === jobId ? updatedJob : job
       ));
     } catch (err) {
-      console.error("Error updating status:", err);
       setError("Failed to update job status. Please try again.");
     }
   };
@@ -127,10 +126,9 @@ const JobDashboard = () => {
     if (window.confirm("Are you sure you want to delete this application?")) {
       try {
         await deleteJobApplication(jobId);
-        setJobs(prev => prev.filter(job => job.id !== jobId));
+        await loadJobs(); // Always refetch from backend after delete
         setError(null);
       } catch (err) {
-        console.error("Error deleting job:", err);
         setError("Failed to delete job application. Please try again.");
       }
     }
