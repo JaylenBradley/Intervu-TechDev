@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../components/Navbar.jsx";
+import { auth } from "../services/firebase";
+import { getUserJobs, createJobApplication, updateJobApplication, deleteJobApplication } from "../services/jobServices";
 
 const JobDashboard = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingJob, setEditingJob] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     company_name: "",
     job_title: "",
@@ -17,44 +20,38 @@ const JobDashboard = () => {
     status: "applied"
   });
 
-  // Mock data for now - replace with actual API calls
-  useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setJobs([
-        {
-          id: "1",
-          company_name: "Google",
-          job_title: "Software Engineer",
-          status: "interviewing",
-          applied_date: "2024-01-15",
-          notes: "First round interview scheduled for next week",
-          location: "Mountain View, CA",
-          salary_range: "$150k - $200k"
-        },
-        {
-          id: "2",
-          company_name: "Microsoft",
-          job_title: "Frontend Developer",
-          status: "applied",
-          applied_date: "2024-01-10",
-          notes: "Applied through LinkedIn",
-          location: "Seattle, WA",
-          salary_range: "$120k - $160k"
-        },
-        {
-          id: "3",
-          company_name: "Amazon",
-          job_title: "SDE II",
-          status: "rejected",
-          applied_date: "2024-01-05",
-          notes: "Rejected after technical interview",
-          location: "Seattle, WA",
-          salary_range: "$140k - $180k"
-        }
-      ]);
+  // Get current user ID from Firebase
+  const getCurrentUserId = () => {
+    const user = auth.currentUser;
+    return user ? user.uid : null;
+  };
+
+  // Load jobs from API
+  const loadJobs = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const userId = getCurrentUserId();
+      
+      if (!userId) {
+        setError("Please sign in to view your job applications");
+        setLoading(false);
+        return;
+      }
+
+      const jobsData = await getUserJobs(userId);
+      setJobs(jobsData);
+    } catch (err) {
+      console.error("Error loading jobs:", err);
+      setError("Failed to load job applications. Please try again.");
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
+  };
+
+  // Load jobs on component mount
+  useEffect(() => {
+    loadJobs();
   }, []);
 
   const handleInputChange = (e) => {
@@ -65,49 +62,77 @@ const JobDashboard = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (editingJob) {
-      // Update existing job
-      setJobs(prev => prev.map(job => 
-        job.id === editingJob.id 
-          ? { ...job, ...formData }
-          : job
-      ));
-      setEditingJob(null);
-    } else {
-      // Add new job
-      const newJob = {
-        id: Date.now().toString(),
-        ...formData,
-        applied_date: new Date().toISOString().split('T')[0]
-      };
-      setJobs(prev => [...prev, newJob]);
+    try {
+      setSubmitting(true);
+      const userId = getCurrentUserId();
+      
+      if (!userId) {
+        setError("Please sign in to add job applications");
+        return;
+      }
+
+      if (editingJob) {
+        // Update existing job
+        const updatedJob = await updateJobApplication(editingJob.id, formData);
+        setJobs(prev => prev.map(job => 
+          job.id === editingJob.id ? updatedJob : job
+        ));
+        setEditingJob(null);
+      } else {
+        // Add new job
+        const newJob = await createJobApplication({
+          ...formData,
+          user_id: userId
+        });
+        setJobs(prev => [...prev, newJob]);
+      }
+      
+      // Reset form
+      setFormData({
+        company_name: "",
+        job_title: "",
+        job_description: "",
+        application_url: "",
+        salary_range: "",
+        location: "",
+        notes: "",
+        status: "applied"
+      });
+      setShowAddForm(false);
+      setError(null);
+    } catch (err) {
+      console.error("Error saving job:", err);
+      setError("Failed to save job application. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
-    
-    setFormData({
-      company_name: "",
-      job_title: "",
-      job_description: "",
-      application_url: "",
-      salary_range: "",
-      location: "",
-      notes: "",
-      status: "applied"
-    });
-    setShowAddForm(false);
   };
 
-  const handleStatusChange = (jobId, newStatus) => {
-    setJobs(prev => prev.map(job => 
-      job.id === jobId ? { ...job, status: newStatus } : job
-    ));
+  const handleStatusChange = async (jobId, newStatus) => {
+    try {
+      const updatedJob = await updateJobApplication(jobId, { status: newStatus });
+      setJobs(prev => prev.map(job => 
+        job.id === jobId ? updatedJob : job
+      ));
+    } catch (err) {
+      console.error("Error updating status:", err);
+      setError("Failed to update job status. Please try again.");
+    }
   };
 
-  const handleDelete = (jobId) => {
+  const handleDelete = async (jobId) => {
     if (window.confirm("Are you sure you want to delete this application?")) {
-      setJobs(prev => prev.filter(job => job.id !== jobId));
+      try {
+        await deleteJobApplication(jobId);
+        setJobs(prev => prev.filter(job => job.id !== jobId));
+        setError(null);
+      } catch (err) {
+        console.error("Error deleting job:", err);
+        setError("Failed to delete job application. Please try again.");
+      }
     }
   };
 
@@ -151,7 +176,6 @@ const JobDashboard = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-app-background">
-        <Navbar />
         <div className="flex items-center justify-center mt-24">
           <div className="text-2xl text-app-text">Loading job applications...</div>
         </div>
@@ -161,7 +185,6 @@ const JobDashboard = () => {
 
   return (
     <div className="min-h-screen bg-app-background">
-      <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
@@ -178,6 +201,19 @@ const JobDashboard = () => {
             <span className="text-white">Add Application</span>
           </button>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {error}
+            <button 
+              onClick={() => setError(null)}
+              className="float-right font-bold"
+            >
+              ×
+            </button>
+          </div>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
@@ -221,9 +257,9 @@ const JobDashboard = () => {
                       </div>
                       <p className="text-app-text font-medium mb-1">{job.company_name}</p>
                       <div className="flex items-center gap-4 text-sm text-app-text/70 mb-3">
-                        <span>📍 {job.location}</span>
-                        <span>💰 {job.salary_range}</span>
-                        <span>📅 Applied: {job.applied_date}</span>
+                        <span>📍 {job.location || 'No location'}</span>
+                        <span>💰 {job.salary_range || 'No salary info'}</span>
+                        <span>📅 Applied: {new Date(job.applied_date).toLocaleDateString()}</span>
                       </div>
                       {job.notes && (
                         <p className="text-sm text-app-text/80 bg-gray-50 p-3 rounded-md">
@@ -364,9 +400,10 @@ const JobDashboard = () => {
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 bg-app-primary text-white py-2 px-4 rounded-md hover:bg-app-primary/90 transition-colors font-medium"
+                  disabled={submitting}
+                  className="flex-1 bg-app-primary text-white py-2 px-4 rounded-md hover:bg-app-primary/90 transition-colors font-medium disabled:opacity-50"
                 >
-                  {editingJob ? 'Update' : 'Add'} Application
+                  {submitting ? 'Saving...' : (editingJob ? 'Update' : 'Add') + ' Application'}
                 </button>
                 <button
                   type="button"
