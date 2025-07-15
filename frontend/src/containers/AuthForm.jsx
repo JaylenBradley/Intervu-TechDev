@@ -10,7 +10,6 @@ const AuthForm = ({ isSignUp }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmedPassword, setConfirmedPassword] = useState("");
-
     const navigate = useNavigate();
 
     const handleSignUp = async () => {
@@ -56,9 +55,9 @@ const AuthForm = ({ isSignUp }) => {
 
             await createUser(data);
             alert("Sign up successful! Welcome");
-            navigate('/questionnaire');
+            navigate('/');
 
-        } catch (error) {
+          } catch (error) {
             if (error.code === "auth/email-already-in-use") {
                 alert("Email is already in use");
             } else {
@@ -110,7 +109,8 @@ const AuthForm = ({ isSignUp }) => {
 
             try {
                 await getUserByFirebaseId(firebaseId);
-                alert("Sign in successful! Welcome back.");
+                alert("Sign in successful! Welcome back");
+                navigate('/');
             } catch {
                 await createUser({
                     username,
@@ -118,9 +118,9 @@ const AuthForm = ({ isSignUp }) => {
                     login_method: "google",
                     firebase_id: firebaseId,
                 });
-                alert("Sign up successful! Welcome.");
+                alert("Sign up successful! Welcome");
+                navigate('/');
             }
-            navigate("/questionnaire");
         } catch (error) {
             alert("Google authentication failed: " + error.message);
         }

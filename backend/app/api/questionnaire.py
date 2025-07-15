@@ -21,16 +21,15 @@ def get_db():
 @router.post("/questionnaire", response_model=QuestionnaireResponse)
 def submit_questionnaire(data: QuestionnaireCreate, db: Session = Depends(get_db)):
     db_obj = upsert_questionnaire(db, data)
-    return QuestionnaireResponse(
-        **data.dict(),
-        passions=db_obj.passions.split(",") if db_obj.passions else [],
-        target_companies=db_obj.target_companies.split(",") if db_obj.target_companies else [],
-        skills=db_obj.skills.split(",") if db_obj.skills else [],
-        certifications=db_obj.certifications.split(",") if db_obj.certifications else [],
-    )
+    response_data = data.dict()
+    response_data["passions"] = db_obj.passions.split(",") if db_obj.passions else []
+    response_data["target_companies"] = db_obj.target_companies.split(",") if db_obj.target_companies else []
+    response_data["skills"] = db_obj.skills.split(",") if db_obj.skills else []
+    response_data["certifications"] = db_obj.certifications.split(",") if db_obj.certifications else []
+    return QuestionnaireResponse(**response_data)
 
 @router.get("/questionnaire/{user_id}", response_model=QuestionnaireResponse)
-def read_questionnaire(user_id: str, db: Session = Depends(get_db)):
+def read_questionnaire(user_id: int, db: Session = Depends(get_db)):
     db_obj = get_questionnaire(db, user_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="Questionnaire not found")
@@ -52,20 +51,19 @@ def read_questionnaire(user_id: str, db: Session = Depends(get_db)):
     )
 
 @router.patch("/questionnaire/{user_id}", response_model=QuestionnaireResponse)
-def patch_questionnaire_endpoint(user_id: str, data: QuestionnaireCreate, db: Session = Depends(get_db)):
+def patch_questionnaire_endpoint(user_id: int, data: QuestionnaireCreate, db: Session = Depends(get_db)):
     db_obj = update_questionnaire(db, user_id, data)
     if not db_obj:
         raise HTTPException(status_code=404, detail="Questionnaire not found")
-    return QuestionnaireResponse(
-        **data.dict(),
-        passions=db_obj.passions.split(",") if db_obj.passions else [],
-        target_companies=db_obj.target_companies.split(",") if db_obj.target_companies else [],
-        skills=db_obj.skills.split(",") if db_obj.skills else [],
-        certifications=db_obj.certifications.split(",") if db_obj.certifications else [],
-    )
+    response_data = data.dict()
+    response_data["passions"] = db_obj.passions.split(",") if db_obj.passions else []
+    response_data["target_companies"] = db_obj.target_companies.split(",") if db_obj.target_companies else []
+    response_data["skills"] = db_obj.skills.split(",") if db_obj.skills else []
+    response_data["certifications"] = db_obj.certifications.split(",") if db_obj.certifications else []
+    return QuestionnaireResponse(**response_data)
 
 @router.delete("/questionnaire/{user_id}")
-def delete_questionnaire_endpoint(user_id: str, db: Session = Depends(get_db)):
+def delete_questionnaire_endpoint(user_id: int, db: Session = Depends(get_db)):
     success = delete_questionnaire(db, user_id)
     if not success:
         raise HTTPException(status_code=404, detail="Questionnaire not found")
