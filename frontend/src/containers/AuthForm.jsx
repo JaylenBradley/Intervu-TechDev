@@ -56,7 +56,7 @@ const AuthForm = ({ isSignUp }) => {
 
             await createUser(data);
             alert("Sign up successful! Welcome");
-            navigate('/');
+            navigate('/questionnaire');
 
         } catch (error) {
             if (error.code === "auth/email-already-in-use") {
@@ -120,7 +120,7 @@ const AuthForm = ({ isSignUp }) => {
                 });
                 alert("Sign up successful! Welcome.");
             }
-            navigate("/");
+            navigate("/questionnaire");
         } catch (error) {
             alert("Google authentication failed: " + error.message);
         }
