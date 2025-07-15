@@ -18,10 +18,10 @@ class QuestionnaireBase(BaseModel):
     available_hours_per_week: str
 
 class QuestionnaireCreate(QuestionnaireBase):
-    user_id: str
+    user_id: int
 
 class QuestionnaireResponse(QuestionnaireBase):
-    user_id: str
+    user_id: int
 
     class Config:
         orm_mode = True
