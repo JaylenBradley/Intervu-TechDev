@@ -1,23 +1,24 @@
 import { useEffect, useState, useRef } from "react";
 import { fetchQuestionnaire } from "../services/questionnaireServices";
-import { getBehavioralQuestions, getBehavioralFeedback } from "../services/behavioralPrepServices"; // You’ll need to implement these
+import { getBehavioralQuestions, getBehavioralFeedback } from "../services/behavioralPrepServices";
+import { renderFeedback } from "../utils/renderFeedback.jsx";
 import { FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
 
-const instructions = `
-Welcome to Behavioral Interview Prep!
-1. Review your Target Role and Company (auto-filled from your questionnaire).
-2. Choose the number of questions (1-10) and difficulty.
-3. Click "Generate Questions" to get tailored behavioral questions.
-4. Select any question from the dropdown to answer.
-5. Click the microphone button to start/stop recording your answer.
-6. After submitting, you'll get real-time feedback for each answer.
-7. You can answer as many or as few questions as you like. Click "Done" to finish.
-`;
+const instructionsSteps = [
+  "Review your Target Role and Company (auto-filled from your questionnaire)",
+  "Choose the seniority, number of questions (1-10) and difficulty",
+  "Click \"Generate Questions\" to get tailored behavioral questions",
+  "Select any question from the dropdown to answer",
+  "Click the microphone button to start/stop recording your answer",
+  "After submitting, you'll get real-time feedback for each answer",
+  "You can answer as many or as few questions as you like. Click \"Done\" to finish"
+];
 
 const BehavioralPrep = ({ user }) => {
   const [form, setForm] = useState({
     target_role: "",
     company: "",
+    seniority: "Junior",
     num_questions: 3,
     difficulty: "Medium",
   });
@@ -41,9 +42,10 @@ const BehavioralPrep = ({ user }) => {
           ...f,
           target_role: data.career_goal || "",
           company: (data.target_companies && data.target_companies[0]) || "",
+          seniority: data.seniority || "Junior", // auto-fill if available
         }));
       } catch (err) {
-        setError("Failed to fetch questionnaire data.");
+        setError("Failed to fetch questionnaire data");
       }
     };
     load();
@@ -67,7 +69,7 @@ const BehavioralPrep = ({ user }) => {
       setQuestions(qs);
       setSelectedIdx(0);
     } catch (err) {
-      setError("Failed to generate questions.");
+      setError("Failed to generate questions");
     } finally {
       setGenerating(false);
     }
@@ -77,7 +79,7 @@ const BehavioralPrep = ({ user }) => {
   const handleRecord = () => {
     if (!recording) {
       if (!("webkitSpeechRecognition" in window)) {
-        setError("Speech recognition not supported in this browser.");
+        setError("Speech recognition not supported in this browser");
         return;
       }
       setError("");
@@ -110,13 +112,14 @@ const BehavioralPrep = ({ user }) => {
       const fb = await getBehavioralFeedback({
         question: questions[selectedIdx],
         answer,
-        role: form.target_role,
+        target_role: form.target_role,
         company: form.company,
+        seniority: form.seniority,
         difficulty: form.difficulty,
       });
       setFeedback(fb);
     } catch {
-      setFeedback("Failed to get feedback.");
+      setFeedback("Failed to get feedback");
     } finally {
       setLoading(false);
     }
@@ -128,59 +131,92 @@ const BehavioralPrep = ({ user }) => {
     <div className="min-h-screen flex flex-col items-center py-10">
       <div className="bg-app-accent border border-app-primary rounded-xl p-8 w-full max-w-2xl shadow-lg">
         <h2 className="text-2xl font-bold text-app-primary mb-4 text-center">Behavioral Interview Prep</h2>
-        <pre className="bg-app-background p-4 rounded mb-6 text-sm whitespace-pre-wrap">{instructions}</pre>
-        <form className="flex flex-col gap-4 mb-6" onSubmit={handleGenerate}>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="block mb-1 font-medium">Target Role</label>
-              <input name="target_role" value={form.target_role} onChange={handleChange}
-                className="w-full px-3 py-2 border border-app-primary rounded-lg bg-app-background" required />
+        <ul className="bg-app-background p-4 rounded mb-6 text-sm">
+          {instructionsSteps.map((step, idx) => (
+            <li key={idx} className="mb-1">{idx + 1}. {step}</li>
+          ))}
+        </ul>
+        <form className="flex flex-col gap-6 mb-8" onSubmit={handleGenerate}>
+          <div className="flex gap-6">
+            <div className="flex-1 min-w-[160px]">
+              <label className="block mb-2 font-medium">Target Role</label>
+              <input
+                name="target_role"
+                value={form.target_role}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-app-primary rounded-lg bg-app-background text-base resize-vertical"
+                rows={2}
+                required
+              />
             </div>
-            <div className="flex-1">
-              <label className="block mb-1 font-medium">Company</label>
-              <input name="company" value={form.company} onChange={handleChange}
-                className="w-full px-3 py-2 border border-app-primary rounded-lg bg-app-background" required />
+            <div className="flex-1 min-w-[160px]">
+              <label className="block mb-2 font-medium">Company</label>
+              <input
+                name="company"
+                value={form.company}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-app-primary rounded-lg bg-app-background text-base resize-vertical"
+                rows={2}
+                required
+              />
             </div>
           </div>
-          <div className="flex gap-4">
-            <div>
-              <label className="block mb-1 font-medium">Number of Questions</label>
+          <div className="flex gap-6">
+            <div className="min-w-[160px] flex-1">
+              <label className="block mb-2 font-medium">Seniority</label>
+              <select name="seniority" value={form.seniority} onChange={handleChange}
+                className="w-full px-4 py-3 border border-app-primary rounded-lg bg-app-background text-base">
+                <option value="Intern">Intern</option>
+                <option value="Junior">Junior</option>
+                <option value="Mid">Mid</option>
+                <option value="Senior">Senior</option>
+                <option value="Lead">Lead</option>
+                <option value="Manager">Manager</option>
+              </select>
+            </div>
+            <div className="min-w-[160px] flex-1">
+              <label className="block mb-2 font-medium">Number of Questions</label>
               <select name="num_questions" value={form.num_questions} onChange={handleChange}
-                className="px-3 py-2 border border-app-primary rounded-lg bg-app-background">
+                className="w-full px-4 py-3 border border-app-primary rounded-lg bg-app-background text-base">
                 {[...Array(10)].map((_, i) => (
                   <option key={i+1} value={i+1}>{i+1}</option>
                 ))}
               </select>
             </div>
-            <div>
-              <label className="block mb-1 font-medium">Difficulty</label>
+            <div className="min-w-[160px] flex-1">
+              <label className="block mb-2 font-medium">Difficulty</label>
               <select name="difficulty" value={form.difficulty} onChange={handleChange}
-                className="px-3 py-2 border border-app-primary rounded-lg bg-app-background">
+                className="w-full px-4 py-3 border border-app-primary rounded-lg bg-app-background text-base">
                 <option value="Easy">Easy</option>
                 <option value="Medium">Medium</option>
                 <option value="Hard">Hard</option>
               </select>
             </div>
           </div>
-          <button type="submit" className="btn w-full font-semibold py-2 rounded-lg" disabled={generating}>
+          <button type="submit" className="btn w-full h-12 text-lg font-semibold py-2 rounded-lg" disabled={generating}>
             {generating ? "Generating..." : "Generate Questions"}
           </button>
         </form>
+
         {error && <div className="text-red-600 mb-4">{error}</div>}
+
         {questions.length > 0 && (
           <div className="mb-6">
-            <label className="block mb-1 font-medium">Select Question</label>
-            <select value={selectedIdx} onChange={e => { setSelectedIdx(Number(e.target.value)); setAnswer(""); setFeedback(""); }}
-              className="w-full px-3 py-2 border border-app-primary rounded-lg bg-app-background mb-2">
+            <label className="font-medium min-w-[120px]">Select Question:</label>
+            <select
+              value={selectedIdx}
+              onChange={e => { setSelectedIdx(Number(e.target.value)); setAnswer(""); setFeedback(""); }}
+              className="flex-1 px-1 py-1 ml-1 mb-2 border border-app-primary rounded-lg bg-app-background"
+            >
               {questions.map((q, i) => (
-                <option key={i} value={i}>{q}</option>
+                <option key={i} value={i}>{`Q${i + 1}`}</option>
               ))}
             </select>
             <div className="mb-2 p-3 bg-app-background rounded border">{questions[selectedIdx]}</div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mt-4 mb-2">
               <button type="button" onClick={handleRecord}
                 className={`rounded-full p-3 border border-app-primary flex items-center justify-center
-                  ${recording ? "bg-app-primary text-white" : "bg-app-background text-app-primary"}`}>
+                  ${recording ? "bg-app-background text-app-primary" : "bg-app-background text-app-primary"}`}>
                 {recording ? <FaMicrophone /> : <FaMicrophoneSlash />}
               </button>
               <textarea
@@ -191,16 +227,16 @@ const BehavioralPrep = ({ user }) => {
                 rows={3}
               />
             </div>
-            <button className="btn w-full font-semibold py-2 rounded-lg mb-2" onClick={handleSubmitAnswer} disabled={loading || !answer}>
+            <button className="btn w-full h-12 text-lg font-semibold py-2 rounded-lg mt-2 mb-4" onClick={handleSubmitAnswer} disabled={loading || !answer}>
               {loading ? "Getting Feedback..." : "Submit Answer"}
             </button>
             {feedback && (
-              <div className="p-4 bg-app-background border border-app-primary rounded mt-2">
+              <div className="p-4 bg-app-background border border-app-primary rounded">
                 <strong>Feedback:</strong>
-                <div>{feedback}</div>
+                {renderFeedback(feedback)}
               </div>
             )}
-            <button className="btn w-full font-semibold py-2 rounded-lg mt-4" onClick={() => window.location.href = "/"}>Done</button>
+            <button className="btn w-full h-12 text-lg font-semibold py-2 rounded-lg mt-3" onClick={() => window.location.href = "/"}>Done</button>
           </div>
         )}
       </div>

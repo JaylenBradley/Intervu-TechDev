@@ -37,6 +37,8 @@ def behavioral_feedback_prompt(target_role, seniority, company, question, answer
     - Question: "{question}"
     - Answer: "{answer}"
 
+    You must provide structured feedback in valid JSON. Focus on:
+
     Provide structured feedback in valid JSON. Focus on:
     - Structure: Did they follow STAR format? Was it complete and clear?
     - Content: Was the story relevant and strong? Did they demonstrate useful skills or behaviors?
@@ -44,31 +46,36 @@ def behavioral_feedback_prompt(target_role, seniority, company, question, answer
     - Overall Assessment: A brief, 1–2 sentence summary of your evaluation.
     - Suggestions: Clear, actionable tips to improve future answers.
 
+    Return your feedback in **strictly valid JSON**. Do not include any explanations, markdown, or escaped strings. Do not include extra text outside the JSON block. If any field is not applicable, use an empty string "" or empty array [].
+    Do not use any markdown, formatting symbols, or asterisks (*).
+
     Output format:
-    {
-      "structure": {
+    {{
+      "structure": {{
         "star_used": true,
         "missing_parts": ["Result"],
         "notes": "The answer included Situation, Task, and Action but lacked a clear Result."
-      },
-      "content": {
+      }},
+      "content": {{
         "relevance": true,
         "strengths": ["Clear leadership example", "Specific challenge described"],
         "weaknesses": ["No measurable outcome mentioned"]
-      },
-      "tone": {
+      }},
+      "tone": {{
         "confident": true,
         "issues": [],
         "notes": ""
-      },
+      }},
       "overall_assessment": "Strong answer with relevant content and structure, but could be improved by including a quantifiable result.",
       "suggestions": [
         "Include a measurable outcome to complete the STAR format.",
         "Try to emphasize the impact your actions had on the team or project."
       ]
-    }
+    }}
 
-    If any part of the answer is not evaluable (e.g., tone not provided), return an empty string or array for that field. Always return consistent JSON with the same structure.
+    Only return this JSON object, filled in with your evaluation.
+    If any part of the answer is not evaluable (e.g., tone not provided), return an empty string or array for that field. 
+    Always return consistent JSON with the same structure.
     """
 
 def improve_resume_prompt(resume_text: str) -> str:

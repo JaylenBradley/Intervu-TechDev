@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchRoadmap } from "../services/roadmapServices";
-import { parseRoadmapJson } from "../utils/parseRoadmapJson";
+import { parseRoadmapJson } from "../utils/parseRoadmapJson.js";
 
 const Roadmap = ({ user }) => {
   const [roadmap, setRoadmap] = useState(null);

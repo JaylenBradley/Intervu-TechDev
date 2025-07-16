@@ -69,6 +69,12 @@ const Navbar = ({ user }) => {
           <div className="absolute right-0 top-12 w-44 bg-app-accent rounded-xl shadow-2xl py-3 z-20 text-app-text border border-app-secondary">
             {/*<button className="menu-btn" type="button">Profile</button>*/}
             <button
+                className="menu-btn text-app-primary"
+                type="button"
+                // onClick={}
+            >
+              {user.username}</button>
+            <button
               className="menu-btn"
               type="button"
               onClick={handleAuthClick}

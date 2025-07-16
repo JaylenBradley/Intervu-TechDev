@@ -39,7 +39,13 @@ def generate_behavioral_feedback(target_role, seniority, company, question, answ
     )
     feedback = res.text if hasattr(res, "text") else str(res)
     try:
-        feedback_json = json.loads(feedback)
-        return feedback_json
+        json.loads(feedback)
+        return feedback
     except Exception:
-        return feedback.strip()
+        return json.dumps({
+            "structure": {"star_used": False, "missing_parts": [], "notes": ""},
+            "content": {"relevance": False, "strengths": [], "weaknesses": []},
+            "tone": {"confident": False, "issues": [], "notes": ""},
+            "overall_assessment": "",
+            "suggestions": []
+        })

@@ -11,12 +11,12 @@ export async function getBehavioralQuestions({ target_role, seniority, company, 
   return data.questions;
 }
 
-export async function getBehavioralFeedback({ role, seniority, company, question, answer, difficulty }) {
+export async function getBehavioralFeedback({ target_role, seniority, company, question, answer, difficulty }) {
   const res = await fetch(`${BASE_URL}/api/behavioral-prep/feedback`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      target_role: role,
+      target_role,
       seniority,
       company,
       question,
@@ -26,5 +26,5 @@ export async function getBehavioralFeedback({ role, seniority, company, question
   });
   if (!res.ok) throw new Error("Failed to fetch feedback");
   const data = await res.json();
-  return typeof data.feedback === "string" ? data.feedback : JSON.stringify(data.feedback, null, 2);
+  return data.feedback;
 }

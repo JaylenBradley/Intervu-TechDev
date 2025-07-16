@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Any
 
 class BehavioralQuestionsRequest(BaseModel):
     target_role: str
@@ -20,4 +20,4 @@ class BehavioralFeedbackRequest(BaseModel):
     difficulty: str
 
 class BehavioralFeedbackResponse(BaseModel):
-    feedback: str
+    feedback: Any
