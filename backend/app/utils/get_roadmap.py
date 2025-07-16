@@ -6,7 +6,7 @@ from google import genai
 from google.genai import types
 
 load_dotenv()
-api_key = os.getenv('GENAI_API_KEY')
+api_key = os.getenv('GEMINI_API_KEY')
 genai.api_key = api_key
 
 client = genai.Client(

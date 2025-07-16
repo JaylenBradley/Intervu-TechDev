@@ -206,8 +206,13 @@ const JobDashboard = () => {
   };
 
   const handleExportGoogleSheets = async () => {
+    const userId = getCurrentUserId();
+    if (!userId) {
+      alert("Please sign in to export to Google Sheets.");
+      return;
+    }
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/jobs/export-to-sheets`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/jobs/export-to-sheets/${userId}`, {
         method: "GET",
         credentials: "include"
       });
