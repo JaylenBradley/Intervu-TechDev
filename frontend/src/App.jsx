@@ -4,6 +4,7 @@ import { auth } from "./services/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { fetchQuestionnaireStatus, getUserByFirebaseId } from "./services/userServices";
 import AuthForm from "./containers/AuthForm.jsx";
+import BehavioralPrep from "./pages/BehavioralPrep.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
 import Home from "./pages/Home.jsx";
 import Navbar from "./components/Navbar.jsx";
@@ -77,6 +78,11 @@ const App = () => {
         <Route path="/resume" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             {/*<Resume />*/}
+          </ProtectedRoute>
+        }/>
+        <Route path="/behavioral-prep" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <BehavioralPrep user={user}/>
           </ProtectedRoute>
         }/>
         <Route path="*" element={<ErrorPage/>}/>

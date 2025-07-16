@@ -58,7 +58,7 @@ const Navbar = ({ user }) => {
         <NavButton icon={<FaRegFileAlt size={24} />} alt="Resume" onClick={() => navigate('/resume')} />
         <NavButton icon={<MdWork size={24} />} alt="Job Dashboard" onClick={() => navigate('/jobs')} />
         <NavButton icon={<FaTools size={24} />} alt="Tech Prep" onClick={() => navigate('/tech-prep')} />
-        <NavButton icon={<FaRobot size={24} />} alt="AI-Interviewer" onClick={() => navigate('/ai-interviewer')} />
+        <NavButton icon={<FaRobot size={24} />} alt="AI-Interviewer" onClick={() => navigate('/behavioral-prep')} />
         <button
           className="w-10 h-10 rounded-full border-2 border-app-primary flex items-center justify-center focus:outline-none bg-app-accent ml-2"
           onClick={() => setMenuOpen((v) => !v)}
