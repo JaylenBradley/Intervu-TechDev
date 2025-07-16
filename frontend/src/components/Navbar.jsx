@@ -9,15 +9,7 @@ import { FaRegFileAlt, FaMapSigns, FaTools, FaRobot } from "react-icons/fa";
 import { MdWork } from "react-icons/md";
 import logo from "../assets/images/intervu-logo.png";
 
-<<<<<<< HEAD
-const homeIcon = "https://img.icons8.com/ios-filled/50/1F2937/home.png";
-const dashboardIcon = "https://img.icons8.com/ios-filled/50/1F2937/dashboard.png";
-const aboutIcon = "https://img.icons8.com/ios-filled/50/1F2937/about.png";
-
-const Navbar = () => {
-=======
 const Navbar = ({ user }) => {
->>>>>>> main
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef();
   const navigate = useNavigate();
@@ -48,48 +40,30 @@ const Navbar = ({ user }) => {
 
   return (
     <nav className="flex items-center justify-between px-6 py-3 shadow bg-app-background">
-<<<<<<< HEAD
-      <div className="flex items-center">
-        <span 
-          className="text-4xl font-bold text-app-primary cursor-pointer"
-          onClick={() => navigate("/")}
-        >
-=======
-      <button
-        className="flex items-center focus:outline-none"
-        onClick={() => navigate('/')}
-        style={{ background: "none", border: "none", padding: 0, margin: 0 }}
-        type="button"
-      >
-        <img src={logo} alt="Intervu Logo" className="h-19 w-19 mr-1" />
-        <span className="text-5xl font-bold text-app-primary">
->>>>>>> main
-          Intervu
-        </span>
-      </button>
-      <div className="flex items-center gap-2 relative" ref={menuRef}>
-<<<<<<< HEAD
-        <NavButton icon={homeIcon} alt="Home" onClick={() => navigate('/')} />
-        <NavButton icon={dashboardIcon} alt="Dashboard" onClick={() => navigate('/dashboard')} />
-        <NavButton icon={aboutIcon} alt="Resume" onClick={() => navigate('/health')} />
-        <NavButton icon={aboutIcon} alt="Questionnaire" onClick={() => navigate('/health')} />
-        <NavButton icon={aboutIcon} alt="Roadmap" onClick={() => navigate('/health')} />
-        <NavButton icon={aboutIcon} alt="Tech Prep" onClick={() => navigate('/health')} />
-        <NavButton icon={aboutIcon} alt="AI-Interviewer" onClick={() => navigate('/health')} />
-=======
-        <NavButton icon={<AiFillHome size={24} />} alt="Home" onClick={() => navigate('/')} />
-        <NavButton icon={<RiQuestionnaireFill size={24} />} alt="Questionnaire" onClick={() => navigate('/questionnaire')} />
-        <NavButton icon={<FaMapSigns size={24} />} alt="Roadmap" onClick={() => navigate('/roadmap')} />
-        <NavButton icon={<FaRegFileAlt size={24} />} alt="Resume" onClick={() => navigate('/resume')} />
-        <NavButton icon={<MdWork size={24} />} alt="Job Dashboard" onClick={() => navigate('/jobs')} />
-        <NavButton icon={<FaTools size={24} />} alt="Tech Prep" onClick={() => navigate('/tech-prep')} />
-        <NavButton icon={<FaRobot size={24} />} alt="AI-Interviewer" onClick={() => navigate('/ai-interviewer')} />
->>>>>>> main
+      <div className="flex items-center min-w-0">
         <button
-          className="w-10 h-10 rounded-full border-2 border-app-primary flex items-center justify-center focus:outline-none bg-app-accent ml-2"
+          className="flex items-center focus:outline-none"
+          onClick={() => navigate('/')} 
+          style={{ background: "none", border: "none", padding: 0, margin: 0 }}
+          type="button"
+        >
+          <img src={logo} alt="Intervu Logo" className="h-14 w-14 mr-2" />
+          <span className="text-3xl font-bold text-app-primary truncate">Intervu</span>
+        </button>
+      </div>
+      <div className="flex items-center gap-2 ml-4" ref={menuRef} style={{flexShrink: 0}}>
+        <NavButton icon={<AiFillHome size={16} />} alt="Home" onClick={() => navigate('/')} />
+        <NavButton icon={<RiQuestionnaireFill size={16} />} alt="Questionnaire" onClick={() => navigate('/questionnaire')} />
+        <NavButton icon={<FaMapSigns size={16} />} alt="Roadmap" onClick={() => navigate('/roadmap')} />
+        <NavButton icon={<FaRegFileAlt size={16} />} alt="Resume" onClick={() => navigate('/resume')} />
+        <NavButton icon={<MdWork size={16} />} alt="Job Dashboard" onClick={() => navigate('/dashboard')} />
+        <NavButton icon={<FaTools size={16} />} alt="Tech Prep" onClick={() => navigate('/tech-prep')} />
+        <NavButton icon={<FaRobot size={16} />} alt="AI-Interviewer" onClick={() => navigate('/ai-interviewer')} />
+        <button
+          className="w-12 h-12 rounded-full border-2 border-app-primary flex items-center justify-center focus:outline-none bg-app-accent ml-1"
           onClick={() => setMenuOpen((v) => !v)}
         >
-          <span className="text-lg text-app-primary font-bold">U</span>
+          <span className="text-base text-app-primary font-bold">U</span>
         </button>
         {menuOpen && (
           <div className="absolute right-0 top-12 w-44 bg-app-accent rounded-xl shadow-2xl py-3 z-20 text-app-text border border-app-secondary">

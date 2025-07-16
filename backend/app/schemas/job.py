@@ -22,7 +22,7 @@ class JobApplicationBase(BaseModel):
     location: Optional[str] = None
 
 class JobApplicationCreate(JobApplicationBase):
-    user_id: str
+    user_id: int
 
 class JobApplicationUpdate(BaseModel):
     company_name: Optional[str] = None
@@ -36,7 +36,7 @@ class JobApplicationUpdate(BaseModel):
 
 class JobApplicationResponse(JobApplicationBase):
     id: str
-    user_id: str
+    user_id: int
     applied_date: datetime
     updated_date: datetime
 

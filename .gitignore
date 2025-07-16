@@ -1,3 +1,4 @@
 .idea
 *.pyc
-__pycache__/
+__pycache__/backend/app/core/client_secret.json
+backend/app/core/token.json

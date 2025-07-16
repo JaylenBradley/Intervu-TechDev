@@ -33,12 +33,12 @@ def get_db():
 
 @router.post("/jobs", response_model=JobApplicationResponse)
 def create_application(job_data: JobApplicationCreate, db: Session = Depends(get_db)):
-    # The frontend sends firebase_id as user_id in the job data
-    firebase_id = job_data.user_id
-    user = db.query(User).filter(User.firebase_id == firebase_id).first()
+    # The frontend sends user_id (internal integer) in the job data
+    user_id = job_data.user_id
+    user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    job_data.user_id = str(user.id)  # Convert integer to string for varchar column
+    # user_id is already correct type
     return create_job_application(db, job_data)
 
 @router.get("/jobs/application/{application_id}", response_model=JobApplicationResponse)
@@ -62,19 +62,19 @@ def delete_application_endpoint(application_id: str, db: Session = Depends(get_d
         raise HTTPException(status_code=404, detail="Application not found")
     return {"message": "Application deleted successfully"}
 
-@router.get("/jobs/{firebase_id}", response_model=List[JobApplicationResponse])
-def get_applications(firebase_id: str, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.firebase_id == firebase_id).first()
+@router.get("/jobs/{user_id}", response_model=List[JobApplicationResponse])
+def get_applications(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return get_user_applications(db, str(user.id))  # Convert to string for varchar column
+    return get_user_applications(db, user_id)
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive.file']
 CLIENT_SECRET_FILE = str(pathlib.Path(__file__).parent.parent / 'core' / 'client_secret.json')
 TOKEN_FILE = str(pathlib.Path(__file__).parent.parent / 'core' / 'token.json')
 
-@router.get("/jobs/export-to-sheets/{firebase_id}")
-async def export_to_sheets(firebase_id: str, request: Request, db: Session = Depends(get_db)):
+@router.get("/jobs/export-to-sheets/{user_id}")
+async def export_to_sheets(user_id: int, request: Request, db: Session = Depends(get_db)):
     # Step 1: OAuth flow
     creds = None
     if os.path.exists(TOKEN_FILE):
@@ -89,10 +89,10 @@ async def export_to_sheets(firebase_id: str, request: Request, db: Session = Dep
             token.write(creds.to_json())
 
     # Step 2: Get user and their job applications
-    user = db.query(User).filter(User.firebase_id == firebase_id).first()
+    user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    jobs = db.query(JobApplication).filter(JobApplication.user_id == str(user.id)).all()
+    jobs = db.query(JobApplication).filter(JobApplication.user_id == user_id).all()
     data = [["Company Name", "Job Title", "Status", "Applied Date", "Notes"]]
     for job in jobs:
         data.append([

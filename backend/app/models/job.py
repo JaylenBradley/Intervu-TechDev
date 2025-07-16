@@ -15,7 +15,7 @@ class JobApplication(Base):
     __tablename__ = "job_applications"
     
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String, index=True)  # Keep as String to match current DB schema
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     company_name = Column(String, nullable=False)
     job_title = Column(String, nullable=False)
     job_description = Column(Text)

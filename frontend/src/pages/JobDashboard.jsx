@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { auth } from "../services/firebase";
-import { onAuthStateChanged } from "firebase/auth";
 import { getUserJobs, createJobApplication, updateJobApplication, deleteJobApplication } from "../services/jobServices";
 import axios from "axios";
 
-const JobDashboard = () => {
+const JobDashboard = ({ user }) => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingJob, setEditingJob] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [user, setUser] = useState(undefined); // undefined = loading, null = not signed in
   const [formData, setFormData] = useState({
     company_name: "",
     job_title: "",
@@ -23,33 +20,17 @@ const JobDashboard = () => {
     status: "applied"
   });
 
-  // Listen for Firebase auth state
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Get current user ID from Firebase
-  const getCurrentUserId = () => {
-    return user ? user.uid : null;
-  };
-
   // Load jobs from API
   const loadJobs = async () => {
     try {
       setLoading(true);
       setError(null);
-      const userId = getCurrentUserId();
-      
-      if (!userId) {
+      if (!user || !user.id) {
         setError("Please sign in to view your job applications");
         setLoading(false);
         return;
       }
-
-      const jobsData = await getUserJobs(userId);
+      const jobsData = await getUserJobs(user.id);
       setJobs(jobsData);
     } catch (err) {
       setError("Failed to load job applications. Please try again.");
@@ -60,13 +41,8 @@ const JobDashboard = () => {
 
   // Fetch jobs only after user is loaded
   useEffect(() => {
-    if (user === undefined) return; // Wait for auth state
-    if (user) {
-      loadJobs();
-    } else {
-      setJobs([]);
-      setLoading(false);
-    }
+    if (!user) return;
+    loadJobs();
   }, [user]);
 
   const handleInputChange = (e) => {
@@ -81,8 +57,7 @@ const JobDashboard = () => {
     e.preventDefault();
     try {
       setSubmitting(true);
-      const userId = getCurrentUserId();
-      if (!userId) {
+      if (!user || !user.id) {
         setError("Please sign in to add job applications");
         return;
       }
@@ -97,7 +72,7 @@ const JobDashboard = () => {
         // Add new job
         const newJob = await createJobApplication({
           ...formData,
-          user_id: userId
+          user_id: user.id
         });
         setJobs(prev => [...prev, newJob]);
       }
@@ -182,21 +157,20 @@ const JobDashboard = () => {
 
   // Export to CSV handler
   const handleExportCSV = async () => {
-    const userId = getCurrentUserId();
-    if (!userId) {
+    if (!user || !user.id) {
       alert("Please sign in to export your job applications.");
       return;
     }
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/jobs/${userId}/export`,
+        `${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/jobs/${user.id}/export`,
         { responseType: "blob" }
       );
       // Create a link and trigger download
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `job_applications_${userId}.csv`);
+      link.setAttribute("download", `job_applications_${user.id}.csv`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -206,13 +180,12 @@ const JobDashboard = () => {
   };
 
   const handleExportGoogleSheets = async () => {
-    const userId = getCurrentUserId();
-    if (!userId) {
+    if (!user || !user.id) {
       alert("Please sign in to export to Google Sheets.");
       return;
     }
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/jobs/export-to-sheets/${userId}`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/jobs/export-to-sheets/${user.id}`, {
         method: "GET",
         credentials: "include"
       });

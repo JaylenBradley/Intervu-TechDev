@@ -69,7 +69,7 @@ const App = () => {
         <Route path="/" element={<Home questionnaireComplete={questionnaireComplete}/>}/>
         <Route path="/signup" element={<AuthForm isSignUp={true}/>}/>
         <Route path="/signin" element={<AuthForm isSignUp={false} />} />
-        <Route path="/dashboard" element={<JobDashboard/>}/>
+        <Route path="/dashboard" element={<JobDashboard user={user}/>}/>
         <Route path="/resume" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <ResumeMain />

@@ -1,10 +1,12 @@
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, ForeignKey
+import uuid
 from app.core.database import Base
 
 class Questionnaire(Base):
     __tablename__ = "questionnaire"
 
-    user_id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(Integer, ForeignKey("user.id"), unique=True, nullable=False)
     career_goal = Column(String)
     major = Column(String, nullable=False)
     education_level = Column(String)
