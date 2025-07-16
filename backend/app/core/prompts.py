@@ -135,7 +135,8 @@ def roadmap_prompt(profile, current_date):
     Here is the user's profile data:
     {profile}
     
-    Format the response as raw JSON. Do not include any plain text, greetings, section titles, or formatting symbols.
+    CRITICAL: Return ONLY raw JSON. No markdown formatting, no code blocks, no explanations, no text before or after the JSON.
+    Do not include any plain text, greetings, section titles, or formatting symbols.
     
     The JSON should include the following top-level keys:
     
@@ -182,4 +183,5 @@ def roadmap_prompt(profile, current_date):
     - Format must be valid and parseable by standard JSON parsers.
     
     If you cannot provide the requested information, respond with an empty JSON object or empty arrays instead of text.
+    Start your response with {{ and end with }}. Nothing else.
     """

@@ -47,6 +47,41 @@ body {
   color: var(--primary);
 }
 
+.btn-primary {
+  background-color: var(--primary);
+  color: #fff;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.btn-primary:hover {
+  background-color: var(--secondary);
+  color: var(--primary);
+}
+
+.btn-primary:disabled {
+  background-color: #e5e7eb;
+  color: #929292;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  background-color: var(--danger, #ef4444);
+  color: #fff;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.btn-danger:disabled {
+  background-color: #e5e7eb;
+  color: #929292;
+  cursor: not-allowed;
+}
+
 .nav-btn {
   background-color: var(--accent);
   color: var(--text);

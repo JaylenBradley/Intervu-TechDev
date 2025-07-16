@@ -2,7 +2,10 @@ import { useEffect, useState, useRef } from "react";
 import { fetchQuestionnaire } from "../services/questionnaireServices";
 import { getBehavioralQuestions, getBehavioralFeedback } from "../services/behavioralPrepServices";
 import { renderFeedback } from "../utils/renderFeedback.jsx";
+import { uploadAudio } from "../services/audioUploadServices";
 import { FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
+import { GoPlay } from "react-icons/go";
+import { ImStop } from "react-icons/im";
 
 const instructionsSteps = [
   "Review your Target Role and Company (auto-filled from your questionnaire)",
@@ -22,6 +25,7 @@ const BehavioralPrep = ({ user }) => {
     num_questions: 3,
     difficulty: "Medium",
   });
+
   const [questions, setQuestions] = useState([]);
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [answer, setAnswer] = useState("");
@@ -30,9 +34,12 @@ const BehavioralPrep = ({ user }) => {
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
-  const recognitionRef = useRef(null);
+  const [audioChunks, setAudioChunks] = useState([]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioUrlRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioElementRef = useRef(null);
 
-  // Fetch questionnaire for auto-fill
   useEffect(() => {
     const load = async () => {
       if (!user) return;
@@ -51,13 +58,11 @@ const BehavioralPrep = ({ user }) => {
     load();
   }, [user]);
 
-  // Handle form changes
   const handleChange = e => {
     const { name, value } = e.target;
     setForm(f => ({ ...f, [name]: value }));
   };
 
-  // Generate questions
   const handleGenerate = async e => {
     e.preventDefault();
     setGenerating(true);
@@ -75,36 +80,131 @@ const BehavioralPrep = ({ user }) => {
     }
   };
 
-  // Speech-to-text logic (Web Speech API)
-  const handleRecord = () => {
+  const handleRecord = async () => {
     if (!recording) {
-      if (!("webkitSpeechRecognition" in window)) {
-        setError("Speech recognition not supported in this browser");
-        return;
-      }
       setError("");
-      const recognition = new window.webkitSpeechRecognition();
-      recognition.lang = "en-US";
-      recognition.interimResults = true;
-      recognition.continuous = false;
-      recognition.onresult = event => {
-        let transcript = "";
-        for (let i = 0; i < event.results.length; ++i) {
-          transcript += event.results[i][0].transcript;
-        }
-        setAnswer(transcript);
-      };
-      recognition.onerror = () => setError("Speech recognition error.");
-      recognitionRef.current = recognition;
-      recognition.start();
-      setRecording(true);
+      let localChunks = [];
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+
+        mediaRecorder.ondataavailable = event => {
+          localChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          if (localChunks.length === 0) {
+            setError("No audio detected. Please try recording again.");
+            setRecording(false);
+            return;
+          }
+          const audioBlob = new Blob(localChunks, { type: "audio/webm" });
+          audioUrlRef.current = URL.createObjectURL(audioBlob);
+          setAudioChunks(localChunks);
+          handleAudioUploadAndFeedback(audioBlob);
+          setRecording(false);
+        };
+
+        mediaRecorder.start();
+        setRecording(true);
+      } catch {
+        setError("Microphone access denied");
+      }
     } else {
-      recognitionRef.current && recognitionRef.current.stop();
-      setRecording(false);
+      mediaRecorderRef.current && mediaRecorderRef.current.stop();
     }
   };
 
-  // Submit answer for feedback
+  function formatFeedbackForSpeech(feedbackObj) {
+    let data;
+    try {
+      data = typeof feedbackObj === "string" ? JSON.parse(feedbackObj) : feedbackObj;
+    } catch {
+      return typeof feedbackObj === "string" ? feedbackObj : "";
+    }
+    const assessment = data.overall_assessment || "";
+    const suggestions = Array.isArray(data.suggestions) ? data.suggestions.join(" ") : "";
+    return `${assessment}. ${suggestions}`;
+  }
+
+  function stopFeedbackSpeech() {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
+    }
+  }
+
+  const speakFeedback = (feedbackObj) => {
+    if ("speechSynthesis" in window) {
+      let text = "";
+      if (typeof feedbackObj === "string") {
+        try {
+          const parsed = JSON.parse(feedbackObj);
+          text = parsed.overall_assessment + ". " + (parsed.suggestions || []).join(" ");
+        } catch {
+          text = feedbackObj;
+        }
+      } else {
+        text = feedbackObj.overall_assessment + ". " + (feedbackObj.suggestions || []).join(" ");
+      }
+      const utterance = new window.SpeechSynthesisUtterance(text);
+      utterance.onstart = () => setIsPlaying(true);
+      utterance.onend = () => setIsPlaying(false);
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  const handleAudioUploadAndFeedback = async (audioFile) => {
+    if (audioChunks.length === 0) {
+      setError("No audio detected. Please try recording again.");
+      setRecording(false);
+      return;
+    }
+
+    setLoading(true);
+    setFeedback("");
+    try {
+      const transcript = await uploadAudio(audioFile);
+      setAnswer(transcript);
+      const fb = await getBehavioralFeedback({
+        question: questions[selectedIdx],
+        answer: transcript,
+        target_role: form.target_role,
+        company: form.company,
+        seniority: form.seniority,
+        difficulty: form.difficulty,
+      });
+      setFeedback(fb);
+    } catch {
+      setError("Failed to process audio or get feedback");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //F Function for playing back the user's recorded audio
+  const handlePlayAudio = () => {
+    if (!audioUrlRef.current) return;
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+      audioElementRef.current.currentTime = 0;
+    }
+    const audio = new Audio(audioUrlRef.current);
+    audio.onended = () => setIsPlaying(false);
+    audioElementRef.current = audio;
+    audio.play();
+    setIsPlaying(true);
+  };
+
+  const handleStopAudio = () => {
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+      audioElementRef.current.currentTime = 0;
+    }
+    setIsPlaying(false);
+  };
+
   const handleSubmitAnswer = async () => {
     setLoading(true);
     setFeedback("");
@@ -193,7 +293,12 @@ const BehavioralPrep = ({ user }) => {
               </select>
             </div>
           </div>
-          <button type="submit" className="btn w-full h-12 text-lg font-semibold py-2 rounded-lg" disabled={generating}>
+          <button
+            type="submit"
+            className={`btn w-full h-12 text-lg font-semibold py-2 rounded-lg
+              ${generating ? "bg-app-secondary opacity-60 cursor-not-allowed" : ""}`}
+            disabled={generating}
+          >
             {generating ? "Generating..." : "Generate Questions"}
           </button>
         </form>
@@ -222,18 +327,48 @@ const BehavioralPrep = ({ user }) => {
               <textarea
                 value={answer}
                 onChange={e => setAnswer(e.target.value)}
+                onInput={e => {
+                  e.target.style.height = "auto";
+                  e.target.style.height = `${e.target.scrollHeight}px`;
+                }}
                 className="flex-1 px-3 py-2 border border-app-primary rounded-lg bg-app-background"
                 placeholder="Your answer (or use the mic)"
                 rows={3}
               />
             </div>
-            <button className="btn w-full h-12 text-lg font-semibold py-2 rounded-lg mt-2 mb-4" onClick={handleSubmitAnswer} disabled={loading || !answer}>
+            <button className={`btn w-full h-12 text-lg font-semibold py-2 rounded-lg mt-2 mb-4
+              ${loading ? "bg-app-secondary opacity-60 cursor-not-allowed" : ""}`}
+              onClick={handleSubmitAnswer}
+              disabled={loading || !answer}
+            >
               {loading ? "Getting Feedback..." : "Submit Answer"}
             </button>
             {feedback && (
               <div className="p-4 bg-app-background border border-app-primary rounded">
                 <strong>Feedback:</strong>
                 {renderFeedback(feedback)}
+                <div className="flex gap-2 mt-2">
+                  <button
+                    className="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 btn-primary"
+                    onClick={() => speakFeedback(formatFeedbackForSpeech(feedback))}
+                    type="button"
+                    disabled={isPlaying}
+                  >
+                    <span role="img" aria-label="Play">
+                      <GoPlay/>
+                    </span> Play Feedback
+                  </button>
+                  <button
+                    className="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 btn-danger"
+                    onClick={stopFeedbackSpeech}
+                    type="button"
+                    disabled={!isPlaying}
+                  >
+                    <span role="img" aria-label="Stop">
+                      <ImStop/>
+                    </span> Stop Feedback
+                  </button>
+                </div>
               </div>
             )}
             <button className="btn w-full h-12 text-lg font-semibold py-2 rounded-lg mt-3" onClick={() => window.location.href = "/"}>Done</button>
