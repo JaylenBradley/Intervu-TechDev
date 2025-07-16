@@ -21,6 +21,7 @@ import pathlib
 import json
 from app.models.job import JobApplication
 from google.auth.transport.requests import Request as GoogleRequest
+from app.core.config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_PROJECT_ID
 
 router = APIRouter()
 
@@ -70,7 +71,6 @@ def get_applications(user_id: int, db: Session = Depends(get_db)):
     return get_user_applications(db, user_id)
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive.file']
-CLIENT_SECRET_FILE = str(pathlib.Path(__file__).parent.parent / 'core' / 'client_secret.json')
 TOKEN_FILE = str(pathlib.Path(__file__).parent.parent / 'core' / 'token.json')
 
 @router.get("/jobs/export-to-sheets/{user_id}")
@@ -83,7 +83,19 @@ async def export_to_sheets(user_id: int, request: Request, db: Session = Depends
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(GoogleRequest())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET_FILE, SCOPES)
+            # Build the client config dict from environment variables
+            client_config = {
+                "installed": {
+                    "client_id": GOOGLE_CLIENT_ID,
+                    "project_id": GOOGLE_PROJECT_ID,
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                    "client_secret": GOOGLE_CLIENT_SECRET,
+                    "redirect_uris": ["http://localhost"]
+                }
+            }
+            flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
             creds = flow.run_local_server(port=0)
         with open(TOKEN_FILE, 'w') as token:
             token.write(creds.to_json())
