@@ -16,7 +16,6 @@ const App = () => {
   const [questionnaireStatusLoading, setQuestionnaireStatusLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
