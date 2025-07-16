@@ -93,20 +93,22 @@ const Roadmap = ({ user }) => {
         {roadmap.resource_links && (
           <>
             <h3 className="font-semibold text-lg mt-4 mb-2">Resource Links</h3>
-            {Object.entries(roadmap.resource_links).map(([cat, items]) => (
-              <div key={cat} className="mb-2">
-                <strong className="capitalize">{cat}:</strong>
-                <ul className="list-disc ml-6">
-                  {(items || []).map((item, i) => (
-                    <li key={i}>
-                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-app-primary underline">
-                        {item.title}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            {Object.entries(roadmap.resource_links).map(([cat, items]) =>
+              (items && items.length > 0) && (
+                <div key={cat} className="mb-2">
+                  <strong className="capitalize">{cat}:</strong>
+                  <ul className="list-disc ml-6">
+                    {items.map((item, i) => (
+                      <li key={i}>
+                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-app-primary underline">
+                          {item.title}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            )}
           </>
         )}
       </div>
