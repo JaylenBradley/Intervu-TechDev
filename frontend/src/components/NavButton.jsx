@@ -1,9 +1,10 @@
-const NavButton = ({ icon, onClick, alt }) => (
+const NavButton = ({ icon, alt, onClick }) => (
   <button
     onClick={onClick}
-    className="mx-2 p-2 rounded-full hover:bg-app-primary transition bg-transparent"
+    className="nav-btn"
   >
-    <img src={icon} alt={alt} className="w-6 h-6" />
+    {icon}
+    <span className="font-medium">{alt}</span>
   </button>
 );
 

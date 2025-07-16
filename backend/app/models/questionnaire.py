@@ -1,14 +1,14 @@
-from sqlalchemy import Column, String
+from sqlalchemy import Column, String, Integer
 from app.core.database import Base
 
 class Questionnaire(Base):
     __tablename__ = "questionnaire"
 
-    user_id = Column(String, primary_key=True, index=True)
+    user_id = Column(Integer, primary_key=True, index=True)
     career_goal = Column(String)
-    major = Column(String)
+    major = Column(String, nullable=False)
     education_level = Column(String)
-    passions = Column(String)
+    interests = Column(String)
     institution = Column(String)
     target_companies = Column(String)
     skills = Column(String)

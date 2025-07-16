@@ -9,8 +9,23 @@ def create_user(db: Session, user: UserCreate):
     db.refresh(db_user)
     return db_user
 
+def set_questionnaire_completed(db: Session, id: int):
+    user = db.query(User).filter(User.id == id).first()
+    if user:
+        user.questionnaire_completed = True
+        db.commit()
+        db.refresh(user)
+    return user
+
 def get_user(db: Session, id: int):
     return db.query(User).filter(User.id == id).first()
+
+def get_user_by_firebase_id(db, firebase_id: str):
+    return db.query(User).filter_by(firebase_id=firebase_id).first()
+
+def get_questionnaire_status(db: Session, id: int) -> bool:
+    user = db.query(User).filter(User.id == id).first()
+    return user.questionnaire_completed if user else False
 
 def update_user(db: Session, id: int, user: UserCreate):
     db_user = db.query(User).filter(User.id == id).first()
@@ -21,18 +36,6 @@ def update_user(db: Session, id: int, user: UserCreate):
     db.commit()
     db.refresh(db_user)
     return db_user
-
-def get_questionnaire_status(db: Session, id: int) -> bool:
-    user = db.query(User).filter(User.id == id).first()
-    return user.questionnaire_completed if user else False
-
-def set_questionnaire_completed(db: Session, id: int):
-    user = db.query(User).filter(User.id == id).first()
-    if user:
-        user.questionnaire_completed = True
-        db.commit()
-        db.refresh(user)
-    return user
 
 def delete_user(db: Session, id: int):
     db_user = db.query(User).filter(User.id == id).first()
