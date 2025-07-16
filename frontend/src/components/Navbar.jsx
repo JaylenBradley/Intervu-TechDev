@@ -40,32 +40,6 @@ const Navbar = ({ user }) => {
 
   return (
     <nav className="flex items-center justify-between px-6 py-3 shadow bg-app-background">
-<<<<<<< HEAD
-      <button
-        className="flex items-center focus:outline-none"
-        onClick={() => navigate('/')}
-        style={{ background: "none", border: "none", padding: 0, margin: 0 }}
-        type="button"
-      >
-        <img src={logo} alt="Intervu Logo" className="h-19 w-19 mr-1" />
-        <span className="text-5xl font-bold text-app-primary">
-          Intervu
-        </span>
-      </button>
-      <div className="flex items-center gap-2 relative" ref={menuRef}>
-        <NavButton icon={<AiFillHome size={24} />} alt="Home" onClick={() => navigate('/')} />
-        <NavButton icon={<RiQuestionnaireFill size={24} />} alt="Questionnaire" onClick={() => navigate('/questionnaire')} />
-        <NavButton icon={<FaMapSigns size={24} />} alt="Roadmap" onClick={() => navigate('/roadmap')} />
-        <NavButton icon={<FaRegFileAlt size={24} />} alt="Resume" onClick={() => navigate('/resume')} />
-        <NavButton icon={<MdWork size={24} />} alt="Job Dashboard" onClick={() => navigate('/jobs')} />
-        <NavButton icon={<FaTools size={24} />} alt="Tech Prep" onClick={() => navigate('/tech-prep')} />
-        <NavButton icon={<FaRobot size={24} />} alt="AI-Interviewer" onClick={() => navigate('/ai-interviewer')} />
-        <button
-          className="w-10 h-10 rounded-full border-2 border-app-primary flex items-center justify-center focus:outline-none bg-app-accent ml-2"
-          onClick={() => setMenuOpen((v) => !v)}
-        >
-          <span className="text-lg text-app-primary font-bold">U</span>
-=======
       <div className="flex items-center min-w-0">
         <button
           className="flex items-center focus:outline-none"
@@ -90,7 +64,6 @@ const Navbar = ({ user }) => {
           onClick={() => setMenuOpen((v) => !v)}
         >
           <span className="text-base text-app-primary font-bold">U</span>
->>>>>>> justin/dev
         </button>
         {menuOpen && (
           <div className="absolute right-0 top-12 w-44 bg-app-accent rounded-xl shadow-2xl py-3 z-20 text-app-text border border-app-secondary">

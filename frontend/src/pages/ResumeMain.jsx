@@ -5,7 +5,7 @@ const ResumeMain = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-app-background flex flex-col items-center justify-center py-16">
+    <div className="min-h-screen flex flex-col items-center justify-center py-16">
       <h1 className="text-4xl font-bold text-app-primary mb-8">Resume Tools</h1>
       <div className="flex flex-col md:flex-row gap-8">
         {/* Left Card: Create a Resume */}

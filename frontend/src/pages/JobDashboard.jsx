@@ -236,7 +236,14 @@ const JobDashboard = ({ user }) => {
           </div>
           <div className="flex gap-2">
             <button
-              onClick={handleExportGoogleSheets}
+              onClick={() => {
+                if (!user || !user.id) {
+                  alert("Please sign in to export to Google Sheets.");
+                  return;
+                }
+                const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+                window.open(`${backendUrl}/api/jobs/export-to-sheets/${user.id}`, '_blank');
+              }}
               className="bg-app-primary text-white px-6 py-3 rounded-lg hover:bg-app-primary/90 transition-colors flex items-center gap-2"
             >
               <span>⬆️</span>

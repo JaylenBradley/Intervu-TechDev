@@ -1,12 +1,4 @@
 from sqlalchemy.orm import Session
-<<<<<<< HEAD
-from app.models.job import JobApplication
-from app.schemas.job import JobApplicationCreate, JobApplicationUpdate
-from typing import List, Optional
-
-def create_job_application(db: Session, job_data: JobApplicationCreate):
-    db_job = JobApplication(**job_data.dict())
-=======
 from app.models.job import JobApplication, ApplicationStatus
 from app.schemas.job import JobApplicationCreate, JobApplicationUpdate
 from typing import List, Optional
@@ -22,7 +14,6 @@ def create_job_application(db: Session, job_data: JobApplicationCreate):
         job_dict['status'] = ApplicationStatus(job_dict['status'].value)
     
     db_job = JobApplication(**job_dict)
->>>>>>> justin/dev
     db.add(db_job)
     db.commit()
     db.refresh(db_job)
@@ -38,11 +29,6 @@ def update_application(db: Session, application_id: str, job_data: JobApplicatio
     db_job = get_application_by_id(db, application_id)
     if not db_job:
         return None
-<<<<<<< HEAD
-    update_data = job_data.dict(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(db_job, field, value)
-=======
     
     update_data = job_data.dict(exclude_unset=True)
     
@@ -53,7 +39,6 @@ def update_application(db: Session, application_id: str, job_data: JobApplicatio
     for field, value in update_data.items():
         setattr(db_job, field, value)
     
->>>>>>> justin/dev
     db.commit()
     db.refresh(db_job)
     return db_job

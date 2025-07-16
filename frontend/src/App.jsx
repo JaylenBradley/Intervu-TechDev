@@ -70,7 +70,7 @@ const App = () => {
         <Route path="/signup" element={<AuthForm isSignUp={true}/>}/>
         <Route path="/signin" element={<AuthForm isSignUp={false} />} />
         <Route path="/dashboard" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+          <ProtectedRoute user={user}>
             <JobDashboard user={user}/>
           </ProtectedRoute>
         }/>

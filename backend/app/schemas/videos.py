@@ -12,7 +12,7 @@ class RoadmapVideoResponse(BaseModel):
     search_terms: List[str]
     selected_term: str
     message: Optional[str] = None
-    
+
     class Config:
         from_attributes = True
 

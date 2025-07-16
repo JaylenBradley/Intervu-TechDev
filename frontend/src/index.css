@@ -29,13 +29,10 @@ body {
   border-color: var(--primary);
 }
 
-<<<<<<< HEAD
-=======
 .bg-app-primary {
   background-color: var(--primary);
 }
 
->>>>>>> justin/dev
 .text-app-primary {
   color: var(--primary);
 }

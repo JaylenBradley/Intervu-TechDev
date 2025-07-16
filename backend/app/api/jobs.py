@@ -1,10 +1,6 @@
 # backend/app/api/jobs.py
-<<<<<<< HEAD
-from fastapi import APIRouter, Depends, HTTPException
-=======
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse, JSONResponse
->>>>>>> justin/dev
 from sqlalchemy.orm import Session
 from typing import List
 from app.core.database import SessionLocal
@@ -16,8 +12,6 @@ from app.crud.job import (
     update_application,
     delete_application
 )
-<<<<<<< HEAD
-=======
 from app.models.user import User
 import os
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -28,7 +22,6 @@ import json
 from app.models.job import JobApplication
 from google.auth.transport.requests import Request as GoogleRequest
 from app.core.config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_PROJECT_ID
->>>>>>> justin/dev
 
 router = APIRouter()
 
@@ -41,14 +34,6 @@ def get_db():
 
 @router.post("/jobs", response_model=JobApplicationResponse)
 def create_application(job_data: JobApplicationCreate, db: Session = Depends(get_db)):
-<<<<<<< HEAD
-    return create_job_application(db, job_data)
-
-@router.get("/jobs/{user_id}", response_model=List[JobApplicationResponse])
-def get_applications(user_id: str, db: Session = Depends(get_db)):
-    return get_user_applications(db, user_id)
-
-=======
     # The frontend sends user_id (internal integer) in the job data
     user_id = job_data.user_id
     user = db.query(User).filter(User.id == user_id).first()
@@ -57,7 +42,6 @@ def get_applications(user_id: str, db: Session = Depends(get_db)):
     # user_id is already correct type
     return create_job_application(db, job_data)
 
->>>>>>> justin/dev
 @router.get("/jobs/application/{application_id}", response_model=JobApplicationResponse)
 def get_application(application_id: str, db: Session = Depends(get_db)):
     application = get_application_by_id(db, application_id)
@@ -65,13 +49,8 @@ def get_application(application_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Application not found")
     return application
 
-<<<<<<< HEAD
-@router.put("/jobs/{application_id}", response_model=JobApplicationResponse)
-def update_application_endpoint(application_id: str, job_data: JobApplicationUpdate, db: Session = Depends(get_db)):
-=======
 @router.patch("/jobs/{application_id}", response_model=JobApplicationResponse)
 def patch_application_endpoint(application_id: str, job_data: JobApplicationUpdate, db: Session = Depends(get_db)):
->>>>>>> justin/dev
     updated_job = update_application(db, application_id, job_data)
     if not updated_job:
         raise HTTPException(status_code=404, detail="Application not found")
@@ -82,9 +61,6 @@ def delete_application_endpoint(application_id: str, db: Session = Depends(get_d
     success = delete_application(db, application_id)
     if not success:
         raise HTTPException(status_code=404, detail="Application not found")
-<<<<<<< HEAD
-    return {"message": "Application deleted successfully"}
-=======
     return {"message": "Application deleted successfully"}
 
 @router.get("/jobs/{user_id}", response_model=List[JobApplicationResponse])
@@ -152,5 +128,4 @@ async def export_to_sheets(user_id: int, request: Request, db: Session = Depends
         body={'values': data}
     ).execute()
     sheet_url = f'https://docs.google.com/spreadsheets/d/{sheet_id}'
-    return {"sheet_url": sheet_url}
->>>>>>> justin/dev
+    return RedirectResponse(sheet_url)

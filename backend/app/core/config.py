@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
-=======
 import os
 from dotenv import load_dotenv
 
@@ -19,7 +13,6 @@ GOOGLE_PROJECT_ID = os.getenv("GOOGLE_PROJECT_ID")
 
 # Debug print to verify loading
 print("GOOGLE_CLIENT_ID:", GOOGLE_CLIENT_ID)
->>>>>>> justin/dev
 
 class Settings:
     DATABASE_URL: str = os.getenv("DATABASE_URL")
