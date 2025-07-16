@@ -4,18 +4,23 @@ import { auth } from "./services/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { fetchQuestionnaireStatus, getUserByFirebaseId } from "./services/userServices";
 import AuthForm from "./containers/AuthForm.jsx";
+import JobDashboard from "./pages/JobDashboard.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
 import Home from "./pages/Home.jsx";
 import Navbar from "./components/Navbar.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Questionnaire from "./pages/Questionnaire.jsx";
 import Roadmap from "./pages/Roadmap.jsx";
+import ResumeMain from "./pages/ResumeMain.jsx";
+import CreateResume from "./pages/CreateResume.jsx";
+import ResumeFeedback from "./pages/ResumeFeedback.jsx";
 
 const App = () => {
   const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
   const [questionnaireStatusLoading, setQuestionnaireStatusLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -63,7 +68,19 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home questionnaireComplete={questionnaireComplete}/>}/>
         <Route path="/signup" element={<AuthForm isSignUp={true}/>}/>
-        <Route path="/signin" element={<AuthForm isSignUp={false}/>}/>
+        <Route path="/signin" element={<AuthForm isSignUp={false} />} />
+        <Route path="/dashboard" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <JobDashboard user={user}/>
+          </ProtectedRoute>
+        }/>
+        <Route path="/resume" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <ResumeMain />
+          </ProtectedRoute>
+        }/>
+        <Route path="/resume/create" element={<CreateResume/>}/>
+        <Route path="/resume/feedback" element={<ResumeFeedback/>}/>
         <Route path="/questionnaire" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <Questionnaire onComplete={() => setQuestionnaireComplete(true)} user={user}/>
@@ -72,11 +89,6 @@ const App = () => {
         <Route path="/roadmap" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <Roadmap user={user}/>
-          </ProtectedRoute>
-        }/>
-        <Route path="/resume" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            {/*<Resume />*/}
           </ProtectedRoute>
         }/>
         <Route path="*" element={<ErrorPage/>}/>

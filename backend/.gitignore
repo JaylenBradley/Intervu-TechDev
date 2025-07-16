@@ -2,4 +2,8 @@
 
 old_questionnaire.py
 old_resume.py
+<<<<<<< HEAD
 app/old_main.py
+=======
+app/old_main.pybackend/app/core/client_secret.json
+>>>>>>> justin/dev
