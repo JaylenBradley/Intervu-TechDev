@@ -79,16 +79,13 @@ const JobDashboard = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     try {
       setSubmitting(true);
       const userId = getCurrentUserId();
-      
       if (!userId) {
         setError("Please sign in to add job applications");
         return;
       }
-
       if (editingJob) {
         // Update existing job
         const updatedJob = await updateJobApplication(editingJob.id, formData);
@@ -104,8 +101,6 @@ const JobDashboard = () => {
         });
         setJobs(prev => [...prev, newJob]);
       }
-      
-      // Reset form
       setFormData({
         company_name: "",
         job_title: "",
@@ -210,6 +205,28 @@ const JobDashboard = () => {
     }
   };
 
+  const handleExportGoogleSheets = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/jobs/export-to-sheets`, {
+        method: "GET",
+        credentials: "include"
+      });
+      if (response.redirected) {
+        // If OAuth flow, redirect the user
+        window.location.href = response.url;
+        return;
+      }
+      const data = await response.json();
+      if (data.sheet_url) {
+        window.open(data.sheet_url, "_blank");
+      } else {
+        alert("Failed to export to Google Sheets.");
+      }
+    } catch (err) {
+      alert("Failed to export to Google Sheets. Please try again.");
+    }
+  };
+
   // Calculate stats
   const stats = {
     applied: jobs.filter(j => j.status === 'applied').length,
@@ -241,11 +258,11 @@ const JobDashboard = () => {
           </div>
           <div className="flex gap-2">
             <button
-              onClick={handleExportCSV}
+              onClick={handleExportGoogleSheets}
               className="bg-app-primary text-white px-6 py-3 rounded-lg hover:bg-app-primary/90 transition-colors flex items-center gap-2"
             >
-              <span>⬇️</span>
-              <span>Export to CSV</span>
+              <span>⬆️</span>
+              <span>Export to Google Sheets</span>
             </button>
             <button
               onClick={() => setShowAddForm(true)}
