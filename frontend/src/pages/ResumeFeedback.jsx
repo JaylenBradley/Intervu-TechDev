@@ -76,21 +76,29 @@ const ResumeFeedback = () => {
       });
       if (!res.ok) throw new Error("Failed to get feedback");
       const data = await res.json();
+      console.log("Raw API response:", data); // Debug log
+      console.log("Feedback type:", typeof data.feedback); // Debug log
+      console.log("Feedback length:", data.feedback?.length); // Debug log
       let feedbackArr = [];
       if (typeof data.feedback === "string" && data.feedback.trim().startsWith("[")) {
         // Try to parse as JSON array
         try {
           feedbackArr = JSON.parse(data.feedback);
+          console.log("Parsed as JSON array:", feedbackArr); // Debug log
         } catch {
           feedbackArr = [];
+          console.log("Failed to parse as JSON"); // Debug log
         }
       }
       if (feedbackArr.length > 0 && feedbackArr[0].bullet) {
+        console.log("Setting structured feedback"); // Debug log
         setFeedback(feedbackArr);
       } else {
+        console.log("Setting raw feedback"); // Debug log
         setRawFeedback(data.feedback);
       }
     } catch (err) {
+      console.error("Error in handleGetFeedback:", err); // Debug log
       setError("Error getting feedback. Please try again.");
     } finally {
       setLoading(false);

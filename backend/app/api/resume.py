@@ -1,4 +1,5 @@
-from fastapi import APIRouter, UploadFile, File, FileResponse, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException
+from starlette.responses import FileResponse
 from app.schemas.resume import ResumeImproveResponse, ResumeFeedbackResponse
 from PyPDF2 import PdfReader
 import os
@@ -39,6 +40,7 @@ async def feedback_resume(file: UploadFile = File(...)):
         config=types.GenerateContentConfig(temperature=0.3),
         contents=prompt
     )
+    print(f"Feedback response: {response.text[:500]}...")  # Log first 500 chars
     return {"feedback": response.text}
 
 @router.post("/resume/export")
