@@ -4,15 +4,15 @@ from typing import List, Optional
 
 class QuestionnaireBase(BaseModel):
     career_goal: str
-    major: str
+    major: List[str]
     education_level: str
-    passions: List[str]
+    interests: List[str]
     institution: str
     target_companies: List[str]
     skills: List[str]
     certifications: Optional[List[str]] = None
-    projects: Optional[str] = None
-    experience: Optional[str] = None
+    projects: Optional[List[str]] = None
+    experience: Optional[List[str]] = None
     timeline: str
     learning_preference: str
     available_hours_per_week: str

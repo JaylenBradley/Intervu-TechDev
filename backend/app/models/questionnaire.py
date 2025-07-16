@@ -6,9 +6,9 @@ class Questionnaire(Base):
 
     user_id = Column(Integer, primary_key=True, index=True)
     career_goal = Column(String)
-    major = Column(String)
+    major = Column(String, nullable=False)
     education_level = Column(String)
-    passions = Column(String)
+    interests = Column(String)
     institution = Column(String)
     target_companies = Column(String)
     skills = Column(String)

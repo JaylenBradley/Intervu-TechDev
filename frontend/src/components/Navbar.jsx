@@ -30,6 +30,7 @@ const Navbar = ({ user }) => {
       if (confirmed) {
         await signOut(auth);
         alert("Goodbye! You have been logged out");
+        navigate("/signin");
       }
     } else {
       navigate("/signin");

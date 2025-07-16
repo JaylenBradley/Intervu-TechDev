@@ -1,11 +1,11 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Any
 
 class RoadmapResponse(BaseModel):
-    roadmap: str
-    
+    roadmap_json: Any
+
     class Config:
         from_attributes = True
 
 class RoadmapError(BaseModel):
-    detail: str 
+    detail: str
