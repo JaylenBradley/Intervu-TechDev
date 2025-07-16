@@ -10,7 +10,6 @@ const AuthForm = ({ isSignUp }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmedPassword, setConfirmedPassword] = useState("");
-
     const navigate = useNavigate();
 
     const handleSignUp = async () => {
@@ -56,9 +55,9 @@ const AuthForm = ({ isSignUp }) => {
 
             await createUser(data);
             alert("Sign up successful! Welcome");
-            navigate('/');
+            window.location.href = "/";
 
-        } catch (error) {
+          } catch (error) {
             if (error.code === "auth/email-already-in-use") {
                 alert("Email is already in use");
             } else {
@@ -84,7 +83,7 @@ const AuthForm = ({ isSignUp }) => {
             await getUserByFirebaseId(firebaseId);
 
         alert("Sign in successful! Welcome back");
-        navigate('/');
+        window.location.href = "/";
 
         } catch (error) {
             if (error.code === "auth/user-not-found") {
@@ -110,7 +109,8 @@ const AuthForm = ({ isSignUp }) => {
 
             try {
                 await getUserByFirebaseId(firebaseId);
-                alert("Sign in successful! Welcome back.");
+                alert("Sign in successful! Welcome back");
+                window.location.href = "/";
             } catch {
                 await createUser({
                     username,
@@ -118,9 +118,9 @@ const AuthForm = ({ isSignUp }) => {
                     login_method: "google",
                     firebase_id: firebaseId,
                 });
-                alert("Sign up successful! Welcome.");
+                alert("Sign up successful! Welcome");
+                window.location.href = "/";
             }
-            navigate("/");
         } catch (error) {
             alert("Google authentication failed: " + error.message);
         }
@@ -192,6 +192,15 @@ const AuthForm = ({ isSignUp }) => {
                         >
                             <FcGoogle/>
                             {isSignUp ? "Sign up with Google" : "Sign in with Google"}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => navigate(isSignUp ? "/signin" : "/signup")}
+                            className="w-full mt-2 font-semibold text-base py-1 rounded-lg btn"
+                        >
+                            {isSignUp
+                                ? "Already have an account? Sign In"
+                                : "Don't have an account? Sign Up"}
                         </button>
                     </div>
                 </form>
