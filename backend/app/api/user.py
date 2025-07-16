@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from app.core.database import SessionLocal
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse
-from app.crud.user import create_user, get_user, update_user, delete_user
+from app.crud.user import create_user, get_user, update_user, delete_user, get_user_by_firebase_id
 
 router = APIRouter()
 
@@ -15,9 +16,16 @@ def get_db():
         db.close()
 
 @router.post("/user", response_model=UserResponse)
-def create_user_endpoint(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = create_user(db, user)
-    return db_user
+def create_user_route(data: UserCreate, db: Session = Depends(get_db)):
+    try:
+        user = create_user(db, data)
+        return user
+    except IntegrityError:
+        db.rollback()
+        existing = get_user_by_firebase_id(db, data.firebase_id)
+        if existing:
+            return existing
+        raise HTTPException(status_code=409, detail="User already exists")
 
 @router.post("/user/{id}/questionnaire-complete")
 def set_questionnaire_complete(id: int, db: Session = Depends(get_db)):
@@ -42,8 +50,8 @@ def read_user(id: int, db: Session = Depends(get_db)):
     return db_user
 
 @router.get("/user/firebase/{firebase_id}", response_model=UserResponse)
-def read_user_by_firebase_id(firebase_id: str, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter_by(firebase_id=firebase_id).first()
+def get_user_by_firebase_id_route(firebase_id: str, db: Session = Depends(get_db)):
+    db_user = get_user_by_firebase_id(db, firebase_id)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user

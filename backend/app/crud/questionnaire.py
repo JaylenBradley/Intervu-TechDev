@@ -7,17 +7,20 @@ def upsert_questionnaire(db: Session, data: QuestionnaireCreate):
     if db_obj:
         for field, value in data.dict().items():
             if isinstance(value, list):
-                setattr(db_obj, field, ",".join(value))
+                setattr(db_obj, field, ", ".join(value))
             else:
                 setattr(db_obj, field, value)
     else:
         db_obj = Questionnaire(
             **{
                 **data.dict(),
-                "passions": ",".join(data.passions),
-                "target_companies": ",".join(data.target_companies),
-                "skills": ",".join(data.skills),
-                "certifications": ",".join(data.certifications),
+                "major": ", ".join(data.major),
+                "projects": ", ".join(data.projects),
+                "experience": ", ".join(data.experience),
+                "interests": ", ".join(data.interests),
+                "target_companies": ", ".join(data.target_companies),
+                "skills": ", ".join(data.skills),
+                "certifications": ", ".join(data.certifications),
             }
         )
         db.add(db_obj)
@@ -34,7 +37,7 @@ def update_questionnaire(db: Session, user_id: str, data: QuestionnaireCreate):
         return None
     for field, value in data.dict().items():
         if isinstance(value, list):
-            setattr(db_obj, field, ",".join(value))
+            setattr(db_obj, field, ", ".join(value))
         else:
             setattr(db_obj, field, value)
     db.commit()

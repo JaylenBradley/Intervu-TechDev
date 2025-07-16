@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000/api";
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 // Submit (create or update) questionnaire
 export async function submitQuestionnaire(data) {
