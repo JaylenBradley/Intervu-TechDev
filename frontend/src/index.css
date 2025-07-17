@@ -139,6 +139,22 @@ body {
   animation: spin 1s linear infinite;
 }
 
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.card {
+  transition: box-shadow 0.2s, transform 0.18s, border-color 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border: 1px solid var(--primary);
+}
+.card:hover {
+  box-shadow: 0 8px 24px rgba(6,182,212,0.12);
+  transform: translateY(-6px) scale(1.03);
+  border-color: var(--secondary);
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

@@ -6,6 +6,7 @@ import { fetchQuestionnaireStatus, getUserByFirebaseId } from "./services/userSe
 import AuthForm from "./containers/AuthForm.jsx";
 import BehavioralPrep from "./pages/BehavioralPrep.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
+import Footer from "./components/Footer.jsx";
 import Home from "./pages/Home.jsx";
 import Navbar from "./components/Navbar.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -54,12 +55,15 @@ const App = () => {
     checkStatus();
   }, [user]);
 
-  if (loading || questionnaireStatusLoading) {
-    return <div>Loading...</div>;
-  }
+  if (loading || questionnaireStatusLoading)
+    return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="loader-lg"/>
+        </div>
+    );
 
   return (
-    <>
+    <x>
       <Navbar user={user}/>
       <Routes>
         <Route path="/" element={<Home user={user} questionnaireComplete={questionnaireComplete}/>}/>
@@ -87,7 +91,8 @@ const App = () => {
         }/>
         <Route path="*" element={<ErrorPage/>}/>
       </Routes>
-    </>
+      <Footer/>
+    </x>
   );
 }
 

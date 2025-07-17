@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { fetchRoadmap } from "../services/roadmapServices";
+import { fetchRoadmap, generateRoadmap } from "../services/roadmapServices";
 import { parseRoadmapJson } from "../utils/parseRoadmapJson.js";
 
 const Roadmap = ({ user }) => {
   const [roadmap, setRoadmap] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -23,16 +25,47 @@ const Roadmap = ({ user }) => {
       }
     };
     getRoadmap();
-  }, [user]);
+  }, [user, generating]);
 
-  if (loading) return (
+  const handleGenerateRoadmap = async () => {
+    setGenerating(true);
+    setGenError("");
+    try {
+      await generateRoadmap(user.id);
+      setGenerating(false);
+    } catch (err) {
+      setGenError(err.message);
+      setGenerating(false);
+    }
+  };
+
+  if (loading || generating) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="loader-lg"/>
     </div>
   );
 
+  if (!roadmap && user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-app-accent text-app-text border border-app-primary p-8 rounded-xl shadow-lg w-full max-w-md mt-16 mb-16 flex flex-col items-center">
+          <h2 className="text-2xl font-bold mb-4 text-center text-app-primary">No Roadmap Found</h2>
+          <p className="mb-6 text-center">You haven't generated a roadmap yet. Would you like to generate one now?</p>
+          {genError && <div className="text-red-600 mb-2">{genError}</div>}
+          <button
+            className="btn-primary w-full py-3 text-lg font-semibold rounded-lg"
+            onClick={handleGenerateRoadmap}
+            disabled={generating}
+          >
+            {generating ? <div className="loader-md mr-2"></div> : null}
+            {generating ? "Generating..." : "Generate Roadmap"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (error) return <div className="text-red-600">{error}</div>;
-  if (!roadmap) return <div>No roadmap available</div>;
 
   return (
     <div className="min-h-screen flex items-center justify-center">
