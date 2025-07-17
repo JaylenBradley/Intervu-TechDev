@@ -350,132 +350,127 @@ const JobDashboard = ({ user }) => {
 
       {/* Add/Edit Job Modal */}
       {showAddForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h2 className="text-xl font-semibold text-app-primary mb-4">
-              {editingJob ? 'Edit Application' : 'Add New Application'}
-            </h2>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-app-text mb-1">Company Name *</label>
-                <input
-                  type="text"
-                  name="company_name"
-                  value={formData.company_name}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-app-primary"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-app-text mb-1">Job Title *</label>
-                <input
-                  type="text"
-                  name="job_title"
-                  value={formData.job_title}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-app-primary"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-app-text mb-1">Location</label>
-                <input
-                  type="text"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-app-primary"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-app-text mb-1">Salary Range</label>
-                <input
-                  type="text"
-                  name="salary_range"
-                  value={formData.salary_range}
-                  onChange={handleInputChange}
-                  placeholder="e.g., $100k - $150k"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-app-primary"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-app-text mb-1">Application URL</label>
-                <input
-                  type="text"
-                  name="application_url"
-                  value={formData.application_url}
-                  onChange={handleInputChange}
-                  placeholder="e.g., https://www.company.com/careers or www.company.com"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-app-primary"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-app-text mb-1">Status</label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-app-primary"
-                >
-                  <option value="applied">Applied</option>
-                  <option value="interviewing">Interviewing</option>
-                  <option value="offer">Offer</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="withdrawn">Withdrawn</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-app-text mb-1">Notes</label>
-                <textarea
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleInputChange}
-                  rows="3"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-app-primary"
-                  placeholder="Add any notes about this application..."
-                />
-              </div>
-              
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="flex-1 bg-app-primary text-white py-2 px-4 rounded-md hover:bg-app-primary/90 transition-colors font-medium disabled:opacity-50"
-                >
-                  {submitting ? 'Saving...' : (editingJob ? 'Update' : 'Add') + ' Application'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAddForm(false);
-                    setEditingJob(null);
-                    setFormData({
-                      company_name: "",
-                      job_title: "",
-                      job_description: "",
-                      application_url: "",
-                      salary_range: "",
-                      location: "",
-                      notes: "",
-                      status: "applied"
-                    });
-                  }}
-                  className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors font-medium"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+        <>
+          <div className="fixed inset-0 z-40 backdrop-blur-sm pointer-events-auto"></div>
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="bg-white text-black rounded-xl p-4 shadow-2xl max-w-md w-full border border-app-primary flex flex-col items-center max-h-[90vh] overflow-y-auto">
+              <h2 className="text-lg font-semibold text-app-primary mb-3">
+                {editingJob ? 'Edit Application' : 'Add New Application'}
+              </h2>
+              <form onSubmit={handleSubmit} className="space-y-2 w-full">
+                <div>
+                  <label className="block text-sm font-medium text-app-text mb-1">Company Name *</label>
+                  <input
+                    type="text"
+                    name="company_name"
+                    value={formData.company_name}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-app-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-app-text mb-1">Job Title *</label>
+                  <input
+                    type="text"
+                    name="job_title"
+                    value={formData.job_title}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-app-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-app-text mb-1">Location</label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleInputChange}
+                    className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-app-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-app-text mb-1">Salary Range</label>
+                  <input
+                    type="text"
+                    name="salary_range"
+                    value={formData.salary_range}
+                    onChange={handleInputChange}
+                    placeholder="e.g., $100k - $150k"
+                    className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-app-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-app-text mb-1">Application URL</label>
+                  <input
+                    type="text"
+                    name="application_url"
+                    value={formData.application_url}
+                    onChange={handleInputChange}
+                    placeholder="e.g., https://www.company.com/careers or www.company.com"
+                    className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-app-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-app-text mb-1">Status</label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleInputChange}
+                    className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-app-primary"
+                  >
+                    <option value="applied">Applied</option>
+                    <option value="interviewing">Interviewing</option>
+                    <option value="offer">Offer</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="withdrawn">Withdrawn</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-app-text mb-1">Notes</label>
+                  <textarea
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleInputChange}
+                    rows="3"
+                    className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-app-primary"
+                    placeholder="Add any notes about this application..."
+                  />
+                </div>
+                <div className="flex gap-2 pt-3">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex-1 bg-app-primary text-white py-1.5 px-3 rounded-md hover:bg-app-primary/90 transition-colors font-medium disabled:opacity-50 text-sm"
+                  >
+                    {submitting ? 'Saving...' : (editingJob ? 'Update' : 'Add') + ' Application'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddForm(false);
+                      setEditingJob(null);
+                      setFormData({
+                        company_name: "",
+                        job_title: "",
+                        job_description: "",
+                        application_url: "",
+                        salary_range: "",
+                        location: "",
+                        notes: "",
+                        status: "applied"
+                      });
+                    }}
+                    className="flex-1 bg-gray-300 text-gray-700 py-1.5 px-3 rounded-md hover:bg-gray-400 transition-colors font-medium text-sm"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
