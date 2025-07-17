@@ -30,8 +30,10 @@ Create a `.env` file in the project root with the following content:
 
 ```bash
 GENAI_API_KEY=your_gemini_api_key
-GOOGLE_SPEECH_API_KEY=your_google_speech_api_key
-GOOGLE_SHEETS_API_KEY=your_google_sheets_api_key
+GOOGLE_APPLICATION_CREDENTIALS=your_google_speech_api_key
+GOOGLE_CLIENT_ID=from_your_google_sheets_api_key
+GOOGLE_CLIENT_SECRET=from_your_google_sheets_api_key
+GOOGLE_PROJECT_ID=from_your_google_sheets_api_key
 DATABASE_URL=your_postgress_url
 ```
 
