@@ -39,7 +39,7 @@ const team = [
   },
 ];
 
-const Home = ({ user, questionnaireComplete }) => {
+const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
   const showModal = user && !questionnaireComplete;
   const navigate = useNavigate();
 
@@ -62,7 +62,7 @@ const Home = ({ user, questionnaireComplete }) => {
           className="btn-primary px-8 py-3 text-xl font-semibold rounded-lg mt-2 shadow"
           onClick={() => goTo(user ? "/roadmap" : "/signup")}
         >
-          {user ? "View Your Roadmap" : "Get Started"}
+          {user ? (hasRoadmap ? "View Your Roadmap" : "Create Your Roadmap") : "Get Started"}
         </button>
       </section>
 

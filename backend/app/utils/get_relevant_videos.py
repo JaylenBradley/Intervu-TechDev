@@ -8,12 +8,10 @@ url = 'https://www.googleapis.com/youtube/v3/search'
 api_key = os.getenv('YOUTUBE_API_KEY')
 
 def extract_youtube_search_terms(gemini_output):
-    """Extract YouTube search terms from roadmap text"""
     pattern = re.compile(r'^\s*-\s*\[YouTube\]\s*(.+)$', re.MULTILINE | re.IGNORECASE)
     return pattern.findall(gemini_output)
 
 def get_videos(query, vid_duration, language='en', num_videos=1):
-    """Get YouTube videos based on search parameters"""
     params = {
         'part': 'snippet',
         'q': query,
@@ -30,9 +28,8 @@ def get_videos(query, vid_duration, language='en', num_videos=1):
 
     videos = data.get('items', [])
     if not videos:
-        return []  # Return empty list instead of printing
-    
-    # Convert to JSON format
+        return []
+
     video_list = []
     for video in videos:
         video_list.append({
@@ -43,4 +40,4 @@ def get_videos(query, vid_duration, language='en', num_videos=1):
             "thumbnail": video['snippet']['thumbnails']['default']['url']
         })
     
-    return video_list  # Return list instead of printing 
+    return video_list

@@ -136,7 +136,8 @@ def roadmap_prompt(profile, current_date):
     {profile}
     
     CRITICAL: Return ONLY raw JSON. No markdown formatting, no code blocks, no explanations, no text before or after the JSON.
-    Do not include any plain text, greetings, section titles, or formatting symbols.
+    Do not include any plain text, greetings, section titles, special formatting, or emphasis symbols (such as asterisks *, underscores _, or HTML tags). 
+    Do not surround or highlight any word or phrase in any way. Return all content as plain, unformatted text.
     
     The JSON should include the following top-level keys:
     
@@ -156,6 +157,14 @@ def roadmap_prompt(profile, current_date):
       If you are unsure whether the video is accessible, omit it entirely.
       Long-form content (10+ minutes) over shorts or trailers.
       If no valid YouTube URL is available, leave the list empty.
+      
+    STRICT YOUTUBE RULES:
+      - Only include actual YouTube videos that are publicly available and accessible (not private or deleted).
+      - Do not include videos that redirect to unavailable content or lead to a “video not found” page.
+      - Do not include trailers, ads, or short videos under 5 minutes.
+      - Avoid extreme durations — do not include videos longer than 3 hours. Ideal length is between 8 minutes and 180 minutes.
+      - If you cannot verify that the video is real, accessible, and within the required duration range, do not include it.
+      - If no valid YouTube videos meet these criteria, leave the list empty.
     
     - "job_titles": A list of job titles the user could reasonably apply for right now based on their background.
     

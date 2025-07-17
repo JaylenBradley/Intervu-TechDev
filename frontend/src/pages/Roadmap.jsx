@@ -106,9 +106,9 @@ const Roadmap = ({ user }) => {
             </div>
           </>
         )}
-        {roadmap.youtube_search_terms && (
+        {roadmap.youtube_search_terms && roadmap.youtube_search_terms.length > 0 &&(
           <>
-            <h3 className="font-semibold text-lg mt-4 mb-2">YouTube Resources</h3>
+            <h3 className="font-semibold text-lg mt-4 mb-2">YouTube Videos</h3>
             <ul className="list-disc ml-6">
               {roadmap.youtube_search_terms.map((item, i) => (
                 <li key={i}>
