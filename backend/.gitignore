@@ -1,5 +1,9 @@
 .env
+env
 
 old_questionnaire.py
 old_resume.py
-app/old_main.pybackend/app/core/client_secret.json
+old_main.py
+
+app/core/client_secret.json
+app/gen-lang-client-0080872580-2e4a0982c79c.json
