@@ -4,36 +4,34 @@ import { useNavigate } from "react-router-dom";
 // Helper to parse raw feedback string into structured data
 function parseFeedback(raw) {
   if (typeof raw !== "string") return [];
-  const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  const sections = [];
-  let currentPosition = null;
-  let currentBullet = null;
-  let inOptions = false;
-
+  const lines = raw.split(/\r?\n/).map(l => l.trim());
+  const pairs = [];
+  let current = {};
   lines.forEach(line => {
-    if (line.startsWith("Position:")) {
-      if (currentPosition) sections.push(currentPosition);
-      currentPosition = { position: line.replace("Position:", "").trim(), bullets: [] };
-      currentBullet = null;
-      inOptions = false;
-    } else if (line.startsWith("Original:")) {
-      if (currentBullet) currentPosition?.bullets.push(currentBullet);
-      currentBullet = { original: line.replace("Original:", "").trim(), feedback: "", options: [] };
-      inOptions = false;
+    if (line.startsWith("Original:")) {
+      if (current.original || current.feedback) pairs.push(current);
+      // Remove bullet point symbols (• or -) from the original text
+      let originalText = line.replace("Original:", "").trim();
+      originalText = originalText.replace(/^[•\-]\s*/, ""); // Remove leading bullet point
+      current = { original: originalText, feedback: "", options: [] };
     } else if (line.startsWith("Feedback:")) {
-      if (currentBullet) currentBullet.feedback = line.replace("Feedback:", "").trim();
-      inOptions = false;
+      current.feedback = line.replace("Feedback:", "").trim();
     } else if (line.startsWith("- Option")) {
-      if (currentBullet) currentBullet.options.push(line.replace(/- Option \d+:/, "").trim());
-      inOptions = true;
-    } else if (inOptions && currentBullet) {
-      // Option lines may wrap
-      currentBullet.options[currentBullet.options.length - 1] += " " + line;
+      current.options = current.options || [];
+      current.options.push(line.replace(/- Option \d+:/, "").trim());
+    } else if (line && (current.feedback || current.original)) {
+      // If it's a non-empty line after feedback, treat as extra feedback or option
+      if (current.options && current.options.length > 0) {
+        current.options[current.options.length - 1] += " " + line;
+      } else if (!current.feedback) {
+        current.feedback = line;
+      }
     }
   });
-  if (currentBullet) currentPosition?.bullets.push(currentBullet);
-  if (currentPosition) sections.push(currentPosition);
-  return sections.filter(s => s.position || s.bullets.length > 0);
+  if (current.original || current.feedback) pairs.push(current);
+  
+  // Filter out pairs that don't have options (they should always have suggestions)
+  return pairs.filter(pair => pair.options && pair.options.length >= 2);
 }
 
 const ResumeFeedback = () => {
@@ -63,10 +61,19 @@ const ResumeFeedback = () => {
       setError("Please select a file first.");
       return;
     }
+    
+    // Prevent multiple simultaneous requests
+    if (loading) {
+      return;
+    }
+    
     setLoading(true);
     setError("");
     setFeedback([]);
     setRawFeedback("");
+    
+    console.log("Starting feedback request...");
+    
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -74,11 +81,26 @@ const ResumeFeedback = () => {
         method: "POST",
         body: formData,
       });
-      if (!res.ok) throw new Error("Failed to get feedback");
+      console.log("Response status:", res.status);
+      console.log("Response ok:", res.ok);
+      console.log("Response headers:", Object.fromEntries(res.headers.entries()));
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Response not ok:", errorText);
+        throw new Error("Failed to get feedback");
+      }
+      
       const data = await res.json();
       console.log("Raw API response:", data); // Debug log
       console.log("Feedback type:", typeof data.feedback); // Debug log
       console.log("Feedback length:", data.feedback?.length); // Debug log
+      
+      if (!data.feedback) {
+        console.error("No feedback in response:", data);
+        throw new Error("No feedback received from server");
+      }
+      
       let feedbackArr = [];
       if (typeof data.feedback === "string" && data.feedback.trim().startsWith("[")) {
         // Try to parse as JSON array
@@ -99,6 +121,7 @@ const ResumeFeedback = () => {
       }
     } catch (err) {
       console.error("Error in handleGetFeedback:", err); // Debug log
+      console.error("Error stack:", err.stack);
       setError("Error getting feedback. Please try again.");
     } finally {
       setLoading(false);
@@ -128,65 +151,54 @@ const ResumeFeedback = () => {
     return result;
   }
 
-  // Updated renderParsed for two-giant-divs layout
+    // Updated renderParsed for consistent minimal output
   const renderParsed = () => {
-    const sections = parseFeedback(rawFeedback);
-    const allBullets = flattenBullets(sections);
-    // Split bullets into two columns
-    const mid = Math.ceil(allBullets.length / 2);
-    const col1 = allBullets.slice(0, mid);
-    const col2 = allBullets.slice(mid);
-    return (
-      <div className="w-full flex flex-row gap-8 mt-4">
-        <div className="flex-1 flex flex-col gap-6">
-          {col1.map((b, idx) => (
-            <div key={idx} className="bg-app-accent border border-app-primary rounded-2xl p-6">
-              {b.position && (
-                <div className="text-xl font-bold text-app-primary mb-2">{b.position}</div>
+    try {
+      const pairs = parseFeedback(rawFeedback);
+      if (pairs.length === 0) {
+        // Fallback: split raw feedback into paragraphs and show each as a div blurb
+        const paras = rawFeedback.split(/\n{2,}|\r{2,}/).filter(p => p.trim());
+        return (
+          <div className="w-full mt-4">
+            {paras.map((para, idx) => (
+              <div key={idx} style={{ marginBottom: '1.5em' }} className="bg-app-accent border border-app-primary rounded-2xl p-4">
+                <div className="text-app-text whitespace-pre-wrap">{para}</div>
+              </div>
+            ))}
+          </div>
+        );
+      }
+      return (
+        <div className="w-full mt-4">
+          {pairs.map((pair, idx) => (
+            <div key={idx} style={{ marginBottom: '1.5em' }} className="bg-app-accent border border-app-primary rounded-2xl p-4">
+              {pair.original && <div><strong>Original:</strong> {pair.original}</div>}
+              {pair.feedback && <div><strong>Feedback:</strong> {pair.feedback}</div>}
+              {pair.options && pair.options.length > 0 && (
+                <div>
+                  {pair.options.map((opt, i) => (
+                    <div key={i}><strong>Option {i + 1}:</strong> {opt}</div>
+                  ))}
+                </div>
               )}
-              <div className="font-semibold text-app-primary mb-1">Original:</div>
-              <div className="mb-2 text-app-text">{b.original}</div>
-              <div className="font-semibold text-app-primary mb-1">Feedback:</div>
-              <div className="mb-2 text-app-text">{b.feedback}</div>
-              {b.options.length > 0 && (
-                <div className="font-semibold text-app-primary mb-1">Suggestions:</div>
-              )}
-              <ul className="list-disc ml-6 text-app-text mb-2">
-                {b.options.map((opt, k) => (
-                  <li key={k}>{opt}</li>
-                ))}
-              </ul>
             </div>
           ))}
         </div>
-        <div className="flex-1 flex flex-col gap-6">
-          {col2.map((b, idx) => (
-            <div key={idx} className="bg-app-accent border border-app-primary rounded-2xl p-6">
-              {b.position && (
-                <div className="text-xl font-bold text-app-primary mb-2">{b.position}</div>
-              )}
-              <div className="font-semibold text-app-primary mb-1">Original:</div>
-              <div className="mb-2 text-app-text">{b.original}</div>
-              <div className="font-semibold text-app-primary mb-1">Feedback:</div>
-              <div className="mb-2 text-app-text">{b.feedback}</div>
-              {b.options.length > 0 && (
-                <div className="font-semibold text-app-primary mb-1">Suggestions:</div>
-              )}
-              <ul className="list-disc ml-6 text-app-text mb-2">
-                {b.options.map((opt, k) => (
-                  <li key={k}>{opt}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
+      );
+    } catch (error) {
+      console.error("Error rendering parsed feedback:", error);
+      return (
+        <div className="w-full mt-4 p-4 bg-red-100 border border-red-400 rounded-lg">
+          <p className="text-red-700">Error displaying feedback. Showing raw text instead.</p>
+          <pre className="mt-2 text-sm text-red-600 whitespace-pre-wrap">{rawFeedback}</pre>
         </div>
-      </div>
-    );
+      );
+    }
   };
 
   return (
     <div className="min-h-screen bg-app-background flex flex-col items-center justify-center py-20">
-      <div className="w-full max-w-4xl flex flex-col items-center">
+      <div className={`w-full ${feedback.length > 0 || rawFeedback ? 'max-w-4xl' : 'max-w-2xl'} flex flex-col items-center`}>
         <button
           onClick={() => navigate("/resume")}
           className="mb-6 bg-white text-app-primary px-6 py-3 text-lg rounded-xl border-2 border-app-primary hover:bg-app-primary hover:text-white transition-colors shadow font-semibold"

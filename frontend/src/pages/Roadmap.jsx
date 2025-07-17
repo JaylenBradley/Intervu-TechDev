@@ -44,9 +44,9 @@ const Roadmap = ({ user }) => {
         {roadmap.roadmap && (
           <>
             <h3 className="font-semibold text-lg mt-4 mb-2">Step-by-Step Roadmap</h3>
-            <ol className="list-decimal ml-6">
+            <ul className="list-disc ml-6">
               {roadmap.roadmap.map((step, i) => <li key={i}>{step}</li>)}
-            </ol>
+            </ul>
           </>
         )}
         {roadmap.skills && (
