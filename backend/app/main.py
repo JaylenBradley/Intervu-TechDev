@@ -3,7 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import roadmap, videos, questionnaire, user, jobs, resume
 from app.core.database import Base, engine
 from dotenv import load_dotenv
-load_dotenv()
+import os
+
+# Load environment variables from the correct path
+load_dotenv('app/.env')
 
 # Create FastAPI app
 app = FastAPI(

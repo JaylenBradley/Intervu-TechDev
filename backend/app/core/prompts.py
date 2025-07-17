@@ -13,37 +13,45 @@ Raw resume text:
 """
 
 def feedback_resume_prompt(resume_text: str) -> str:
-    return f"""You are a resume feedback assistant. I will give you my resume experience section text.
+    return f"""You are a resume feedback assistant. Analyze this resume and provide feedback ONLY for substantive content.
 
-For each job/experience or project, do the following:
+IMPORTANT RULES:
+- SKIP these lines (do not output anything for them):
+  * Section headers: "Education, Experience", "Skills", "Projects", "Awards", "Employment History, Career Summary"
+  * Job titles/positions: "Manager", "Assistant, Specialist", "Coordinator", "Director"
+  * Company names and institutions
+  * Project names and titles
+  * Dates and locations
+  * Contact information
+  * Simple statements like "This is a clear entry" orThis is standard formatting"
 
-If it's a job/experience, print the position title and company like this:
-Position: [Title] | Company [Company]
+- ONLY analyze these types of lines:
+  * Bullet points with actual achievements (starting with • or -)
+  * Degree descriptions with specific details
+  * Certification descriptions with specific skills
+  * Skills lists with multiple items
+  * Achievement descriptions with quantifiable results
 
-If it's a project, print it like this:
-Project: [Project Name]
+- For EVERY substantive line you analyze, you MUST provide:
+  Original: [the line]
+  Feedback:brief evaluation]
+  - Option 1 [improved version]
+  - Option 2: [another improved version]
 
-For each bullet under that position or project:
+- If a line is a header, title, company, project name, date, location, or simple statement, SKIP IT COMPLETELY.
 
-Print:Original: followed by the bullet point and a newline
+Examples of what to SKIP:
+- "Education" (section header)
+- Marketing Manager" (job title)
+- "Company Name" (company)
+- "Project Name (project title)
+-2023224ate range)
+- "This is a clear entry" (simple statement)
 
-Print:Feedback: followed by a brief evaluation. If it’s strong, say so and explain why. If it needs improvement, give clear, concise suggestions. then print a new line
+Examples of what to ANALYZE:
+-•Increased sales by 25% through targeted marketing campaigns..." (achievement bullet)
+- "Bachelor of Science in Business Administration with 30.8(detailed degree)
+- "Project management, data analysis, customer service" (skills list)
 
-Then print the following (formatted exactly like below):
-
-- Option 1: [Improved version of the bullet point]
-- Option 2: [Another improved version of the bullet point]
-Separate each job or project section with a line like this:
-print a new line
-Important guidelines:
-
-Do NOT use markdown formatting (no **, *, etc.)
-
-Format everything cleanly for display in a command-line interface
-
-Do not print section titles like "Experience" or "Projects"
-
-Keep the formatting consistent and professional
-Raw resume text:
-{resume_text}
-"""
+Resume text:
+{resume_text}"""
