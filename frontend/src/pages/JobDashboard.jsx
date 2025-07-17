@@ -68,7 +68,7 @@ const JobDashboard = ({ user }) => {
       }
       if (editingJob) {
         const updatedJob = await updateJobApplication(editingJob.id, formData);
-        setJobs(prev => prev.map(job => 
+        setJobs(prev => prev.map(job =>
           job.id === editingJob.id ? updatedJob : job
         ));
         setEditingJob(null);
@@ -101,7 +101,7 @@ const JobDashboard = ({ user }) => {
   const handleStatusChange = async (jobId, newStatus) => {
     try {
       const updatedJob = await updateJobApplication(jobId, { status: newStatus });
-      setJobs(prev => prev.map(job => 
+      setJobs(prev => prev.map(job =>
         job.id === jobId ? updatedJob : job
       ));
     } catch (err) {
@@ -220,7 +220,7 @@ const JobDashboard = ({ user }) => {
 
   return (
     <div className="min-h-screen bg-app-background">
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -236,16 +236,16 @@ const JobDashboard = ({ user }) => {
                 }
                 window.open(`${backendUrl}/api/jobs/export-to-sheets/${user.id}`, '_blank');
               }}
-              className="bg-app-primary text-white px-6 py-3 rounded-lg hover:bg-app-primary/90 transition-colors flex items-center gap-2"
+              className="btn-primary text-white px-6 py-3 rounded-lg transition-colors flex items-center gap-2"
             >
               <span>⬆️</span>
               <span>Export to Google Sheets</span>
             </button>
             <button
               onClick={() => setShowAddForm(true)}
-              className="bg-app-primary text-white px-6 py-3 rounded-lg hover:bg-app-primary/90 transition-colors flex items-center gap-2"
+              className="btn-primary text-white px-6 py-3 rounded-lg transition-colors flex items-center gap-2"
             >
-              <span className="text-white">+</span>
+              <span className="vtintext-white">+</span>
               <span className="text-white">Add Application</span>
             </button>
           </div>
@@ -254,7 +254,7 @@ const JobDashboard = ({ user }) => {
         {error && (
           <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             {error}
-            <button 
+            <button
               onClick={() => setError(null)}
               className="float-right font-bold"
             >
@@ -279,7 +279,7 @@ const JobDashboard = ({ user }) => {
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-app-primary">Your Applications</h2>
           </div>
-          
+
           {jobs.length === 0 ? (
             <div className="p-8 text-center">
               <div className="text-4xl mb-4">📝</div>
@@ -310,7 +310,7 @@ const JobDashboard = ({ user }) => {
                         </p>
                       )}
                     </div>
-                    
+
                     <div className="flex items-center gap-2 ml-4">
                       <select
                         value={job.status}
@@ -437,7 +437,7 @@ const JobDashboard = ({ user }) => {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 bg-app-primary text-white py-1.5 px-3 rounded-md hover:bg-app-primary/90 transition-colors font-medium disabled:opacity-50 text-sm"
+                    className="flex-1 btn-primary text-white py-1.5 px-3 rounded-md transition-colors font-medium disabled:opacity-50 text-sm"
                   >
                     {submitting ? 'Saving...' : (editingJob ? 'Update' : 'Add') + ' Application'}
                   </button>
@@ -471,4 +471,4 @@ const JobDashboard = ({ user }) => {
   );
 };
 
-export default JobDashboard; 
+export default JobDashboard;

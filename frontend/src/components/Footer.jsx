@@ -12,7 +12,7 @@ const Footer = () => (
       <span className="text-app-primary font-bold text-lg">Intervu</span>
     </div>
     <span className="text-app-text font-medium text-base">
-      © {new Date().getFullYear()} Intervu &mdash; Jaylen Bradley, Justin Song
+      © {new Date().getFullYear()} Intervu LLC &mdash; Jaylen Bradley, Justin Song
     </span>
   </footer>
 );

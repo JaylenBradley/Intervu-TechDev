@@ -225,6 +225,7 @@ const ResumeFeedback = () => {
             disabled={!file || loading}
             className="bg-app-primary text-white px-8 py-3 text-lg rounded-xl mb-6 hover:bg-app-primary/90 transition-colors disabled:opacity-50 font-semibold"
           >
+            {loading ? <div className="loader-md mr-2"></div> : null}
             {loading ? "Analyzing..." : "Get Feedback"}
           </button>
           {error && (

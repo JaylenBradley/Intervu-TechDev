@@ -1,26 +1,31 @@
 import { useNavigate } from "react-router-dom";
+import { BsLinkedin, BsGraphUpArrow } from "react-icons/bs";
+import { FaGithubSquare } from "react-icons/fa";
+import { RiRoadMapFill } from "react-icons/ri";
+import { GiBrain } from "react-icons/gi";
+import { SiProbot } from "react-icons/si";
 import intervuLogo from "../assets/images/intervu-logo-transparent.png";
 
 const features = [
   {
     title: "Personalized Roadmaps",
-    desc: "Get a step-by-step plan tailored to your career goals, skills, and interests.",
-    icon: "🗺️",
+    desc: "Get a step-by-step plan tailored to your career goals, skills, and interests",
+    icon: <RiRoadMapFill/>,
   },
   {
     title: "Technical & Behavioral Interview Prep",
-    desc: "Practice with AI-generated questions and get instant feedback on your answers.",
-    icon: "🤖",
+    desc: "Practice with AI-generated questions and get instant feedback on your responses",
+    icon: <SiProbot/>,
   },
   {
     title: "Resume Impromvent",
-    desc: "Access curated videos, articles, and links to boost your learning.",
-    icon: "📚",
+    desc: "Access curated videos, books, articles, and courses to boost your learning",
+    icon: <GiBrain/>,
   },
   {
     title: "Job Tracking",
-    desc: "Monitor your journey and stay motivated as you reach milestones.",
-    icon: "📈",
+    desc: "Monitor your journey and stay motivated as you reach milestones",
+    icon: <BsGraphUpArrow/>,
   },
 ];
 
@@ -28,13 +33,15 @@ const team = [
   {
     name: "Jaylen Bradley",
     role: "Co-Founder & Lead Developer",
-    bio: "Jaylen specializes in full-stack development and product design. Passionate about helping others achieve their career goals.",
+    linkedin: "https://www.linkedin.com/in/jaylenbradley8/",
+    github: "https://github.com/JaylenBradley",
     img: null
   },
   {
     name: "Justin Song",
-    role: "Co-Founder & AI Engineer",
-    bio: "Justin focuses on AI, backend, and data. Dedicated to building smart tools for interview and career success.",
+    role: "Co-Founder & Fullstack Engineer",
+    linkedin: "https://www.linkedin.com/in/jujiwoo/",
+    github: "https://github.com/jujiwoo",
     img: null
   },
 ];
@@ -49,7 +56,7 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
   };
 
   return (
-    <div className="min-h-screen bg-app-background flex flex-col items-center">
+    <div className="min-h-screen flex flex-col items-center">
       <section className="w-full flex flex-col items-center justify-center mt-20 mb-12">
         <img src={intervuLogo} alt="Intervu Logo" className="h-40 mb-4 mx-auto" />
         <h1 className="text-5xl font-bold text-app-primary mb-2">
@@ -71,7 +78,9 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
         <div className="grid grid-cols-2 gap-8">
           {features.map((f, i) => (
             <div key={i} className="card bg-app-accent border-app-primary rounded-xl p-6 shadow flex flex-col items-center">
-              <span className="text-5xl mb-3">{f.icon}</span>
+              <span className="text-5xl mb-3">
+                {f.icon}
+              </span>
               <h3 className="text-xl font-semibold text-app-primary mb-2">{f.title}</h3>
               <p className="text-app-text text-center">{f.desc}</p>
             </div>
@@ -83,11 +92,21 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
         <h2 className="text-3xl font-bold text-app-primary mb-8 text-center">Meet the Team</h2>
         <div className="flex gap-8 justify-center">
           {team.map((member, i) => (
-            <div key={i} className="card bg-app-accent border-app-primary rounded-xl p-6 shadow flex flex-col items-center w-80">
-              {/* If you add images, use: <img src={member.img} ... /> */}
-              <h3 className="text-lg font-bold text-app-primary mb-1">{member.name}</h3>
-              <span className="text-app-text font-medium mb-2">{member.role}</span>
-              <p className="text-app-text text-center text-sm">{member.bio}</p>
+          <div key={i} className="card rounded-xl p-6 shadow flex flex-col items-center border-app-primary bg-app-accent">
+              <div className="font-bold text-lg">{member.name}</div>
+              <div className="text-app-text mb-2">{member.role}</div>
+              <div className="flex gap-2">
+                {member.linkedin && (
+                  <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline icon-pop">
+                    <BsLinkedin size={28} />
+                  </a>
+                )}
+                {member.github && (
+                  <a href={member.github} target="_blank" rel="noopener noreferrer" className="underline icon-pop">
+                    <FaGithubSquare size={28} />
+                  </a>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -106,7 +125,7 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
       </section>
       {showModal && (
         <>
-          <div className="fixed inset-0 z-40 backdrop-blur-md pointer-events-auto"></div>
+          <div className="fixed inset-0 z-40 backdrop-blur-sm pointer-events-auto"></div>
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="bg-white rounded-xl p-8 shadow-2xl max-w-md w-full border border-app-primary text-center relative">
               <h2 className="text-2xl font-bold mb-4 text-app-primary">

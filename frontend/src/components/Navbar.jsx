@@ -5,7 +5,7 @@ import { auth } from "../services/firebase.js";
 import { signOut } from "firebase/auth";
 import { RiQuestionnaireFill } from "react-icons/ri";
 import { AiFillHome } from "react-icons/ai";
-import { FaRegFileAlt, FaMapSigns, FaTools, FaRobot } from "react-icons/fa";
+import { FaMapSigns, FaFileAlt, FaRobot } from "react-icons/fa";
 import { MdWork } from "react-icons/md";
 import logo from "../assets/images/intervu-logo.png";
 
@@ -57,7 +57,7 @@ const Navbar = ({ user }) => {
         <NavButton icon={<AiFillHome size={24} />} alt="Home" onClick={() => navigate('/')} />
         <NavButton icon={<RiQuestionnaireFill size={24} />} alt="Questionnaire" onClick={() => navigate('/questionnaire')} />
         <NavButton icon={<FaMapSigns size={24} />} alt="Roadmap" onClick={() => navigate('/roadmap')} />
-        <NavButton icon={<FaRegFileAlt size={24} />} alt="Resume" onClick={() => navigate('/resume')} />
+        <NavButton icon={<FaFileAlt size={24} />} alt="Resume" onClick={() => navigate('/resume')} />
         <NavButton icon={<MdWork size={24} />} alt="Job Dashboard" onClick={() => navigate('/dashboard')} />
         <NavButton icon={<FaRobot size={24} />} alt="AI-Interviewer" onClick={() => navigate('/ai-interviewer')} />
         <button

@@ -17,8 +17,8 @@ import Roadmap from "./pages/Roadmap.jsx";
 import ResumeMain from "./pages/ResumeMain.jsx";
 import CreateResume from "./pages/CreateResume.jsx";
 import ResumeFeedback from "./pages/ResumeFeedback.jsx";
-import AIInterviewerMain from "./pages/AIInterviewerMain.jsx";
-import TechnicalInterview from "./pages/TechnicalInterview.jsx";
+import AiInterviewerMain from "./pages/AiInterviewerMain.jsx";
+import TechnicalPrep from "./pages/TechnicalPrep.jsx";
 
 const App = () => {
   const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
@@ -109,7 +109,7 @@ const App = () => {
             <ResumeMain />
           </ProtectedRoute>
         }/>
-        <Route path="/resume/create" element={<CreateResume/>}/>
+        <Route path="/resume/improve" element={<CreateResume/>}/>
         <Route path="/resume/feedback" element={<ResumeFeedback/>}/>
         <Route path="/questionnaire" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
@@ -123,12 +123,12 @@ const App = () => {
         }/>
         <Route path="/ai-interviewer" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <AIInterviewerMain />
+            <AiInterviewerMain />
           </ProtectedRoute>
         }/>
         <Route path="/ai-interviewer/technical" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <TechnicalInterview user={user} />
+            <TechnicalPrep user={user} />
           </ProtectedRoute>
         }/>
         <Route path="/ai-interviewer/behavioral" element={

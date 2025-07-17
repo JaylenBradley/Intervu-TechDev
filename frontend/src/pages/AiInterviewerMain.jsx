@@ -1,19 +1,20 @@
-import { FaFileAlt, FaSearch } from "react-icons/fa";
-import { FaFilePen } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
+import { GiTalk } from "react-icons/gi";
+import { GrPersonalComputer } from "react-icons/gr";
+import { FaRobot } from "react-icons/fa";
 
-const ResumeMain = () => {
+const AiInterviewerMain = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col items-center py-16">
+    <div className="min-h-screen bg-app-background flex flex-col items-center py-16">
       <div className="w-full max-w-3xl bg-app-accent rounded-2xl shadow-lg px-8 py-10 flex flex-col items-center mb-12 border border-app-primary">
         <div className="flex items-center gap-4 mb-2">
-          <FaFileAlt className="text-5xl"/>
-          <h1 className="text-4xl font-bold text-app-primary">Resume Center</h1>
+          <FaRobot className="text-5xl"/>
+          <h1 className="text-4xl font-bold text-app-primary">AI Interviewer</h1>
         </div>
         <p className="text-xl text-app-text text-center font-medium">
-          Build, analyze, and optimize your resume for your target roles and companies.
+          Practice technical and behavioral interviews with instant AI feedback.
         </p>
       </div>
 
@@ -22,28 +23,30 @@ const ResumeMain = () => {
       <div className="flex flex-col md:flex-row gap-8 justify-center">
         <div
           className="bg-white rounded-xl shadow-lg p-8 w-80 cursor-pointer border-2 border-app-primary hover:scale-105 transition-transform flex flex-col items-center"
-          onClick={() => navigate("/resume/improve")}
+          onClick={() => navigate("/ai-interviewer/technical")}
         >
-          <FaFilePen className="text-5xl mb-4" />
-          <h2 className="text-2xl font-bold text-app-primary mb-2">Build Resume</h2>
+          <GrPersonalComputer className="text-5xl mb-4" />
+          <h2 className="text-2xl font-bold text-app-primary mb-2">Technical Interview</h2>
           <p className="text-app-text text-center mb-4">
-            Create a professional resume tailored to your career goals and target companies
+            Practice coding questions, system design, and algorithmic problems tailored
+            to your background and target companies
           </p>
           <button className="btn-primary px-6 py-2 rounded-lg font-semibold">
-            Start Building
+            Start Technical Prep
           </button>
         </div>
         <div
           className="bg-white rounded-xl shadow-lg p-8 w-80 cursor-pointer border-2 border-app-primary hover:scale-105 transition-transform flex flex-col items-center"
-          onClick={() => navigate("/resume/feedback")}
+          onClick={() => navigate("/ai-interviewer/behavioral")}
         >
-          <FaSearch className="text-5xl mb-4" />
-          <h2 className="text-2xl font-bold text-app-primary mb-2">Analyze Resume</h2>
+          <GiTalk className="text-5xl mb-4" />
+          <h2 className="text-2xl font-bold text-app-primary mb-2">Behavioral Interview</h2>
           <p className="text-app-text text-center mb-4">
-            Get instant feedback and optimization tips for your uploaded resume
+            Practice behavioral questions, STAR method responses, and
+            situational scenarios with AI feedback
           </p>
           <button className="btn-primary px-6 py-2 rounded-lg font-semibold">
-            Analyze Resume
+            Start Behavioral Prep
           </button>
         </div>
       </div>
@@ -51,4 +54,4 @@ const ResumeMain = () => {
   );
 };
 
-export default ResumeMain;
+export default AiInterviewerMain;
