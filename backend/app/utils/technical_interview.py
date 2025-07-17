@@ -23,8 +23,18 @@ def generate_leetcode_questions(user_profile, target_role, target_company, diffi
     Projects: {user_profile.projects or 'Not specified'}
     """
     
+    # Generate a random seed for this request to ensure variety
+    import time
+    import datetime
+    random_seed = int(time.time() * 1000) % 10000
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
     prompt = f"""
-    You are a technical interview expert. Generate {num_questions} LeetCode-style coding questions for a {difficulty} level interview.
+    You are a technical interview expert. Generate {num_questions} COMPLETELY RANDOM and UNIQUE LeetCode-style coding questions for a {difficulty} level interview.
+
+    RANDOM SEED: {random_seed}
+    TIMESTAMP: {current_time}
+    IMPORTANT: Use this seed and timestamp to ensure different questions each time. Generate questions that are NOT commonly found in standard LeetCode problem sets.
 
     User Profile:
     {profile_str}
@@ -51,15 +61,22 @@ def generate_leetcode_questions(user_profile, target_role, target_company, diffi
 
     IMPORTANT: The difficulty field must be exactly "{difficulty}" (lowercase string), not an enum or object.
 
+    STRICT RANDOMIZATION RULES:
+    1. NEVER generate these classic problems: "Two Sum", "Valid Parentheses", "Reverse String", "Palindrome", "Merge Sorted Arrays", "Remove Duplicates", "Find Maximum", "Check Duplicates", "Group Anagrams", "Subarray Sum", "Rotated Array", "Word Ladder", "Trapping Rain Water", "Longest Consecutive"
+    2. Create COMPLETELY NEW problem scenarios that don't exist on LeetCode
+    3. Use the random seed {random_seed} to vary the problem types, data structures, and scenarios
+    4. Mix different categories: arrays, strings, trees, graphs, dynamic programming, etc.
+    5. Vary the problem context: business scenarios, real-world applications, mathematical problems, etc.
+    6. Use different naming conventions and problem descriptions
+    7. Ensure each question is genuinely unique and creative
+
     Guidelines:
     - Focus on topics relevant to {target_role} role
     - Consider {target_company}'s typical interview style
     - {difficulty} level should match the user's skill level
-    - Include a mix of data structures and algorithms
     - Make questions practical and realistic
     - Provide clear problem descriptions with examples
-    - Do NOT repeat classic LeetCode questions like "Two Sum", "Valid Parentheses", "Merge k Sorted Lists", etc. Try to generate fresh, less common problems each time.
-    - Avoid repeating the same question if this prompt is run multiple times.
+    - Be CREATIVE and ORIGINAL - avoid any standard textbook problems
 
     Return the JSON array starting with [ and ending with ]. Nothing else.
     """
@@ -68,7 +85,7 @@ def generate_leetcode_questions(user_profile, target_role, target_company, diffi
         response = client.models.generate_content(
             model="gemini-2.0-flash-exp",
             config=types.GenerateContentConfig(
-                temperature=0.7,
+                temperature=0.9,
                 max_output_tokens=4000
             ),
             contents=prompt
@@ -212,6 +229,28 @@ def get_fallback_questions(difficulty, num_questions):
                 "expected_approach": "Iterate and check membership in a set.",
                 "time_complexity": "O(n)",
                 "space_complexity": "O(n)"
+            },
+            {
+                "id": "fallback_easy_4",
+                "title": "Count Vowels",
+                "description": "Given a string, count the number of vowels (a, e, i, o, u) in the string.",
+                "difficulty": "easy",
+                "category": "strings",
+                "hints": ["Iterate through each character and check if it's a vowel."],
+                "expected_approach": "Linear scan with vowel checking.",
+                "time_complexity": "O(n)",
+                "space_complexity": "O(1)"
+            },
+            {
+                "id": "fallback_easy_5",
+                "title": "Find Missing Number",
+                "description": "Given an array containing n distinct numbers taken from 0, 1, 2, ..., n, find the one that is missing from the array.",
+                "difficulty": "easy",
+                "category": "arrays",
+                "hints": ["Use mathematical formula or XOR operation."],
+                "expected_approach": "Sum of first n numbers minus array sum.",
+                "time_complexity": "O(n)",
+                "space_complexity": "O(1)"
             }
         ],
         "medium": [
@@ -247,6 +286,28 @@ def get_fallback_questions(difficulty, num_questions):
                 "expected_approach": "Binary search for the minimum value.",
                 "time_complexity": "O(log n)",
                 "space_complexity": "O(1)"
+            },
+            {
+                "id": "fallback_medium_4",
+                "title": "Longest Substring Without Repeating Characters",
+                "description": "Given a string, find the length of the longest substring without repeating characters.",
+                "difficulty": "medium",
+                "category": "strings",
+                "hints": ["Use sliding window with a set to track characters."],
+                "expected_approach": "Sliding window with hash set.",
+                "time_complexity": "O(n)",
+                "space_complexity": "O(min(m,n))"
+            },
+            {
+                "id": "fallback_medium_5",
+                "title": "Container With Most Water",
+                "description": "Given n non-negative integers representing the heights of vertical lines, find two lines that together with the x-axis forms a container that would hold the maximum amount of water.",
+                "difficulty": "medium",
+                "category": "arrays",
+                "hints": ["Use two pointers starting from both ends."],
+                "expected_approach": "Two pointer approach from ends.",
+                "time_complexity": "O(n)",
+                "space_complexity": "O(1)"
             }
         ],
         "hard": [
@@ -280,6 +341,28 @@ def get_fallback_questions(difficulty, num_questions):
                 "category": "arrays",
                 "hints": ["Use a set for O(1) lookups."],
                 "expected_approach": "Hash set to check for sequence starts and count length.",
+                "time_complexity": "O(n)",
+                "space_complexity": "O(n)"
+            },
+            {
+                "id": "fallback_hard_4",
+                "title": "Sliding Window Maximum",
+                "description": "Given an array of integers and an integer k, find the maximum element in each sliding window of size k.",
+                "difficulty": "hard",
+                "category": "arrays",
+                "hints": ["Use a deque to maintain the maximum in the current window."],
+                "expected_approach": "Monotonic decreasing deque.",
+                "time_complexity": "O(n)",
+                "space_complexity": "O(k)"
+            },
+            {
+                "id": "fallback_hard_5",
+                "title": "Serialize and Deserialize Binary Tree",
+                "description": "Design an algorithm to serialize and deserialize a binary tree.",
+                "difficulty": "hard",
+                "category": "trees",
+                "hints": ["Use preorder traversal with null markers."],
+                "expected_approach": "Preorder traversal with null markers.",
                 "time_complexity": "O(n)",
                 "space_complexity": "O(n)"
             }
