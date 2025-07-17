@@ -13,6 +13,29 @@ def generate_leetcode_questions(user_profile, target_company, difficulty, num_qu
     """
     Generate LeetCode questions using Gemini API based on user profile and preferences
     """
+    import time
+    import datetime
+    random_seed = int(time.time() * 1000) % 10000
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    prompt = f"""
+Generate {num_questions} unique and random LeetCode-style coding questions for a {difficulty} level interview.
+RANDOM SEED: {random_seed}
+TIMESTAMP: {current_time}
+Use this seed to ensure the questions are different each time and not repeated.
+Make the questions in the style of company {target_company} interviews.
+Return ONLY a valid JSON array of question objects, with each object containing:
+- id (string)
+- title (string)
+- description (string)
+- difficulty (string)
+- category (string)
+- hints (list of strings)
+- expected_approach (string)
+- time_complexity (string)
+- space_complexity (string)
+No explanations, no markdown, no extra text.
+"""
     
     # Convert user profile to string format
     profile_str = f"""
@@ -22,62 +45,6 @@ def generate_leetcode_questions(user_profile, target_company, difficulty, num_qu
     Skills: {user_profile.skills or 'Not specified'}
     Experience: {user_profile.experience or 'Not specified'}
     Projects: {user_profile.projects or 'Not specified'}
-    """
-    
-    # Generate a random seed for this request to ensure variety
-    import time
-    import datetime
-    random_seed = int(time.time() * 1000) % 10000
-    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    prompt = f"""
-    You are a technical interview expert. Generate {num_questions} COMPLETELY RANDOM and UNIQUE LeetCode-style coding questions for a {difficulty} level interview.
-
-    RANDOM SEED: {random_seed}
-    TIMESTAMP: {current_time}
-    IMPORTANT: Use this seed and timestamp to ensure different questions each time. Generate questions that are NOT commonly found in standard LeetCode problem sets.
-
-    User Profile:
-    {profile_str}
-    
-    Target Company: {target_company}
-    Difficulty Level: {difficulty}
-    Number of Questions: {num_questions}
-
-    CRITICAL: Return ONLY a valid JSON array. No markdown, no explanations, no text before or after.
-
-    Each question object should have this exact structure:
-    {{
-        "id": "unique_id",
-        "title": "Question Title",
-        "description": "Detailed problem description with examples",
-        "difficulty": "{difficulty}",
-        "category": "arrays|strings|trees|dynamic_programming|graphs|linked_lists|stacks|queues|heaps|binary_search|two_pointers|sliding_window|backtracking|greedy|bit_manipulation",
-        "hints": ["hint1", "hint2"],
-        "expected_approach": "Brief description of the optimal approach",
-        "time_complexity": "O(n) or similar",
-        "space_complexity": "O(1) or similar"
-    }}
-
-    IMPORTANT: The difficulty field must be exactly "{difficulty}" (lowercase string), not an enum or object.
-
-    STRICT RANDOMIZATION RULES:
-    1. NEVER generate these classic problems: "Two Sum", "Valid Parentheses", "Reverse String", "Palindrome", "Merge Sorted Arrays", "Remove Duplicates", "Find Maximum", "Check Duplicates", "Group Anagrams", "Subarray Sum", "Rotated Array", "Word Ladder", "Trapping Rain Water", "Longest Consecutive"
-    2. Create COMPLETELY NEW problem scenarios that don't exist on LeetCode
-    3. Use the random seed {random_seed}
-    4. Mix different categories: arrays, strings, trees, graphs, dynamic programming, etc.
-    5. Vary the problem context: business scenarios, real-world applications, mathematical problems, etc.
-    6. Use different naming conventions and problem descriptions
-    7. Ensure each question is genuinely unique and creative
-
-    Guidelines:
-    - Consider {target_company}'s typical interview style
-    - {difficulty} level should match the user's skill level
-    - Make questions practical and realistic
-    - Provide clear problem descriptions with examples
-    - Be CREATIVE and ORIGINAL - avoid any standard textbook problems
-
-    Return the JSON array starting with [ and ending with ]. Nothing else.
     """
     
     try:
