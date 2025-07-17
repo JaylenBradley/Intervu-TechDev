@@ -11,7 +11,7 @@ import ErrorPage from "./pages/ErrorPage.jsx";
 import Footer from "./components/Footer.jsx";
 import Home from "./pages/Home.jsx";
 import Navbar from "./components/Navbar.jsx";
-import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import ProtectedRoute from "./containers/ProtectedRoute.jsx";
 import Questionnaire from "./pages/Questionnaire.jsx";
 import Roadmap from "./pages/Roadmap.jsx";
 import ResumeMain from "./pages/ResumeMain.jsx";
@@ -26,7 +26,6 @@ const App = () => {
   const [hasRoadmap, setHasRoadmap] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -101,7 +100,7 @@ const App = () => {
         <Route path="/signup" element={<AuthForm isSignUp={true}/>}/>
         <Route path="/signin" element={<AuthForm isSignUp={false} />} />
         <Route path="/dashboard" element={
-          <ProtectedRoute user={user}>
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <JobDashboard user={user}/>
           </ProtectedRoute>
         }/>
@@ -119,7 +118,7 @@ const App = () => {
         }/>
         <Route path="/roadmap" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <Roadmap user={user}/>
+            <Roadmap user={user} onRoadmapGenerated={() => setHasRoadmap(true)}/>
           </ProtectedRoute>
         }/>
         <Route path="/ai-interviewer" element={
@@ -132,7 +131,7 @@ const App = () => {
             <TechnicalInterview user={user} />
           </ProtectedRoute>
         }/>
-        <Route path="/behavioral-prep" element={
+        <Route path="/ai-interviewer/behavioral" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <BehavioralPrep user={user}/>
           </ProtectedRoute>

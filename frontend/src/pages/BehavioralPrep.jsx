@@ -51,7 +51,7 @@ const BehavioralPrep = ({ user }) => {
           ...f,
           target_role: data.career_goal || "",
           company: (data.target_companies && data.target_companies[0]) || "",
-          seniority: data.seniority || "Junior", // auto-fill if available
+          seniority: data.seniority || "Junior",
         }));
       } catch (err) {
         setError("Failed to fetch questionnaire data");

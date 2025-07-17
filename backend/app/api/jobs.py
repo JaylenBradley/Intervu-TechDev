@@ -1,4 +1,3 @@
-# backend/app/api/jobs.py
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
@@ -13,15 +12,14 @@ from app.crud.job import (
     delete_application
 )
 from app.models.user import User
-import os
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 import pathlib
-import json
 from app.models.job import JobApplication
 from google.auth.transport.requests import Request as GoogleRequest
 from app.core.config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_PROJECT_ID
+import os
 
 router = APIRouter()
 
@@ -34,12 +32,10 @@ def get_db():
 
 @router.post("/jobs", response_model=JobApplicationResponse)
 def create_application(job_data: JobApplicationCreate, db: Session = Depends(get_db)):
-    # The frontend sends user_id (internal integer) in the job data
     user_id = job_data.user_id
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    # user_id is already correct type
     return create_job_application(db, job_data)
 
 @router.get("/jobs/application/{application_id}", response_model=JobApplicationResponse)
@@ -75,7 +71,6 @@ TOKEN_FILE = str(pathlib.Path(__file__).parent.parent / 'core' / 'token.json')
 
 @router.get("/jobs/export-to-sheets/{user_id}")
 async def export_to_sheets(user_id: int, request: Request, db: Session = Depends(get_db)):
-    # Step 1: OAuth flow
     creds = None
     if os.path.exists(TOKEN_FILE):
         creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
@@ -83,7 +78,6 @@ async def export_to_sheets(user_id: int, request: Request, db: Session = Depends
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(GoogleRequest())
         else:
-            # Build the client config dict from environment variables
             client_config = {
                 "installed": {
                     "client_id": GOOGLE_CLIENT_ID,
@@ -100,7 +94,6 @@ async def export_to_sheets(user_id: int, request: Request, db: Session = Depends
         with open(TOKEN_FILE, 'w') as token:
             token.write(creds.to_json())
 
-    # Step 2: Get user and their job applications
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -115,7 +108,6 @@ async def export_to_sheets(user_id: int, request: Request, db: Session = Depends
             job.notes or ''
         ])
 
-    # Step 3: Create sheet and write data
     service = build('sheets', 'v4', credentials=creds)
     sheet = service.spreadsheets().create(body={
         'properties': {'title': f'Job Applications Export - {user.username}'}

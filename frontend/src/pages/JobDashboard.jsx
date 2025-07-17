@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { getUserJobs, createJobApplication, updateJobApplication, deleteJobApplication } from "../services/jobServices";
-import axios from "axios";
+import {
+  getUserJobs,
+  createJobApplication,
+  updateJobApplication,
+  deleteJobApplication,
+  exportJobsToGoogleSheets,
+  exportJobsToCSV
+} from "../services/jobServices";
 
 const JobDashboard = ({ user }) => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,7 +28,6 @@ const JobDashboard = ({ user }) => {
     status: "applied"
   });
 
-  // Load jobs from API
   const loadJobs = async () => {
     try {
       setLoading(true);
@@ -33,13 +40,11 @@ const JobDashboard = ({ user }) => {
       const jobsData = await getUserJobs(user.id);
       setJobs(jobsData);
     } catch (err) {
-      setError("Failed to load job applications. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch jobs only after user is loaded
   useEffect(() => {
     if (!user) return;
     loadJobs();
@@ -62,14 +67,12 @@ const JobDashboard = ({ user }) => {
         return;
       }
       if (editingJob) {
-        // Update existing job
         const updatedJob = await updateJobApplication(editingJob.id, formData);
         setJobs(prev => prev.map(job => 
           job.id === editingJob.id ? updatedJob : job
         ));
         setEditingJob(null);
       } else {
-        // Add new job
         const newJob = await createJobApplication({
           ...formData,
           user_id: user.id
@@ -110,7 +113,7 @@ const JobDashboard = ({ user }) => {
     if (window.confirm("Are you sure you want to delete this application?")) {
       try {
         await deleteJobApplication(jobId);
-        await loadJobs(); // Always refetch from backend after delete
+        await loadJobs();
         setError(null);
       } catch (err) {
         setError("Failed to delete job application. Please try again.");
@@ -155,19 +158,15 @@ const JobDashboard = ({ user }) => {
     return icons[status] || "📝";
   };
 
-  // Export to CSV handler
   const handleExportCSV = async () => {
     if (!user || !user.id) {
       alert("Please sign in to export your job applications.");
       return;
     }
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/jobs/${user.id}/export`,
-        { responseType: "blob" }
-      );
-      // Create a link and trigger download
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const response = await exportJobsToCSV(user.id);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", `job_applications_${user.id}.csv`);
@@ -185,12 +184,8 @@ const JobDashboard = ({ user }) => {
       return;
     }
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/jobs/export-to-sheets/${user.id}`, {
-        method: "GET",
-        credentials: "include"
-      });
+      const response = await exportJobsToGoogleSheets(user.id);
       if (response.redirected) {
-        // If OAuth flow, redirect the user
         window.location.href = response.url;
         return;
       }
@@ -205,7 +200,6 @@ const JobDashboard = ({ user }) => {
     }
   };
 
-  // Calculate stats
   const stats = {
     applied: jobs.filter(j => j.status === 'applied').length,
     interviewing: jobs.filter(j => j.status === 'interviewing').length,
@@ -228,7 +222,6 @@ const JobDashboard = ({ user }) => {
     <div className="min-h-screen bg-app-background">
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-app-primary">Job Tracker Dashboard</h1>
@@ -241,7 +234,6 @@ const JobDashboard = ({ user }) => {
                   alert("Please sign in to export to Google Sheets.");
                   return;
                 }
-                const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
                 window.open(`${backendUrl}/api/jobs/export-to-sheets/${user.id}`, '_blank');
               }}
               className="bg-app-primary text-white px-6 py-3 rounded-lg hover:bg-app-primary/90 transition-colors flex items-center gap-2"
@@ -259,7 +251,6 @@ const JobDashboard = ({ user }) => {
           </div>
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             {error}
@@ -272,7 +263,6 @@ const JobDashboard = ({ user }) => {
           </div>
         )}
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           {Object.entries(stats).map(([status, count]) => (
             <div key={status} className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
@@ -285,7 +275,6 @@ const JobDashboard = ({ user }) => {
           ))}
         </div>
 
-        {/* Job Applications List */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-app-primary">Your Applications</h2>
@@ -355,7 +344,6 @@ const JobDashboard = ({ user }) => {
         </div>
       </div>
 
-      {/* Add/Edit Job Modal */}
       {showAddForm && (
         <>
           <div className="fixed inset-0 z-40 backdrop-blur-sm pointer-events-auto"></div>

@@ -16,19 +16,7 @@ const ProtectedRoute = ({ user, questionnaireComplete, children }) => {
     }
     return <Navigate to="/signin" />;
   }
-  // Only require questionnaireComplete for certain routes
-  const requireQuestionnaire = [
-    "/roadmap",
-    "/resume",
-    "/tech-prep",
-    "/ai-interviewer"
-    // add any other routes that should require questionnaire completion
-  ];
-
-  if (
-    requireQuestionnaire.includes(location.pathname) &&
-    !questionnaireComplete
-  ) {
+  if (!questionnaireComplete && location.pathname !== "/questionnaire") {
     if (!alerted.current) {
       alert("Please complete the questionnaire before accessing this page");
       alerted.current = true;

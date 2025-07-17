@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchRoadmap, generateRoadmap } from "../services/roadmapServices";
 import { parseRoadmapJson } from "../utils/parseRoadmapJson.js";
 
-const Roadmap = ({ user }) => {
+const Roadmap = ({ user, onRoadmapGenerated }) => {
   const [roadmap, setRoadmap] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -33,6 +33,7 @@ const Roadmap = ({ user }) => {
     try {
       await generateRoadmap(user.id);
       setGenerating(false);
+      if (onRoadmapGenerated) onRoadmapGenerated();
     } catch (err) {
       setGenError(err.message);
       setGenerating(false);

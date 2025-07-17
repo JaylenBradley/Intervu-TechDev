@@ -59,7 +59,6 @@ const Navbar = ({ user }) => {
         <NavButton icon={<FaMapSigns size={24} />} alt="Roadmap" onClick={() => navigate('/roadmap')} />
         <NavButton icon={<FaRegFileAlt size={24} />} alt="Resume" onClick={() => navigate('/resume')} />
         <NavButton icon={<MdWork size={24} />} alt="Job Dashboard" onClick={() => navigate('/dashboard')} />
-        <NavButton icon={<FaTools size={24} />} alt="Tech Prep" onClick={() => navigate('/tech-prep')} />
         <NavButton icon={<FaRobot size={24} />} alt="AI-Interviewer" onClick={() => navigate('/ai-interviewer')} />
         <button
           className="w-12 h-12 rounded-full border-2 border-app-primary flex items-center justify-center focus:outline-none bg-app-accent ml-1"
@@ -69,8 +68,6 @@ const Navbar = ({ user }) => {
         </button>
         {menuOpen && (
           <div className="absolute right-0 top-12 w-44 bg-app-accent rounded-xl shadow-2xl py-3 z-20 text-app-text border border-app-secondary">
-            {/*<button className="menu-btn" type="button">Profile</button>*/}
-
             {user && (
               <button
                   className="menu-btn text-app-primary"

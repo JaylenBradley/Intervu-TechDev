@@ -1,9 +1,12 @@
 .env
 env
 
+__pycache__/
+*.pyc
+
 old_questionnaire.py
 old_resume.py
 
 app/old_main.py
-app/core/client_secret.json
+app/client_secret_601899283409-edc5ntotkp3acoutjd0g9818q1eejg23.apps.googleusercontent.com.json
 app/gen-lang-client-0080872580-2e4a0982c79c.json

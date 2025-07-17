@@ -1,9 +1,8 @@
-const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000/api";
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
-// Get all job applications for a user
 export async function getUserJobs(userId) {
   try {
-    const response = await fetch(`${BASE_URL}/jobs/${userId}`, {
+    const response = await fetch(`${BASE_URL}/api/jobs/${userId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -21,10 +20,9 @@ export async function getUserJobs(userId) {
   }
 }
 
-// Create a new job application
 export async function createJobApplication(jobData) {
   try {
-    const response = await fetch(`${BASE_URL}/jobs`, {
+    const response = await fetch(`${BASE_URL}/api/jobs`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -43,10 +41,9 @@ export async function createJobApplication(jobData) {
   }
 }
 
-// Update a job application (PATCH)
 export async function updateJobApplication(applicationId, jobData) {
   try {
-    const response = await fetch(`${BASE_URL}/jobs/${applicationId}`, {
+    const response = await fetch(`${BASE_URL}/api/jobs/${applicationId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -65,10 +62,9 @@ export async function updateJobApplication(applicationId, jobData) {
   }
 }
 
-// Delete a job application
 export async function deleteJobApplication(applicationId) {
   try {
-    const response = await fetch(`${BASE_URL}/jobs/${applicationId}`, {
+    const response = await fetch(`${BASE_URL}/api/jobs/${applicationId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -86,10 +82,9 @@ export async function deleteJobApplication(applicationId) {
   }
 }
 
-// Get a specific job application
 export async function getJobApplication(applicationId) {
   try {
-    const response = await fetch(`${BASE_URL}/jobs/application/${applicationId}`, {
+    const response = await fetch(`${BASE_URL}/api/jobs/application/${applicationId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -105,4 +100,19 @@ export async function getJobApplication(applicationId) {
     console.error("Error fetching job:", error);
     throw error;
   }
-} 
+}
+
+export async function exportJobsToCSV(userId) {
+  return await fetch(`${BASE_URL}/api/jobs/${userId}/export`, {
+    method: "GET",
+    credentials: "include"
+  });
+}
+
+export async function exportJobsToGoogleSheets(userId) {
+  const response = await fetch(`${BASE_URL}/api/jobs/export-to-sheets/${userId}`, {
+    method: "GET",
+    credentials: "include"
+  });
+  return response;
+}

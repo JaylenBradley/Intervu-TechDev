@@ -3,9 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import roadmap, videos, questionnaire, user, jobs, resume, interview, behavioral_prep
 from app.core.database import Base, engine
 from dotenv import load_dotenv
-import os
-
-load_dotenv('app/.env')
 
 app = FastAPI(
     title="Intervu API",
