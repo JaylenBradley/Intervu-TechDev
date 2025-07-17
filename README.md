@@ -21,10 +21,10 @@ It features a React frontend and a Python backend, helping users generate person
 
 ## API Keys
 You will need API keys for:
+- Firebase (for authentication)
 - Gemini API
 - Google Cloud Speech-to-Text API
 - Google Sheets API
-- Firebase (for authentication)
 
 Create a `.env` file in the project root with the following content:
 
