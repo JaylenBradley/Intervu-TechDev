@@ -37,12 +37,14 @@ const BehavioralPrep = ({ user }) => {
   const [audioChunks, setAudioChunks] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioUrlRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
   const audioElementRef = useRef(null);
+  const localChunksRef = useRef([]);
+  const mediaRecorderRef = useRef(null);
 
   useEffect(() => {
     const load = async () => {
       if (!user) return;
+
       try {
         const data = await fetchQuestionnaire(user.id);
         setForm(f => ({
@@ -65,10 +67,18 @@ const BehavioralPrep = ({ user }) => {
 
   const handleGenerate = async e => {
     e.preventDefault();
+
+    if (recording && mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+      setRecording(false);
+    }
+
     setGenerating(true);
     setError("");
     setQuestions([]);
     setFeedback("");
+    setAnswer("");
+    setAudioChunks([]);
     try {
       const qs = await getBehavioralQuestions(form);
       setQuestions(qs);
@@ -83,30 +93,38 @@ const BehavioralPrep = ({ user }) => {
   const handleRecord = async () => {
     if (!recording) {
       setError("");
-      let localChunks = [];
+      localChunksRef.current = [];
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorderRef.current = mediaRecorder;
 
-        mediaRecorder.ondataavailable = event => {
-          localChunks.push(event.data);
+        const audioTracks = stream.getAudioTracks();
+        if (!stream.active || audioTracks.length === 0) {
+          setError("Microphone not ready. Please try again.");
+          return;
+        }
+
+        mediaRecorderRef.current = new MediaRecorder(stream);
+
+        mediaRecorderRef.current.ondataavailable = event => {
+          localChunksRef.current.push(event.data);
         };
 
-        mediaRecorder.onstop = () => {
-          if (localChunks.length === 0) {
+        mediaRecorderRef.current.onstop = () => {
+          stream.getTracks().forEach(track => track.stop());
+
+          if (localChunksRef.current.length === 0) {
             setError("No audio detected. Please try recording again.");
             setRecording(false);
             return;
           }
-          const audioBlob = new Blob(localChunks, { type: "audio/webm" });
+          const audioBlob = new Blob(localChunksRef.current, { type: "audio/webm" });
           audioUrlRef.current = URL.createObjectURL(audioBlob);
-          setAudioChunks(localChunks);
+          setAudioChunks(localChunksRef.current);
           handleAudioUploadAndFeedback(audioBlob);
           setRecording(false);
         };
 
-        mediaRecorder.start();
+        mediaRecorderRef.current.start();
         setRecording(true);
       } catch {
         setError("Microphone access denied");
@@ -116,47 +134,10 @@ const BehavioralPrep = ({ user }) => {
     }
   };
 
-  function formatFeedbackForSpeech(feedbackObj) {
-    let data;
-    try {
-      data = typeof feedbackObj === "string" ? JSON.parse(feedbackObj) : feedbackObj;
-    } catch {
-      return typeof feedbackObj === "string" ? feedbackObj : "";
-    }
-    const assessment = data.overall_assessment || "";
-    const suggestions = Array.isArray(data.suggestions) ? data.suggestions.join(" ") : "";
-    return `${assessment}. ${suggestions}`;
-  }
+ const handleAudioUploadAndFeedback = async (audioFile) => {
+    const hasAudio = localChunksRef.current.length > 0
 
-  function stopFeedbackSpeech() {
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      setIsPlaying(false);
-    }
-  }
-
-  const speakFeedback = (feedbackObj) => {
-    if ("speechSynthesis" in window) {
-      let text = "";
-      if (typeof feedbackObj === "string") {
-        try {
-          const parsed = JSON.parse(feedbackObj);
-          text = parsed.overall_assessment + ". " + (parsed.suggestions || []).join(" ");
-        } catch {
-          text = feedbackObj;
-        }
-      } else {
-        text = feedbackObj.overall_assessment + ". " + (feedbackObj.suggestions || []).join(" ");
-      }
-      const utterance = new window.SpeechSynthesisUtterance(text);
-      utterance.onstart = () => setIsPlaying(true);
-      utterance.onend = () => setIsPlaying(false);
-      window.speechSynthesis.speak(utterance);
-    }
-  };
-
-  const handleAudioUploadAndFeedback = async (audioFile) => {
-    if (audioChunks.length === 0) {
+    if (!hasAudio) {
       setError("No audio detected. Please try recording again.");
       setRecording(false);
       return;
@@ -183,7 +164,46 @@ const BehavioralPrep = ({ user }) => {
     }
   };
 
-  //F Function for playing back the user's recorded audio
+  function formatFeedbackForSpeech(feedbackObj) {
+    let data;
+    try {
+      data = typeof feedbackObj === "string" ? JSON.parse(feedbackObj) : feedbackObj;
+    } catch {
+      return typeof feedbackObj === "string" ? feedbackObj : "";
+    }
+    const assessment = data.overall_assessment || "";
+    const suggestions = Array.isArray(data.suggestions) ? data.suggestions.join(" ") : "";
+    return `${assessment}. ${suggestions}`;
+  }
+
+  const speakFeedback = (feedbackObj) => {
+    if ("speechSynthesis" in window) {
+      let text = "";
+      if (typeof feedbackObj === "string") {
+        try {
+          const parsed = JSON.parse(feedbackObj);
+          text = parsed.overall_assessment + ". " + (parsed.suggestions || []).join(" ");
+        } catch {
+          text = feedbackObj;
+        }
+      } else {
+        text = feedbackObj.overall_assessment + ". " + (feedbackObj.suggestions || []).join(" ");
+      }
+      const utterance = new window.SpeechSynthesisUtterance(text);
+      utterance.onstart = () => setIsPlaying(true);
+      utterance.onend = () => setIsPlaying(false);
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  function stopFeedbackSpeech() {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
+    }
+  }
+
+  //Function for playing back the user's recorded audio
   const handlePlayAudio = () => {
     if (!audioUrlRef.current) return;
     if (audioElementRef.current) {
@@ -197,6 +217,7 @@ const BehavioralPrep = ({ user }) => {
     setIsPlaying(true);
   };
 
+  //Function for stopping the user's recorded audio
   const handleStopAudio = () => {
     if (audioElementRef.current) {
       audioElementRef.current.pause();
@@ -295,10 +316,11 @@ const BehavioralPrep = ({ user }) => {
           </div>
           <button
             type="submit"
-            className={`btn w-full h-12 text-lg font-semibold py-2 rounded-lg
+            className={`btn w-full h-12 text-lg font-semibold py-2 rounded-lg flex items-center justify-center
               ${generating ? "bg-app-secondary opacity-60 cursor-not-allowed" : ""}`}
             disabled={generating}
           >
+            {generating && <div className="loader-md mr-2"></div>}
             {generating ? "Generating..." : "Generate Questions"}
           </button>
         </form>
@@ -336,11 +358,13 @@ const BehavioralPrep = ({ user }) => {
                 rows={3}
               />
             </div>
-            <button className={`btn w-full h-12 text-lg font-semibold py-2 rounded-lg mt-2 mb-4
+            {loading && <div className="loader mb-4"></div>}
+            <button className={`btn w-full h-12 text-lg font-semibold py-2 rounded-lg mt-3 mb-4 flex items-center justify-center
               ${loading ? "bg-app-secondary opacity-60 cursor-not-allowed" : ""}`}
               onClick={handleSubmitAnswer}
               disabled={loading || !answer}
             >
+              {loading && <div className="loader-md mr-2"></div>}
               {loading ? "Getting Feedback..." : "Submit Answer"}
             </button>
             {feedback && (

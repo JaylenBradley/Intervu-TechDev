@@ -62,7 +62,7 @@ const App = () => {
     <>
       <Navbar user={user}/>
       <Routes>
-        <Route path="/" element={<Home questionnaireComplete={questionnaireComplete}/>}/>
+        <Route path="/" element={<Home user={user} questionnaireComplete={questionnaireComplete}/>}/>
         <Route path="/signup" element={<AuthForm isSignUp={true}/>}/>
         <Route path="/signin" element={<AuthForm isSignUp={false}/>}/>
         <Route path="/questionnaire" element={

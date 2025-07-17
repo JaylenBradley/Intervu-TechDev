@@ -25,9 +25,14 @@ const Roadmap = ({ user }) => {
     getRoadmap();
   }, [user]);
 
-  if (loading) return <div>Loading roadmap...</div>;
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="loader-lg"/>
+    </div>
+  );
+
   if (error) return <div className="text-red-600">{error}</div>;
-  if (!roadmap) return <div>No roadmap available.</div>;
+  if (!roadmap) return <div>No roadmap available</div>;
 
   return (
     <div className="min-h-screen flex items-center justify-center">

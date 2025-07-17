@@ -7,7 +7,7 @@ const Home = ({ user, questionnaireComplete }) => {
     <div className="min-h-screen bg-app-background">
       <div className="flex flex-col items-center justify-center mt-24">
         <h1 className="text-5xl font-bold mb-4 text-app-primary">
-          Welcome to Intervu
+          Welcome to Intervu{user ? `, ${user.username}` : ""}
         </h1>
         {user && !questionnaireComplete && (
           <div className="fixed inset-0 flex items-center justify-center bg-app-background bg-opacity-50 z-50">
