@@ -40,6 +40,7 @@ const team = [
 ];
 
 const Home = ({ user, questionnaireComplete }) => {
+  const showModal = user && !questionnaireComplete;
   const navigate = useNavigate();
 
   const goTo = (path) => {
@@ -47,37 +48,12 @@ const Home = ({ user, questionnaireComplete }) => {
     window.scrollTo(0, 0);
   };
 
-  if (user && !questionnaireComplete) {
-    return (
-      <>
-        <div className="fixed inset-0 z-40 backdrop-blur-sm bg-app-background bg-opacity-60 pointer-events-auto"></div>
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl p-8 shadow-2xl max-w-md w-full border border-app-primary text-center relative">
-            <h2 className="text-2xl font-bold mb-4 text-app-primary">
-              Complete Questionnaire
-            </h2>
-            <p className="mb-6 text-app-text">
-              Please complete the questionnaire before continuing
-            </p>
-            <button
-              className="btn-primary w-full py-3 text-lg font-semibold rounded-lg"
-              onClick={() => goTo("/questionnaire")}
-            >
-              Go to Questionnaire
-            </button>
-          </div>
-        </div>
-      </>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-app-background flex flex-col items-center">
-      {/* Hero Section */}
       <section className="w-full flex flex-col items-center justify-center mt-20 mb-12">
         <img src={intervuLogo} alt="Intervu Logo" className="h-40 mb-4 mx-auto" />
         <h1 className="text-5xl font-bold text-app-primary mb-2">
-          Intervu{user ? `, ${user.username}` : ""}
+          Welcome to Intervu{user ? `, ${user.username}` : ""}
         </h1>
         <p className="text-2xl text-app-text mb-4 font-medium">
           Your AI-powered career planning and interview platform
@@ -90,7 +66,6 @@ const Home = ({ user, questionnaireComplete }) => {
         </button>
       </section>
 
-      {/* Features Section */}
       <section className="w-full max-w-5xl px-8 mb-16">
         <h2 className="text-3xl font-bold text-app-primary mb-8 text-center">Features</h2>
         <div className="grid grid-cols-2 gap-8">
@@ -104,7 +79,6 @@ const Home = ({ user, questionnaireComplete }) => {
         </div>
       </section>
 
-      {/* Team Section */}
       <section className="w-full max-w-4xl px-8 mb-16">
         <h2 className="text-3xl font-bold text-app-primary mb-8 text-center">Meet the Team</h2>
         <div className="flex gap-8 justify-center">
@@ -119,7 +93,6 @@ const Home = ({ user, questionnaireComplete }) => {
         </div>
       </section>
 
-      {/* Call to Action Section */}
       <section className="w-full max-w-3xl px-8 mb-24 flex flex-col items-center">
         <h2 className="text-2xl font-bold text-app-primary mb-4 text-center">
           Ready to take the next step?
@@ -131,6 +104,27 @@ const Home = ({ user, questionnaireComplete }) => {
           {user ? "Go to Your Roadmap" : "Sign Up Now"}
         </button>
       </section>
+      {showModal && (
+        <>
+          <div className="fixed inset-0 z-40 backdrop-blur-md pointer-events-auto"></div>
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-xl p-8 shadow-2xl max-w-md w-full border border-app-primary text-center relative">
+              <h2 className="text-2xl font-bold mb-4 text-app-primary">
+                Complete Questionnaire
+              </h2>
+              <p className="mb-6 text-app-text">
+                Please complete the questionnaire before continuing
+              </p>
+              <button
+                className="btn-primary w-full py-3 text-lg font-semibold rounded-lg"
+                onClick={() => goTo("/questionnaire")}
+              >
+                Go to Questionnaire
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
