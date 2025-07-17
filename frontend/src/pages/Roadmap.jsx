@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { fetchRoadmap } from "../services/roadmapServices";
-import { parseRoadmapJson } from "../utils/parseRoadmapJson";
+import { fetchRoadmap, generateRoadmap } from "../services/roadmapServices";
+import { parseRoadmapJson } from "../utils/parseRoadmapJson.js";
 
 const Roadmap = ({ user }) => {
   const [roadmap, setRoadmap] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -23,11 +25,47 @@ const Roadmap = ({ user }) => {
       }
     };
     getRoadmap();
-  }, [user]);
+  }, [user, generating]);
 
-  if (loading) return <div>Loading roadmap...</div>;
+  const handleGenerateRoadmap = async () => {
+    setGenerating(true);
+    setGenError("");
+    try {
+      await generateRoadmap(user.id);
+      setGenerating(false);
+    } catch (err) {
+      setGenError(err.message);
+      setGenerating(false);
+    }
+  };
+
+  if (loading || generating) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="loader-lg"/>
+    </div>
+  );
+
+  if (!roadmap && user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-app-accent text-app-text border border-app-primary p-8 rounded-xl shadow-lg w-full max-w-md mt-16 mb-16 flex flex-col items-center">
+          <h2 className="text-2xl font-bold mb-4 text-center text-app-primary">No Roadmap Found</h2>
+          <p className="mb-6 text-center">You haven't generated a roadmap yet. Would you like to generate one now?</p>
+          {genError && <div className="text-red-600 mb-2">{genError}</div>}
+          <button
+            className="btn-primary w-full py-3 text-lg font-semibold rounded-lg"
+            onClick={handleGenerateRoadmap}
+            disabled={generating}
+          >
+            {generating ? <div className="loader-md mr-2"></div> : null}
+            {generating ? "Generating..." : "Generate Roadmap"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (error) return <div className="text-red-600">{error}</div>;
-  if (!roadmap) return <div>No roadmap available.</div>;
 
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -68,9 +106,9 @@ const Roadmap = ({ user }) => {
             </div>
           </>
         )}
-        {roadmap.youtube_search_terms && (
+        {roadmap.youtube_search_terms && roadmap.youtube_search_terms.length > 0 &&(
           <>
-            <h3 className="font-semibold text-lg mt-4 mb-2">YouTube Resources</h3>
+            <h3 className="font-semibold text-lg mt-4 mb-2">YouTube Videos</h3>
             <ul className="list-disc ml-6">
               {roadmap.youtube_search_terms.map((item, i) => (
                 <li key={i}>
@@ -93,20 +131,22 @@ const Roadmap = ({ user }) => {
         {roadmap.resource_links && (
           <>
             <h3 className="font-semibold text-lg mt-4 mb-2">Resource Links</h3>
-            {Object.entries(roadmap.resource_links).map(([cat, items]) => (
-              <div key={cat} className="mb-2">
-                <strong className="capitalize">{cat}:</strong>
-                <ul className="list-disc ml-6">
-                  {(items || []).map((item, i) => (
-                    <li key={i}>
-                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-app-primary underline">
-                        {item.title}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            {Object.entries(roadmap.resource_links).map(([cat, items]) =>
+              (items && items.length > 0) && (
+                <div key={cat} className="mb-2">
+                  <strong className="capitalize">{cat}:</strong>
+                  <ul className="list-disc ml-6">
+                    {items.map((item, i) => (
+                      <li key={i}>
+                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-app-primary underline">
+                          {item.title}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            )}
           </>
         )}
       </div>

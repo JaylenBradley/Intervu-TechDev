@@ -135,7 +135,11 @@ const Questionnaire = ({ onComplete, user }) => {
     }
   };
 
-  if (fetching) return <div>Loading questionnaire...</div>;
+  if (fetching) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="loader-lg"/>
+    </div>
+  );
 
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -290,8 +294,9 @@ const Questionnaire = ({ onComplete, user }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full font-semibold py-2 rounded-lg btn mt-4"
+            className="w-full font-semibold py-2 rounded-lg btn mt-4 flex items-center justify-center"
           >
+            {loading && <div className="loader-md mr-2"></div>}
             {loading ? "Saving..." : "Save"}
           </button>
         </form>
@@ -328,7 +333,7 @@ const Questionnaire = ({ onComplete, user }) => {
         <div className="fixed inset-0 z-40 backdrop-blur-sm pointer-events-auto"></div>
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="bg-white text-black rounded-xl p-8 shadow-2xl max-w-md w-full border border-app-primary flex flex-col items-center">
-            <div className="loader mb-4"></div>
+            <div className="loader-md mb-4"></div>
             <span className="font-semibold text-lg">Generating your roadmap...</span>
             {genError && <div className="text-red-600 mt-4">{genError}</div>}
           </div>

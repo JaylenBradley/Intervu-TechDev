@@ -3,9 +3,12 @@ import { useEffect, useState } from "react";
 import { auth } from "./services/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { fetchQuestionnaireStatus, getUserByFirebaseId } from "./services/userServices";
+import { fetchRoadmap } from "./services/roadmapServices";
 import AuthForm from "./containers/AuthForm.jsx";
+import BehavioralPrep from "./pages/BehavioralPrep.jsx";
 import JobDashboard from "./pages/JobDashboard.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
+import Footer from "./components/Footer.jsx";
 import Home from "./pages/Home.jsx";
 import Navbar from "./components/Navbar.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -20,6 +23,7 @@ import TechnicalInterview from "./pages/TechnicalInterview.jsx";
 const App = () => {
   const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
   const [questionnaireStatusLoading, setQuestionnaireStatusLoading] = useState(true);
+  const [hasRoadmap, setHasRoadmap] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -60,15 +64,40 @@ const App = () => {
     checkStatus();
   }, [user]);
 
-  if (loading || questionnaireStatusLoading) {
-    return <div>Loading...</div>;
-  }
+  useEffect(() => {
+    if (!user) {
+      setHasRoadmap(false);
+      return;
+    }
+    const checkRoadmap = async () => {
+      try {
+        const data = await fetchRoadmap(user.id);
+        setHasRoadmap(!!(data && data.roadmap_json && data.roadmap_json.roadmap));
+      } catch {
+        setHasRoadmap(false);
+      }
+    };
+    checkRoadmap();
+  }, [user]);
+
+  if (loading || questionnaireStatusLoading)
+    return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="loader-lg"/>
+        </div>
+    );
 
   return (
     <>
       <Navbar user={user}/>
       <Routes>
-        <Route path="/" element={<Home questionnaireComplete={questionnaireComplete}/>}/>
+        <Route path="/" element={
+          <Home
+              user={user}
+              questionnaireComplete={questionnaireComplete}
+              hasRoadmap={hasRoadmap}
+          />
+        }/>
         <Route path="/signup" element={<AuthForm isSignUp={true}/>}/>
         <Route path="/signin" element={<AuthForm isSignUp={false} />} />
         <Route path="/dashboard" element={
@@ -103,8 +132,14 @@ const App = () => {
             <TechnicalInterview user={user} />
           </ProtectedRoute>
         }/>
+        <Route path="/behavioral-prep" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <BehavioralPrep user={user}/>
+          </ProtectedRoute>
+        }/>
         <Route path="*" element={<ErrorPage/>}/>
       </Routes>
+      <Footer/>
     </>
   );
 }
