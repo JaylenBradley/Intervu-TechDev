@@ -14,6 +14,8 @@ import Roadmap from "./pages/Roadmap.jsx";
 import ResumeMain from "./pages/ResumeMain.jsx";
 import CreateResume from "./pages/CreateResume.jsx";
 import ResumeFeedback from "./pages/ResumeFeedback.jsx";
+import AIInterviewerMain from "./pages/AIInterviewerMain.jsx";
+import TechnicalInterview from "./pages/TechnicalInterview.jsx";
 
 const App = () => {
   const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
@@ -89,6 +91,16 @@ const App = () => {
         <Route path="/roadmap" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <Roadmap user={user}/>
+          </ProtectedRoute>
+        }/>
+        <Route path="/ai-interviewer" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <AIInterviewerMain />
+          </ProtectedRoute>
+        }/>
+        <Route path="/ai-interviewer/technical" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <TechnicalInterview user={user} />
           </ProtectedRoute>
         }/>
         <Route path="*" element={<ErrorPage/>}/>

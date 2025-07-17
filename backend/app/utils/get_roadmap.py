@@ -19,7 +19,7 @@ You are a professional career roadmap assistant helping users improve their chan
 Here is the user's profile data:
 {profile}
 
-Format the response as raw JSON. Do not include any plain text, greetings, section titles, or formatting symbols.
+CRITICAL: Return ONLY raw JSON. No markdown formatting, no code blocks, no explanations, no text before or after the JSON.
 
 The JSON should include the following top-level keys:
 
@@ -48,21 +48,21 @@ The JSON should include the following top-level keys:
   Only include reputable sources (e.g., Coursera, edX, Amazon). Do not include formatting labels like [Book] or [Course].
 
 Timeline Guidance:
-- Today’s date is: {current_date}
-- Reflect the user’s reported education level accurately. For example:
-  - If they say they’re a junior, refer to them as a junior — do not say “rising senior”.
+- Today's date is: {current_date}
+- Reflect the user's reported education level accurately. For example:
+  - If they say they're a junior, refer to them as a junior — do not say "rising senior".
   - Assume summer break means their academic level stays the same.
-  - Use phrasing like “during your junior year” or “in the upcoming semester” to stay time-accurate.
+  - Use phrasing like "during your junior year" or "in the upcoming semester" to stay time-accurate.
 
-Output formatting:
-- The output must be pure JSON, with properly closed brackets.
-- Do not include any Markdown, plain text, explanations, commentary, or symbols like asterisks, hash signs, or HTML tags.
-- Do not wrap the JSON in markdown-style code blocks (e.g., triple backticks ``` or ```json).
-- Do not return the JSON as a string (with escaped newlines or quotes).
-- Avoid inline lists — always use proper arrays.
-- Format must be valid and parseable by standard JSON parsers.
+IMPORTANT OUTPUT RULES:
+- Return ONLY the JSON object, nothing else
+- NO markdown code blocks (no ```json or ```)
+- NO explanations or text before/after the JSON
+- NO escaped quotes or newlines
+- The JSON must be valid and parseable
+- If you cannot provide the requested information, respond with an empty JSON object: {{}}
 
-If you cannot provide the requested information, respond with an empty JSON object or empty arrays instead of text.
+Start your response with {{ and end with }}. Nothing else.
 """
 
 # Generate roadmap based on questionnaire responses

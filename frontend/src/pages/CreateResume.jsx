@@ -81,7 +81,7 @@ const CreateResume = () => {
 
   return (
     <div className="min-h-screen bg-app-background flex flex-col items-center justify-center py-20">
-      <div className="w-full max-w-4xl flex flex-col items-center">
+      <div className={`w-full ${enhancedResume ? 'max-w-4xl' : 'max-w-2xl'} flex flex-col items-center`}>
         <button
           onClick={() => navigate("/resume")}
           className="mb-6 bg-white text-app-primary px-6 py-3 text-lg rounded-xl border-2 border-app-primary hover:bg-app-primary hover:text-white transition-colors shadow font-semibold"

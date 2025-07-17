@@ -33,15 +33,30 @@ async def improve_resume(file: UploadFile = File(...)):
 
 @router.post("/resume/feedback", response_model=ResumeFeedbackResponse)
 async def feedback_resume(file: UploadFile = File(...)):
-    text = extract_text_from_pdf_file(file)
-    prompt = feedback_resume_prompt(text)
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        config=types.GenerateContentConfig(temperature=0.3),
-        contents=prompt
-    )
-    print(f"Feedback response: {response.text[:500]}...")  # Log first 500 chars
-    return {"feedback": response.text}
+    try:
+        text = extract_text_from_pdf_file(file)
+        
+        # Limit text length to prevent timeouts
+        if len(text) > 30000:  # 30KB limit - more reasonable
+            text = text[:30000]
+        
+        prompt = feedback_resume_prompt(text)
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            config=types.GenerateContentConfig(
+                temperature=0.3,
+                max_output_tokens=6000  # Limit output to prevent timeouts
+            ),
+            contents=prompt
+        )
+        print(f"Feedback response: {response.text[:500]}...")  # Log first 500 chars
+        print(f"Response length: {len(response.text)}")
+        result = {"feedback": response.text}
+        print(f"Returning result: {result}")
+        return result
+    except Exception as e:
+        print(f"Error in feedback_resume: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to generate feedback. Please try again.")
 
 @router.post("/resume/export")
 async def export_resume(file: UploadFile = File(...), format: str = "pdf"):
