@@ -14,10 +14,10 @@ It features a React frontend and a Python backend, helping users generate person
 
 ## Prerequisites
 - Python 3.8 or higher
-- Node.js 18
-- npm or yarn
-- `git` (for cloning the repository)
-- PostgreSQL database
+- Node.js 18.x
+- npm or Yarn (package manager for Node.js)
+- Git (used to clone the repository)
+- PostgreSQL (for the database)
 
 ## API Keys
 You will need API keys for:
