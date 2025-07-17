@@ -90,36 +90,45 @@ def evaluate_answer(question, user_answer, target_company, difficulty):
     """
     
     prompt = f"""
-    You are a senior software engineer evaluating a coding interview answer.
+You are a senior software engineer evaluating a coding interview answer.
 
-    Question: {question}
-    User's Answer: {user_answer}
-    Target Company: {target_company}
-    Difficulty Level: {difficulty}
+Question: {question}
+User's Answer: {user_answer}
+Target Company: {target_company}
+Difficulty Level: {difficulty}
 
-    Evaluate the answer and provide detailed feedback. Return ONLY a valid JSON object with this structure:
+Evaluate the answer and provide detailed feedback. Return ONLY a valid JSON object with this structure:
 
-    {{
-        "feedback": "Detailed feedback on the solution approach, code quality, and correctness",
-        "score": 85.5,
-        "suggestions": [
-            "Consider using a hash map for O(1) lookups",
-            "Add edge case handling for empty input",
-            "Optimize the time complexity from O(n²) to O(n)"
-        ],
-        "time_complexity": "O(n)",
-        "space_complexity": "O(1)"
-    }}
+{{
+    "feedback": "Detailed feedback on the solution approach, code quality, and correctness",
+    "score": 100,
+    "suggestions": [
+        "Consider using a hash map for O(1) lookups",
+        "Add edge case handling for empty input",
+        "Optimize the time complexity from O(n²) to O(n)"
+    ],
+    "time_complexity": "O(n)",
+    "space_complexity": "O(1)"
+}}
 
-    Evaluation criteria:
-    - Correctness (40%): Does the solution solve the problem correctly?
-    - Efficiency (30%): Is the time/space complexity optimal?
-    - Code Quality (20%): Is the code readable and well-structured?
-    - Edge Cases (10%): Does it handle edge cases properly?
+Scoring rules:
+- Score is out of 100.
+- Only give a score of 100 if the solution is fully correct, optimal, well-explained, and handles all edge cases.
+- Deduct up to 40 points for correctness issues (wrong or incomplete solution).
+- Deduct up to 30 points for efficiency issues (suboptimal time/space complexity).
+- Deduct up to 20 points for code quality issues (poor readability, bad structure).
+- Deduct up to 10 points for missing edge cases.
+- If the solution is perfect, give 100. If there are minor issues, deduct points as specified above. Be specific and consistent.
+- Do not give arbitrary scores like 85.5 for a perfect solution.
 
-    Score should be 0-100. Be constructive and specific.
-    Return ONLY the JSON object. No markdown, no explanations.
-    """
+Evaluation criteria:
+- Correctness (40%): Does the solution solve the problem correctly?
+- Efficiency (30%): Is the time/space complexity optimal?
+- Code Quality (20%): Is the code readable and well-structured?
+- Edge Cases (10%): Does it handle edge cases properly?
+
+Score should be 0-100. Be constructive and specific.
+"""
     
     try:
         response = client.models.generate_content(

@@ -1,4 +1,6 @@
 from google.cloud import speech_v1p1beta1 as speech
+import os 
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(os.path.dirname(__file__), "../app/gen-lang-client-0080872580-2e4a0982c79c.json")
 
 def transcribe_audio(audio_path):
     client = speech.SpeechClient()
