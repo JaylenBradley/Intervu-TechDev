@@ -40,7 +40,6 @@ def generate_technical_interview(
         # Generate questions using Gemini
         questions = generate_leetcode_questions(
             user_profile=questionnaire,
-            target_role=request.target_role,
             target_company=request.target_company,
             difficulty=request.difficulty,
             num_questions=request.num_questions
@@ -48,7 +47,7 @@ def generate_technical_interview(
         
         return TechnicalInterviewResponse(
             questions=questions,
-            session_id=f"session_{request.user_id}_{request.target_role}_{request.target_company}"
+            session_id=f"session_{request.user_id}_{request.target_company}"
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate questions: {str(e)}")

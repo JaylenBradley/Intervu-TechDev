@@ -4,11 +4,12 @@ import uuid
 import random
 from google import genai
 from google.genai import types
+import logging
 
 genai.api_key = os.getenv('GEMINI_API_KEY')
 client = genai.Client(api_key=genai.api_key)
 
-def generate_leetcode_questions(user_profile, target_role, target_company, difficulty, num_questions):
+def generate_leetcode_questions(user_profile, target_company, difficulty, num_questions):
     """
     Generate LeetCode questions using Gemini API based on user profile and preferences
     """
@@ -39,7 +40,6 @@ def generate_leetcode_questions(user_profile, target_role, target_company, diffi
     User Profile:
     {profile_str}
     
-    Target Role: {target_role}
     Target Company: {target_company}
     Difficulty Level: {difficulty}
     Number of Questions: {num_questions}
@@ -64,14 +64,13 @@ def generate_leetcode_questions(user_profile, target_role, target_company, diffi
     STRICT RANDOMIZATION RULES:
     1. NEVER generate these classic problems: "Two Sum", "Valid Parentheses", "Reverse String", "Palindrome", "Merge Sorted Arrays", "Remove Duplicates", "Find Maximum", "Check Duplicates", "Group Anagrams", "Subarray Sum", "Rotated Array", "Word Ladder", "Trapping Rain Water", "Longest Consecutive"
     2. Create COMPLETELY NEW problem scenarios that don't exist on LeetCode
-    3. Use the random seed {random_seed} to vary the problem types, data structures, and scenarios
+    3. Use the random seed {random_seed}
     4. Mix different categories: arrays, strings, trees, graphs, dynamic programming, etc.
     5. Vary the problem context: business scenarios, real-world applications, mathematical problems, etc.
     6. Use different naming conventions and problem descriptions
     7. Ensure each question is genuinely unique and creative
 
     Guidelines:
-    - Focus on topics relevant to {target_role} role
     - Consider {target_company}'s typical interview style
     - {difficulty} level should match the user's skill level
     - Make questions practical and realistic
@@ -90,36 +89,32 @@ def generate_leetcode_questions(user_profile, target_role, target_company, diffi
             ),
             contents=prompt
         )
-        
-        # Parse the response
         questions_text = response.text.strip()
-        
-        # Clean up the response to extract JSON
         if questions_text.startswith('```json'):
             questions_text = questions_text[7:-3]
         elif questions_text.startswith('```'):
             questions_text = questions_text[3:-3]
-        
-        questions_data = json.loads(questions_text)
-        
-        # Ensure each question has a unique ID and fix enum values
+        try:
+            questions_data = json.loads(questions_text)
+        except json.JSONDecodeError as json_err:
+            logging.error(f"Gemini returned invalid JSON: {json_err} | Partial response: {questions_text[:500]}")
+            return get_fallback_questions(difficulty, num_questions)
         for question in questions_data:
             if 'id' not in question or not question['id']:
                 question['id'] = str(uuid.uuid4())
-            
-            # Fix difficulty enum values
             if 'difficulty' in question:
                 difficulty_val = question['difficulty']
                 if isinstance(difficulty_val, str):
                     difficulty_val = difficulty_val.replace('DifficultyLevel.', '').lower()
                     question['difficulty'] = difficulty_val
-        
         return questions_data
-        
     except Exception as e:
-        print(f"Error generating questions: {str(e)}")
-        print(f"Response text: {response.text if hasattr(response, 'text') else 'No response text'}")
-        # Return fallback questions if generation fails
+        # Check for Gemini 503 error (model overloaded)
+        if hasattr(e, 'args') and e.args and '503' in str(e.args[0]):
+            logging.error(f"Gemini model overloaded (503): {e}")
+            return get_fallback_questions(difficulty, num_questions)
+        logging.error(f"Error generating questions: {e}")
+        print(f"Response text: {response.text if 'response' in locals() and hasattr(response, 'text') else 'No response text'}")
         return get_fallback_questions(difficulty, num_questions)
 
 def evaluate_answer(question, user_answer, target_company, difficulty):
@@ -177,12 +172,22 @@ def evaluate_answer(question, user_answer, target_company, difficulty):
         elif feedback_text.startswith('```'):
             feedback_text = feedback_text[3:-3]
         
-        feedback_data = json.loads(feedback_text)
+        try:
+            feedback_data = json.loads(feedback_text)
+        except json.JSONDecodeError as json_err:
+            logging.error(f"Gemini returned invalid JSON: {json_err} | Partial response: {feedback_text[:500]}")
+            return {
+                "feedback": "Unable to evaluate answer due to invalid response from AI. Please try again.",
+                "score": 0.0,
+                "suggestions": ["Please provide a more detailed solution"],
+                "time_complexity": "Unknown",
+                "space_complexity": "Unknown"
+            }
         
         return feedback_data
         
     except Exception as e:
-        print(f"Error evaluating answer: {str(e)}")
+        logging.error(f"Error evaluating answer: {e}")
         return {
             "feedback": "Unable to evaluate answer. Please try again.",
             "score": 0.0,
