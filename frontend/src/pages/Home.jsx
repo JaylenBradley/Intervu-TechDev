@@ -18,7 +18,7 @@ const features = [
     icon: <SiProbot/>,
   },
   {
-    title: "Resume Impromvent",
+    title: "Resume Improvement",
     desc: "Access curated videos, books, articles, and courses to boost your learning",
     icon: <GiBrain/>,
   },
