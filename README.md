@@ -83,7 +83,7 @@ npm install
 ```
 
 ### 4. Environment Configuration
-- Add your API keys to the .env file in `backend/`
+- Add your API keys to the .env files in `backend/` and `frontend/`
 - Configure Firebase in `frontend/src/services/firebase.js`
 
 ### 5. Running the Application
