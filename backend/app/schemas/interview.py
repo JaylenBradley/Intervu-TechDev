@@ -9,7 +9,6 @@ class DifficultyLevel(str, Enum):
 
 class TechnicalInterviewRequest(BaseModel):
     user_id: int
-    target_role: str
     target_company: str
     difficulty: DifficultyLevel
     num_questions: int
@@ -17,7 +16,7 @@ class TechnicalInterviewRequest(BaseModel):
 class LeetCodeQuestion(BaseModel):
     id: str
     title: str
-    description: str
+    description: str    
     difficulty: DifficultyLevel
     category: str  # e.g., "arrays", "strings", "trees", "dynamic programming"
     hints: List[str]

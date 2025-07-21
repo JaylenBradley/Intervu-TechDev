@@ -17,7 +17,6 @@ const TechnicalInterview = ({ user }) => {
   
   // Form state for generating questions
   const [formData, setFormData] = useState({
-    targetRole: "",
     targetCompany: "",
     difficulty: "medium",
     numQuestions: 3
@@ -36,7 +35,6 @@ const TechnicalInterview = ({ user }) => {
         // Pre-fill form with questionnaire data
         setFormData(prev => ({
           ...prev,
-          targetRole: questionnaireData.career_goal || "",
           targetCompany: (questionnaireData.target_companies && questionnaireData.target_companies.length > 0) 
             ? questionnaireData.target_companies[0] 
             : ""
@@ -65,7 +63,7 @@ const TechnicalInterview = ({ user }) => {
       return;
     }
 
-    if (!formData.targetRole || !formData.targetCompany) {
+    if (!formData.targetCompany) {
       setError("Please fill in all required fields");
       return;
     }
@@ -81,7 +79,6 @@ const TechnicalInterview = ({ user }) => {
         },
         body: JSON.stringify({
           user_id: user.id,
-          target_role: formData.targetRole,
           target_company: formData.targetCompany,
           difficulty: formData.difficulty,
           num_questions: parseInt(formData.numQuestions)
@@ -214,22 +211,6 @@ const TechnicalInterview = ({ user }) => {
           <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); generateQuestions(); }}>
             <div>
               <label className="block mb-2 font-medium text-app-text">
-                Target Role 
-                <span className="text-sm text-gray-500 ml-1">(from your questionnaire)</span>
-              </label>
-              <input
-                type="text"
-                name="targetRole"
-                value={formData.targetRole}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-app-primary rounded-lg focus:outline-none bg-app-background text-app-text"
-                placeholder="e.g., Software Engineer, Data Scientist"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block mb-2 font-medium text-app-text">
                 Target Company 
                 <span className="text-sm text-gray-500 ml-1">(from your questionnaire)</span>
               </label>
@@ -337,7 +318,6 @@ const TechnicalInterview = ({ user }) => {
           </div>
           
           <div className="flex gap-4 text-sm">
-            <span className="text-app-text">Role: {formData.targetRole}</span>
             <span className="text-app-text">Company: {formData.targetCompany}</span>
             <span className={`px-2 py-1 rounded ${getDifficultyColor(formData.difficulty)}`}>
               {formData.difficulty.toUpperCase()}

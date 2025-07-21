@@ -4,14 +4,38 @@ import uuid
 import random
 from google import genai
 from google.genai import types
+import logging
 
 genai.api_key = os.getenv('GEMINI_API_KEY')
 client = genai.Client(api_key=genai.api_key)
 
-def generate_leetcode_questions(user_profile, target_role, target_company, difficulty, num_questions):
+def generate_leetcode_questions(user_profile, target_company, difficulty, num_questions):
     """
     Generate LeetCode questions using Gemini API based on user profile and preferences
     """
+    import time
+    import datetime
+    random_seed = int(time.time() * 1000) % 10000
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    prompt = f"""
+Generate {num_questions} unique and random LeetCode-style coding questions for a {difficulty} level interview.
+RANDOM SEED: {random_seed}
+TIMESTAMP: {current_time}
+Use this seed to ensure the questions are different each time and not repeated.
+Make the questions in the style of company {target_company} interviews.
+Return ONLY a valid JSON array of question objects, with each object containing:
+- id (string)
+- title (string)
+- description (string)
+- difficulty (string)
+- category (string)
+- hints (list of strings)
+- expected_approach (string)
+- time_complexity (string)
+- space_complexity (string)
+No explanations, no markdown, no extra text.
+"""
     
     # Convert user profile to string format
     profile_str = f"""
@@ -23,64 +47,6 @@ def generate_leetcode_questions(user_profile, target_role, target_company, diffi
     Projects: {user_profile.projects or 'Not specified'}
     """
     
-    # Generate a random seed for this request to ensure variety
-    import time
-    import datetime
-    random_seed = int(time.time() * 1000) % 10000
-    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    prompt = f"""
-    You are a technical interview expert. Generate {num_questions} COMPLETELY RANDOM and UNIQUE LeetCode-style coding questions for a {difficulty} level interview.
-
-    RANDOM SEED: {random_seed}
-    TIMESTAMP: {current_time}
-    IMPORTANT: Use this seed and timestamp to ensure different questions each time. Generate questions that are NOT commonly found in standard LeetCode problem sets.
-
-    User Profile:
-    {profile_str}
-    
-    Target Role: {target_role}
-    Target Company: {target_company}
-    Difficulty Level: {difficulty}
-    Number of Questions: {num_questions}
-
-    CRITICAL: Return ONLY a valid JSON array. No markdown, no explanations, no text before or after.
-
-    Each question object should have this exact structure:
-    {{
-        "id": "unique_id",
-        "title": "Question Title",
-        "description": "Detailed problem description with examples",
-        "difficulty": "{difficulty}",
-        "category": "arrays|strings|trees|dynamic_programming|graphs|linked_lists|stacks|queues|heaps|binary_search|two_pointers|sliding_window|backtracking|greedy|bit_manipulation",
-        "hints": ["hint1", "hint2"],
-        "expected_approach": "Brief description of the optimal approach",
-        "time_complexity": "O(n) or similar",
-        "space_complexity": "O(1) or similar"
-    }}
-
-    IMPORTANT: The difficulty field must be exactly "{difficulty}" (lowercase string), not an enum or object.
-
-    STRICT RANDOMIZATION RULES:
-    1. NEVER generate these classic problems: "Two Sum", "Valid Parentheses", "Reverse String", "Palindrome", "Merge Sorted Arrays", "Remove Duplicates", "Find Maximum", "Check Duplicates", "Group Anagrams", "Subarray Sum", "Rotated Array", "Word Ladder", "Trapping Rain Water", "Longest Consecutive"
-    2. Create COMPLETELY NEW problem scenarios that don't exist on LeetCode
-    3. Use the random seed {random_seed} to vary the problem types, data structures, and scenarios
-    4. Mix different categories: arrays, strings, trees, graphs, dynamic programming, etc.
-    5. Vary the problem context: business scenarios, real-world applications, mathematical problems, etc.
-    6. Use different naming conventions and problem descriptions
-    7. Ensure each question is genuinely unique and creative
-
-    Guidelines:
-    - Focus on topics relevant to {target_role} role
-    - Consider {target_company}'s typical interview style
-    - {difficulty} level should match the user's skill level
-    - Make questions practical and realistic
-    - Provide clear problem descriptions with examples
-    - Be CREATIVE and ORIGINAL - avoid any standard textbook problems
-
-    Return the JSON array starting with [ and ending with ]. Nothing else.
-    """
-    
     try:
         response = client.models.generate_content(
             model="gemini-2.0-flash-exp",
@@ -90,36 +56,32 @@ def generate_leetcode_questions(user_profile, target_role, target_company, diffi
             ),
             contents=prompt
         )
-        
-        # Parse the response
         questions_text = response.text.strip()
-        
-        # Clean up the response to extract JSON
         if questions_text.startswith('```json'):
             questions_text = questions_text[7:-3]
         elif questions_text.startswith('```'):
             questions_text = questions_text[3:-3]
-        
-        questions_data = json.loads(questions_text)
-        
-        # Ensure each question has a unique ID and fix enum values
+        try:
+            questions_data = json.loads(questions_text)
+        except json.JSONDecodeError as json_err:
+            logging.error(f"Gemini returned invalid JSON: {json_err} | Partial response: {questions_text[:500]}")
+            return get_fallback_questions(difficulty, num_questions)
         for question in questions_data:
             if 'id' not in question or not question['id']:
                 question['id'] = str(uuid.uuid4())
-            
-            # Fix difficulty enum values
             if 'difficulty' in question:
                 difficulty_val = question['difficulty']
                 if isinstance(difficulty_val, str):
                     difficulty_val = difficulty_val.replace('DifficultyLevel.', '').lower()
                     question['difficulty'] = difficulty_val
-        
         return questions_data
-        
     except Exception as e:
-        print(f"Error generating questions: {str(e)}")
-        print(f"Response text: {response.text if hasattr(response, 'text') else 'No response text'}")
-        # Return fallback questions if generation fails
+        # Check for Gemini 503 error (model overloaded)
+        if hasattr(e, 'args') and e.args and '503' in str(e.args[0]):
+            logging.error(f"Gemini model overloaded (503): {e}")
+            return get_fallback_questions(difficulty, num_questions)
+        logging.error(f"Error generating questions: {e}")
+        print(f"Response text: {response.text if 'response' in locals() and hasattr(response, 'text') else 'No response text'}")
         return get_fallback_questions(difficulty, num_questions)
 
 def evaluate_answer(question, user_answer, target_company, difficulty):
@@ -128,36 +90,45 @@ def evaluate_answer(question, user_answer, target_company, difficulty):
     """
     
     prompt = f"""
-    You are a senior software engineer evaluating a coding interview answer.
+You are a senior software engineer evaluating a coding interview answer.
 
-    Question: {question}
-    User's Answer: {user_answer}
-    Target Company: {target_company}
-    Difficulty Level: {difficulty}
+Question: {question}
+User's Answer: {user_answer}
+Target Company: {target_company}
+Difficulty Level: {difficulty}
 
-    Evaluate the answer and provide detailed feedback. Return ONLY a valid JSON object with this structure:
+Evaluate the answer and provide detailed feedback. Return ONLY a valid JSON object with this structure:
 
-    {{
-        "feedback": "Detailed feedback on the solution approach, code quality, and correctness",
-        "score": 85.5,
-        "suggestions": [
-            "Consider using a hash map for O(1) lookups",
-            "Add edge case handling for empty input",
-            "Optimize the time complexity from O(n²) to O(n)"
-        ],
-        "time_complexity": "O(n)",
-        "space_complexity": "O(1)"
-    }}
+{{
+    "feedback": "Detailed feedback on the solution approach, code quality, and correctness",
+    "score": 100,
+    "suggestions": [
+        "Consider using a hash map for O(1) lookups",
+        "Add edge case handling for empty input",
+        "Optimize the time complexity from O(n²) to O(n)"
+    ],
+    "time_complexity": "O(n)",
+    "space_complexity": "O(1)"
+}}
 
-    Evaluation criteria:
-    - Correctness (40%): Does the solution solve the problem correctly?
-    - Efficiency (30%): Is the time/space complexity optimal?
-    - Code Quality (20%): Is the code readable and well-structured?
-    - Edge Cases (10%): Does it handle edge cases properly?
+Scoring rules:
+- Score is out of 100.
+- Only give a score of 100 if the solution is fully correct, optimal, well-explained, and handles all edge cases.
+- Deduct up to 40 points for correctness issues (wrong or incomplete solution).
+- Deduct up to 30 points for efficiency issues (suboptimal time/space complexity).
+- Deduct up to 20 points for code quality issues (poor readability, bad structure).
+- Deduct up to 10 points for missing edge cases.
+- If the solution is perfect, give 100. If there are minor issues, deduct points as specified above. Be specific and consistent.
+- Do not give arbitrary scores like 85.5 for a perfect solution.
 
-    Score should be 0-100. Be constructive and specific.
-    Return ONLY the JSON object. No markdown, no explanations.
-    """
+Evaluation criteria:
+- Correctness (40%): Does the solution solve the problem correctly?
+- Efficiency (30%): Is the time/space complexity optimal?
+- Code Quality (20%): Is the code readable and well-structured?
+- Edge Cases (10%): Does it handle edge cases properly?
+
+Score should be 0-100. Be constructive and specific.
+"""
     
     try:
         response = client.models.generate_content(
@@ -177,12 +148,22 @@ def evaluate_answer(question, user_answer, target_company, difficulty):
         elif feedback_text.startswith('```'):
             feedback_text = feedback_text[3:-3]
         
-        feedback_data = json.loads(feedback_text)
+        try:
+            feedback_data = json.loads(feedback_text)
+        except json.JSONDecodeError as json_err:
+            logging.error(f"Gemini returned invalid JSON: {json_err} | Partial response: {feedback_text[:500]}")
+            return {
+                "feedback": "Unable to evaluate answer due to invalid response from AI. Please try again.",
+                "score": 0.0,
+                "suggestions": ["Please provide a more detailed solution"],
+                "time_complexity": "Unknown",
+                "space_complexity": "Unknown"
+            }
         
         return feedback_data
         
     except Exception as e:
-        print(f"Error evaluating answer: {str(e)}")
+        logging.error(f"Error evaluating answer: {e}")
         return {
             "feedback": "Unable to evaluate answer. Please try again.",
             "score": 0.0,

@@ -1,4 +1,4 @@
-from google.cloud import speech_v1p1beta1 as speech
+from google.cloud import speech
 
 def transcribe_audio(audio_path):
     client = speech.SpeechClient()

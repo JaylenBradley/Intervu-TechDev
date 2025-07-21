@@ -1,3 +1,7 @@
+
+import os
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(os.path.dirname(__file__), "../app/gen-lang-client-0080872580-2e4a0982c79c.json")
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import roadmap, videos, questionnaire, user, jobs, resume, interview, behavioral_prep
