@@ -70,7 +70,7 @@ const Navbar = ({ user }) => {
           <div className="absolute right-0 top-12 w-44 bg-app-accent rounded-xl shadow-2xl py-3 z-20 text-app-text border border-app-secondary">
             {user && (
               <button
-                  className="menu-btn text-app-primary"
+                  className="dropdown-btn text-app-primary"
                   type="button"
                   // onClick={}
               >
@@ -78,7 +78,7 @@ const Navbar = ({ user }) => {
               </button>
             )}
             <button
-              className="menu-btn"
+              className="dropdown-btn"
               type="button"
               onClick={handleAuthClick}
             >
