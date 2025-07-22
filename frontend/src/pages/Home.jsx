@@ -37,6 +37,12 @@ const team = [
     bio: "Justin focuses on AI, backend, and data. Dedicated to building smart tools for interview and career success.",
     img: null
   },
+    {
+    name: "Samantha Adorno",
+    role: "Co‑Founder & Backend Engineer",
+    bio: "Samantha works on backend APIs, databases, and system architecture. She's passionate about making technical tools more accessible and impactful.",
+    img: null,
+  },
 ];
 
 const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
@@ -86,7 +92,7 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
             <div key={i} className="card bg-app-accent border-app-primary rounded-xl p-6 shadow flex flex-col items-center w-80">
               {/* If you add images, use: <img src={member.img} ... /> */}
               <h3 className="text-lg font-bold text-app-primary mb-1">{member.name}</h3>
-              <span className="text-app-text font-medium mb-2">{member.role}</span>
+              <span className="text-app-text text-center font-medium mb-2">{member.role}</span>
               <p className="text-app-text text-center text-sm">{member.bio}</p>
             </div>
           ))}
