@@ -104,6 +104,13 @@ body {
   outline: none;
 }
 
+.job-edit-button {
+  color: var(--primary);
+}
+.job-edit-button:hover {
+  color: var(--secondary);
+}
+
 .backdrop-blur-sm {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);

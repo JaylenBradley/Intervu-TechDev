@@ -348,7 +348,7 @@ const JobDashboard = ({ user }) => {
                         onClick={() => handleEdit(job)}
                         className=
                           "flex items-center justify-center gap-0.5 cursor-pointer
-                          text-app-primary hover:text-app-primary/80 text-sm"
+                          job-edit-button text-sm"
                       >
                         <FaPencilAlt/>
                         Edit

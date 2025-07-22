@@ -101,7 +101,7 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
           {team.map((member, i) => (
           <div key={i} className="card rounded-xl p-6 shadow flex flex-col items-center border-app-primary bg-app-accent">
               <div className="font-bold text-lg">{member.name}</div>
-              <div className="text-app-text mb-2">{member.role}</div>
+              <div className="text-app-text text-center mb-2">{member.role}</div>
               <div className="flex gap-2">
                 {member.linkedin && (
                   <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline icon-pop">
