@@ -8,11 +8,14 @@ import { AiFillHome } from "react-icons/ai";
 import { FaMapSigns, FaFileAlt, FaRobot } from "react-icons/fa";
 import { MdWork } from "react-icons/md";
 import logo from "../assets/images/intervu-logo.png";
+import { fetchUserResume } from "../services/resumeServices";
 
 const Navbar = ({ user }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef();
   const navigate = useNavigate();
+  const [showResumeModal, setShowResumeModal] = useState(false);
+  const [resumeCheckLoading, setResumeCheckLoading] = useState(false);
 
   useEffect(() => {
     const handler = (e) => {
@@ -38,6 +41,26 @@ const Navbar = ({ user }) => {
     setMenuOpen(false);
   };
 
+  const handleResumeClick = async () => {
+    if (!user || !user.id) {
+      navigate("/signin");
+      return;
+    }
+    setResumeCheckLoading(true);
+    try {
+      const resume = await fetchUserResume(user.id);
+      if (!resume) {
+        setShowResumeModal(true);
+      } else {
+        navigate("/resume");
+      }
+    } catch {
+      setShowResumeModal(true);
+    } finally {
+      setResumeCheckLoading(false);
+    }
+  };
+
   return (
     <nav className="flex items-center justify-between px-6 py-3 shadow bg-app-background">
       <div className="flex items-center min-w-0">
@@ -57,7 +80,7 @@ const Navbar = ({ user }) => {
         <NavButton icon={<AiFillHome size={24} />} alt="Home" onClick={() => navigate('/')} />
         <NavButton icon={<RiQuestionnaireFill size={24} />} alt="Questionnaire" onClick={() => navigate('/questionnaire')} />
         <NavButton icon={<FaMapSigns size={24} />} alt="Roadmap" onClick={() => navigate('/roadmap')} />
-        <NavButton icon={<FaFileAlt size={24} />} alt="Resume" onClick={() => navigate('/resume')} />
+        <NavButton icon={<FaFileAlt size={24} />} alt="Resume" onClick={handleResumeClick} />
         <NavButton icon={<MdWork size={24} />} alt="Job Dashboard" onClick={() => navigate('/dashboard')} />
         <NavButton icon={<FaRobot size={24} />} alt="AI-Interviewer" onClick={() => navigate('/ai-interviewer')} />
         <button
@@ -87,6 +110,35 @@ const Navbar = ({ user }) => {
           </div>
         )}
       </div>
+      {showResumeModal && (
+        <>
+          {/* Blur overlay */}
+          <div className="fixed inset-0 z-40 backdrop-blur-sm pointer-events-auto"></div>
+          {/* Modal */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="bg-white text-black rounded-xl p-8 shadow-2xl max-w-md w-full border border-app-primary text-center relative">
+              <h2 className="text-2xl font-bold mb-4 text-app-primary">
+                Upload Resume Required
+              </h2>
+              <p className="mb-6 text-app-text">
+                Please upload your resume before accessing resume features.
+              </p>
+              <button
+                className="btn-primary w-full py-3 text-lg font-semibold rounded-lg cursor-pointer"
+                onClick={() => { setShowResumeModal(false); navigate("/resume/improve"); }}
+              >
+                Go to Resume Upload
+              </button>
+              <button
+                className="btn w-full py-3 text-lg font-semibold rounded-lg cursor-pointer mt-2"
+                onClick={() => setShowResumeModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </nav>
   );
 };

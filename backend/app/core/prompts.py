@@ -136,6 +136,25 @@ Examples of what to ANALYZE:
 Resume text:
 {resume_text}"""
 
+def parse_resume_prompt(resume_text: str) -> str:
+    return f"""
+You are a resume parser. Given the following resume text, output ONLY valid JSON (no markdown, no commentary, no newlines except inside JSON values). Use this schema:
+
+{{
+  "education": [{{"institution": str, "degree": str, "start_date": str, "end_date": str}}],
+  "experience": [{{"company": str, "title": str, "start_date": str, "end_date": str, "description": str}}],
+  "skills": [str],
+  "certifications": [str],
+  "projects": [{{"name": str, "description": str}}],
+  "contact_info": {{"name": str, "email": str, "phone": str}}
+}}
+
+If a field is missing, return an empty list or empty string for that field. Do not invent information. Return only the JSON object.
+
+Resume text:
+{resume_text}
+"""
+
 def roadmap_prompt(profile, current_date):
     return f"""
     You are a professional career roadmap assistant helping users improve their chances of landing their dream job.
@@ -192,7 +211,7 @@ def roadmap_prompt(profile, current_date):
       - Use phrasing like “during your junior year” or “in the upcoming semester” to stay time-accurate.
 
     Output formatting:
-    - The output must be pure, raw JSON (not a string). Do not return the JSON wrapped in quotes or with escaped characters like \n or \". Return an actual JSON object that can be parsed directly.
+    - The output must be pure, raw JSON (not a string). Do not return the JSON wrapped in quotes or with escaped characters like \n or ". Return an actual JSON object that can be parsed directly.
     - Do not include any Markdown, plain text, explanations, commentary, or symbols like asterisks, hash signs, or HTML tags.
     - Do not wrap the JSON in markdown-style code blocks (e.g., triple backticks ``` or ```json).
     - Do not return the JSON as a string (with escaped newlines or quotes).
