@@ -124,7 +124,7 @@ async def feedback_resume(user_id: int, db: Session = Depends(get_db)):
         ),
         contents=prompt
     )
-    return {"feedback": response.text}
+    return {"feedback": response.text or ""}
 
 @router.get("/resume/export")
 async def export_resume(user_id: int, format: str = "pdf", db: Session = Depends(get_db)):

@@ -2,9 +2,20 @@ import unittest
 from unittest.mock import Mock, patch
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
+import sys
+sys.path.insert(0, 'backend/app')
 from app.main import app
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse
+import io
+import os
+import tempfile
+import pytest
+from fastapi.testclient import TestClient
+from app.main import app
+from reportlab.pdfgen import canvas
+import sys
+sys.path.insert(0, 'backend/app')
 
 class TestUserAPI(unittest.TestCase):
     def setUp(self):
@@ -78,6 +89,56 @@ class TestUserAPI(unittest.TestCase):
         # Skip this test for now as it requires complex database mocking
         # that's not essential for the core functionality
         self.skipTest("Skipping complex database query test")
+
+
+client = TestClient(app)
+
+@pytest.fixture
+def sample_pdf():
+    # Create a simple PDF file in memory
+    pdf_bytes = io.BytesIO()
+    c = canvas.Canvas(pdf_bytes)
+    c.drawString(100, 750, "Sample Resume PDF")
+    c.save()
+    pdf_bytes.seek(0)
+    return pdf_bytes
+
+def test_resume_upload_and_flow(sample_pdf):
+    # Create a test user
+    user_data = {
+        "username": "test_resume_user",
+        "email": "test_resume_user@example.com",
+        "firebase_id": "test_resume_firebase_id",
+        "login_method": "test",
+    }
+    user_resp = client.post("/api/user/", json=user_data)
+    assert user_resp.status_code == 200
+    user_id = user_resp.json()["id"]
+    # Upload resume
+    response = client.post(
+        "/api/resume/upload",
+        data={"user_id": user_id},
+        files={"file": ("sample.pdf", sample_pdf, "application/pdf")},
+    )
+    assert response.status_code == 200
+    resume_id = response.json()["id"]
+    # Get resume
+    response = client.get("/api/resume/me", params={"user_id": user_id})
+    assert response.status_code == 200
+    assert response.json()["file_name"] == "sample.pdf"
+    # Improve resume
+    response = client.get("/api/resume/improve", params={"user_id": user_id})
+    assert response.status_code in (200, 400)  # 400 if Gemini or PDF parse fails
+    # Feedback
+    response = client.get("/api/resume/feedback", params={"user_id": user_id})
+    assert response.status_code in (200, 400)
+    # Export PDF
+    response = client.get("/api/resume/export", params={"user_id": user_id, "format": "pdf"})
+    assert response.status_code in (200, 400)
+    # Export DOCX
+    response = client.get("/api/resume/export", params={"user_id": user_id, "format": "docx"})
+    assert response.status_code in (200, 400)
+    # Optionally: delete the test user (if you have a delete endpoint)
 
 if __name__ == "__main__":
     unittest.main() 
