@@ -4,7 +4,7 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(os.path.dirname(__fi
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import roadmap, videos, questionnaire, user, jobs, resume, interview, behavioral_prep
+from app.api import roadmap, videos, questionnaire, user, jobs, resume, interview, behavioral_prep, blind_75
 from app.core.database import Base, engine
 from dotenv import load_dotenv
 
@@ -30,6 +30,7 @@ app.include_router(resume.router, prefix="/api", tags=["Resume"])
 app.include_router(roadmap.router, prefix="/api", tags=["Roadmap"])
 app.include_router(user.router, prefix="/api", tags=["User"])
 app.include_router(videos.router, prefix="/api", tags=["Videos"])
+app.include_router(blind_75.router, prefix="/api", tags=["Blind75"])
 
 @app.on_event("startup")
 def on_startup():
