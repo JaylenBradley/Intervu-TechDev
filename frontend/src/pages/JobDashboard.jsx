@@ -7,6 +7,13 @@ import {
   exportJobsToGoogleSheets,
   exportJobsToCSV
 } from "../services/jobServices";
+import { IoCalendarOutline, IoTrashBinOutline } from "react-icons/io5";
+import { CiExport, CiNoWaitingSign, CiMapPin } from "react-icons/ci";
+import { FaPencilAlt } from "react-icons/fa";
+import { GiArcheryTarget, GiMoneyStack } from "react-icons/gi";
+import { PiConfetti, PiNotePencil } from "react-icons/pi";
+import { RxCross1 } from "react-icons/rx";
+import { TiPlusOutline } from "react-icons/ti";
 
 const JobDashboard = ({ user }) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
@@ -68,7 +75,7 @@ const JobDashboard = ({ user }) => {
       }
       if (editingJob) {
         const updatedJob = await updateJobApplication(editingJob.id, formData);
-        setJobs(prev => prev.map(job => 
+        setJobs(prev => prev.map(job =>
           job.id === editingJob.id ? updatedJob : job
         ));
         setEditingJob(null);
@@ -101,7 +108,7 @@ const JobDashboard = ({ user }) => {
   const handleStatusChange = async (jobId, newStatus) => {
     try {
       const updatedJob = await updateJobApplication(jobId, { status: newStatus });
-      setJobs(prev => prev.map(job => 
+      setJobs(prev => prev.map(job =>
         job.id === jobId ? updatedJob : job
       ));
     } catch (err) {
@@ -149,13 +156,13 @@ const JobDashboard = ({ user }) => {
 
   const getStatusIcon = (status) => {
     const icons = {
-      applied: "📝",
-      interviewing: "🎯",
-      offer: "🎉",
-      rejected: "❌",
-      withdrawn: "🚫"
+      applied: <PiNotePencil/>,
+      interviewing: <GiArcheryTarget/>,
+      offer: <PiConfetti/>,
+      rejected: <RxCross1/>,
+      withdrawn: <CiNoWaitingSign/>
     };
-    return icons[status] || "📝";
+    return icons[status] || <PiNotePencil/>;
   };
 
   const handleExportCSV = async () => {
@@ -210,17 +217,15 @@ const JobDashboard = ({ user }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-app-background">
-        <div className="flex items-center justify-center mt-24">
-          <div className="text-2xl text-app-text">Loading job applications...</div>
-        </div>
-      </div>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="loader-lg"/>
+    </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-app-background">
-      
+    <div className="min-h-screen">
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -229,6 +234,7 @@ const JobDashboard = ({ user }) => {
           </div>
           <div className="flex gap-2">
             <button
+              className="btn-primary text-white px-6 py-3 rounded-lg transition-colors flex items-center gap-2 cursor-pointer"
               onClick={() => {
                 if (!user || !user.id) {
                   alert("Please sign in to export to Google Sheets.");
@@ -236,16 +242,19 @@ const JobDashboard = ({ user }) => {
                 }
                 window.open(`${backendUrl}/api/jobs/export-to-sheets/${user.id}`, '_blank');
               }}
-              className="bg-app-primary text-white px-6 py-3 rounded-lg hover:bg-app-primary/90 transition-colors flex items-center gap-2"
             >
-              <span>⬆️</span>
+              <span>
+                <CiExport/>
+              </span>
               <span>Export to Google Sheets</span>
             </button>
             <button
+              className="btn-primary text-white px-6 py-3 rounded-lg transition-colors flex items-center gap-2 cursor-pointer"
               onClick={() => setShowAddForm(true)}
-              className="bg-app-primary text-white px-6 py-3 rounded-lg hover:bg-app-primary/90 transition-colors flex items-center gap-2"
             >
-              <span className="text-white">+</span>
+              <span className="vtintext-white">
+                <TiPlusOutline/>
+              </span>
               <span className="text-white">Add Application</span>
             </button>
           </div>
@@ -254,7 +263,7 @@ const JobDashboard = ({ user }) => {
         {error && (
           <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             {error}
-            <button 
+            <button
               onClick={() => setError(null)}
               className="float-right font-bold"
             >
@@ -279,10 +288,12 @@ const JobDashboard = ({ user }) => {
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-app-primary">Your Applications</h2>
           </div>
-          
+
           {jobs.length === 0 ? (
             <div className="p-8 text-center">
-              <div className="text-4xl mb-4">📝</div>
+              <div className="flex items-center justify-center text-4xl mb-4">
+                <PiNotePencil/>
+              </div>
               <h3 className="text-lg font-medium text-app-text mb-2">No applications yet</h3>
               <p className="text-app-text/70">Start tracking your job search by adding your first application</p>
             </div>
@@ -294,28 +305,38 @@ const JobDashboard = ({ user }) => {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-lg font-semibold text-app-primary">{job.job_title}</h3>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(job.status)}`}>
+                        <span className={`flex items-center justify center gap-0.5 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(job.status)}`}>
                           {getStatusIcon(job.status)} {job.status}
                         </span>
                       </div>
                       <p className="text-app-text font-medium mb-1">{job.company_name}</p>
                       <div className="flex items-center gap-4 text-sm text-app-text/70 mb-3">
-                        <span>📍 {job.location || 'No location'}</span>
-                        <span>💰 {job.salary_range || 'No salary info'}</span>
-                        <span>📅 Applied: {new Date(job.applied_date).toLocaleDateString()}</span>
+                        <span className="flex items-center gap-0.5">
+                          <CiMapPin/>
+                          {job.location || 'No location'}
+                        </span>
+                        <span className="flex items-center gap-0.5">
+                          <GiMoneyStack/>
+                          {job.salary_range || 'No salary info'}
+                        </span>
+                        <span className="flex items-center gap-0.5">
+                          <IoCalendarOutline />
+                          Applied: {new Date(job.applied_date).toLocaleDateString()}
+                        </span>
                       </div>
                       {job.notes && (
                         <p className="text-sm text-app-text/80 bg-gray-50 p-3 rounded-md">
-                          📝 {job.notes}
+                          <PiNotePencil/>
+                          {job.notes}
                         </p>
                       )}
                     </div>
-                    
+
                     <div className="flex items-center gap-2 ml-4">
                       <select
                         value={job.status}
                         onChange={(e) => handleStatusChange(job.id, e.target.value)}
-                        className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-app-primary"
+                        className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-app-primary cursor-pointer"
                       >
                         <option value="applied">Applied</option>
                         <option value="interviewing">Interviewing</option>
@@ -325,15 +346,21 @@ const JobDashboard = ({ user }) => {
                       </select>
                       <button
                         onClick={() => handleEdit(job)}
-                        className="text-app-primary hover:text-app-primary/80 text-sm"
+                        className=
+                          "flex items-center justify-center gap-0.5 cursor-pointer
+                          text-app-primary hover:text-app-primary/80 text-sm"
                       >
-                        ✏️ Edit
+                        <FaPencilAlt/>
+                        Edit
                       </button>
                       <button
                         onClick={() => handleDelete(job.id)}
-                        className="text-red-500 hover:text-red-700 text-sm"
+                        className=
+                          "flex items-center justify-center gap-0.5 cursor-pointer
+                          text-red-500 hover:text-red-700 text-sm"
                       >
-                        🗑️ Delete
+                        <IoTrashBinOutline/>
+                        Delete
                       </button>
                     </div>
                   </div>
@@ -437,9 +464,16 @@ const JobDashboard = ({ user }) => {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 bg-app-primary text-white py-1.5 px-3 rounded-md hover:bg-app-primary/90 transition-colors font-medium disabled:opacity-50 text-sm"
+                    className="flex-1 btn-primary text-white py-1.5 px-3 rounded-md transition-colors font-medium disabled:opacity-50 text-sm cursor-pointer"
                   >
-                    {submitting ? 'Saving...' : (editingJob ? 'Update' : 'Add') + ' Application'}
+                    {submitting ? (
+                      <span className="flex items-center justify-center gap-3">
+                        <div className="loader-md" />
+                        Saving...
+                      </span>
+                    ) : (
+                      (editingJob ? 'Update' : 'Add') + ' Application'
+                    )}
                   </button>
                   <button
                     type="button"
@@ -457,7 +491,7 @@ const JobDashboard = ({ user }) => {
                         status: "applied"
                       });
                     }}
-                    className="flex-1 bg-gray-300 text-gray-700 py-1.5 px-3 rounded-md hover:bg-gray-400 transition-colors font-medium text-sm"
+                    className="flex-1 bg-gray-300 text-gray-700 py-1.5 px-3 rounded-md hover:bg-gray-400 transition-colors font-medium text-sm cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -471,4 +505,4 @@ const JobDashboard = ({ user }) => {
   );
 };
 
-export default JobDashboard; 
+export default JobDashboard;

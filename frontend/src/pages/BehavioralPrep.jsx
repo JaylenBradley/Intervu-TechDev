@@ -316,7 +316,7 @@ const BehavioralPrep = ({ user }) => {
           </div>
           <button
             type="submit"
-            className={`btn w-full h-12 text-lg font-semibold py-2 rounded-lg flex items-center justify-center
+            className={`btn-primary w-full h-12 text-lg font-semibold py-2 rounded-lg flex items-center justify-center
               ${generating ? "bg-app-secondary opacity-60 cursor-not-allowed" : ""}`}
             disabled={generating}
           >

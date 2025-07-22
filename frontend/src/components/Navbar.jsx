@@ -5,7 +5,7 @@ import { auth } from "../services/firebase.js";
 import { signOut } from "firebase/auth";
 import { RiQuestionnaireFill } from "react-icons/ri";
 import { AiFillHome } from "react-icons/ai";
-import { FaRegFileAlt, FaMapSigns, FaTools, FaRobot } from "react-icons/fa";
+import { FaMapSigns, FaFileAlt, FaRobot } from "react-icons/fa";
 import { MdWork } from "react-icons/md";
 import logo from "../assets/images/intervu-logo.png";
 
@@ -42,7 +42,7 @@ const Navbar = ({ user }) => {
     <nav className="flex items-center justify-between px-6 py-3 shadow bg-app-background">
       <div className="flex items-center min-w-0">
         <button
-          className="flex items-center focus:outline-none"
+          className="flex items-center focus:outline-none cursor-pointer"
           onClick={() => navigate('/')}
           style={{ background: "none", border: "none", padding: 0, margin: 0 }}
           type="button"
@@ -57,11 +57,11 @@ const Navbar = ({ user }) => {
         <NavButton icon={<AiFillHome size={24} />} alt="Home" onClick={() => navigate('/')} />
         <NavButton icon={<RiQuestionnaireFill size={24} />} alt="Questionnaire" onClick={() => navigate('/questionnaire')} />
         <NavButton icon={<FaMapSigns size={24} />} alt="Roadmap" onClick={() => navigate('/roadmap')} />
-        <NavButton icon={<FaRegFileAlt size={24} />} alt="Resume" onClick={() => navigate('/resume')} />
+        <NavButton icon={<FaFileAlt size={24} />} alt="Resume" onClick={() => navigate('/resume')} />
         <NavButton icon={<MdWork size={24} />} alt="Job Dashboard" onClick={() => navigate('/dashboard')} />
         <NavButton icon={<FaRobot size={24} />} alt="AI-Interviewer" onClick={() => navigate('/ai-interviewer')} />
         <button
-          className="w-12 h-12 rounded-full border-2 border-app-primary flex items-center justify-center focus:outline-none bg-app-accent ml-1"
+          className="w-12 h-12 rounded-full border-2 border-app-primary cursor-pointer flex items-center justify-center focus:outline-none bg-app-accent ml-1"
           onClick={() => setMenuOpen((v) => !v)}
         >
           <span className="text-base text-app-primary font-bold">U</span>
@@ -70,7 +70,7 @@ const Navbar = ({ user }) => {
           <div className="absolute right-0 top-12 w-44 bg-app-accent rounded-xl shadow-2xl py-3 z-20 text-app-text border border-app-secondary">
             {user && (
               <button
-                  className="menu-btn text-app-primary"
+                  className="dropdown-btn text-app-primary"
                   type="button"
                   // onClick={}
               >
@@ -78,7 +78,7 @@ const Navbar = ({ user }) => {
               </button>
             )}
             <button
-              className="menu-btn"
+              className="dropdown-btn"
               type="button"
               onClick={handleAuthClick}
             >

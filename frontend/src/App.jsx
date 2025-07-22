@@ -18,8 +18,8 @@ import Roadmap from "./pages/Roadmap.jsx";
 import ResumeMain from "./pages/ResumeMain.jsx";
 import CreateResume from "./pages/CreateResume.jsx";
 import ResumeFeedback from "./pages/ResumeFeedback.jsx";
-import AIInterviewerMain from "./pages/AIInterviewerMain.jsx";
-import TechnicalInterview from "./pages/TechnicalInterview.jsx";
+import AiInterviewerMain from "./pages/AiInterviewerMain.jsx";
+import TechnicalPrep from "./pages/TechnicalPrep.jsx";
 
 const App = () => {
   const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
@@ -91,6 +91,8 @@ const App = () => {
     <>
       <Navbar user={user}/>
       <Routes>
+        <Route path="/signup" element={<AuthForm isSignUp={true}/>}/>
+        <Route path="/signin" element={<AuthForm isSignUp={false} />} />
         <Route path="/" element={
           <Home
               user={user}
@@ -98,20 +100,6 @@ const App = () => {
               hasRoadmap={hasRoadmap}
           />
         }/>
-        <Route path="/signup" element={<AuthForm isSignUp={true}/>}/>
-        <Route path="/signin" element={<AuthForm isSignUp={false} />} />
-        <Route path="/dashboard" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <JobDashboard user={user}/>
-          </ProtectedRoute>
-        }/>
-        <Route path="/resume" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <ResumeMain />
-          </ProtectedRoute>
-        }/>
-        <Route path="/resume/create" element={<CreateResume/>}/>
-        <Route path="/resume/feedback" element={<ResumeFeedback/>}/>
         <Route path="/questionnaire" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <Questionnaire onComplete={() => setQuestionnaireComplete(true)} user={user}/>
@@ -122,14 +110,26 @@ const App = () => {
             <Roadmap user={user} onRoadmapGenerated={() => setHasRoadmap(true)}/>
           </ProtectedRoute>
         }/>
+        <Route path="/resume" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <ResumeMain />
+          </ProtectedRoute>
+        }/>
+        <Route path="/resume/improve" element={<CreateResume/>}/>
+        <Route path="/resume/feedback" element={<ResumeFeedback/>}/>
+        <Route path="/dashboard" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <JobDashboard user={user}/>
+          </ProtectedRoute>
+        }/>
         <Route path="/ai-interviewer" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <AIInterviewerMain />
+            <AiInterviewerMain />
           </ProtectedRoute>
         }/>
         <Route path="/ai-interviewer/technical" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <TechnicalInterview user={user} />
+            <TechnicalPrep user={user} />
           </ProtectedRoute>
         }/>
         <Route path="/ai-interviewer/behavioral" element={

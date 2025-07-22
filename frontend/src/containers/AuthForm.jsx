@@ -14,36 +14,16 @@ const AuthForm = ({ isSignUp }) => {
 
     const handleSignUp = async () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!username.trim()) {
-            alert("Username cannot be empty");
-            return;
-        }
-        if (!emailRegex.test(email)) {
-            alert("Please enter a valid email address");
-            return;
-        }
-        if (password.length < 8) {
-            alert("Password must be at least 8 characters");
-            return;
-        }
-        if (!/[A-Z]/.test(password)) {
-            alert("Password must contain at least one uppercase letter");
-            return;
-        }
-        if (!/\d/.test(password)) {
-            alert("Password must contain at least one number");
-            return;
-        }
-        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-            alert("Password must contain at least one special character");
-            return;
-        }
-        if (password !== confirmedPassword) {
-            alert("Passwords do not match");
-            return;
-        }
 
         try {
+            if (!username.trim()) throw new Error("Username cannot be empty");
+            if (!emailRegex.test(email)) throw new Error("Please enter a valid email address");
+            if (password.length < 8) throw new Error("Password must be at least 8 characters");
+            if (!/[A-Z]/.test(password)) throw new Error("Password must contain at least one uppercase letter");
+            if (!/\d/.test(password)) throw new Error("Password must contain at least one number");
+            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) throw new Error("Password must contain at least one special character");
+            if (password !== confirmedPassword) throw new Error("Passwords do not match");
+
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
             const data = {
@@ -181,14 +161,14 @@ const AuthForm = ({ isSignUp }) => {
                         <button
                           type="button"
                           onClick={isSignUp ? handleSignUp : handleSignIn}
-                          className="w-full font-semibold py-2 rounded-lg btn"
+                          className="w-full font-semibold py-2 rounded-lg btn cursor-pointer"
                         >
                           {isSignUp ? "Sign up" : "Sign in"}
                         </button>
                         <button
                             type="button"
                             onClick={handleGoogleAuth}
-                            className="w-full font-semibold py-2 rounded-lg flex items-center justify-center gap-2 btn"
+                            className="w-full font-semibold py-2 rounded-lg flex items-center justify-center gap-2 btn cursor-pointer"
                         >
                             <FcGoogle/>
                             {isSignUp ? "Sign up with Google" : "Sign in with Google"}
@@ -196,7 +176,7 @@ const AuthForm = ({ isSignUp }) => {
                         <button
                             type="button"
                             onClick={() => navigate(isSignUp ? "/signin" : "/signup")}
-                            className="w-full mt-2 font-semibold text-base py-1 rounded-lg btn"
+                            className="w-full mt-2 font-semibold text-base py-1 rounded-lg btn cursor-pointer"
                         >
                             {isSignUp
                                 ? "Already have an account? Sign In"

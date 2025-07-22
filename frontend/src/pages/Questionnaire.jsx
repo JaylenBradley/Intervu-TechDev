@@ -294,7 +294,7 @@ const Questionnaire = ({ onComplete, user }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full font-semibold py-2 rounded-lg btn mt-4 flex items-center justify-center"
+            className="w-full font-semibold py-2 rounded-lg btn mt-4 flex items-center justify-center cursor-pointer"
           >
             {loading && <div className="loader-md mr-2"></div>}
             {loading ? "Saving..." : "Save"}
