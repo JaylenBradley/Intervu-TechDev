@@ -10,6 +10,7 @@ import JobDashboard from "./pages/JobDashboard.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
 import Footer from "./components/Footer.jsx";
 import Home from "./pages/Home.jsx";
+import Blind75Prep from "./pages/Blind75Prep.jsx";
 import Navbar from "./components/Navbar.jsx";
 import ProtectedRoute from "./containers/ProtectedRoute.jsx";
 import Questionnaire from "./pages/Questionnaire.jsx";
@@ -134,6 +135,11 @@ const App = () => {
         <Route path="/ai-interviewer/behavioral" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <BehavioralPrep user={user}/>
+          </ProtectedRoute>
+        }/>
+        <Route path="/ai-interviewer/blind75" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <Blind75Prep user={user}/>
           </ProtectedRoute>
         }/>
         <Route path="*" element={<ErrorPage/>}/>

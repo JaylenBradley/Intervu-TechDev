@@ -14,25 +14,40 @@ It features a React frontend and a Python backend, helping users generate person
 
 ## Prerequisites
 - Python 3.8 or higher
-- Node.js 18
-- npm or yarn
-- `git` (for cloning the repository)
-- PostgreSQL database
+- Node.js 18.x
+- npm or Yarn (package manager for Node.js)
+- Git (used to clone the repository)
+- PostgreSQL (for the database)
 
 ## API Keys
 You will need API keys for:
-- Gemini API
-- Google Cloud Speech-to-Text API
-- Google Sheets API
-- Firebase (for authentication)
+- [Firebase](https://console.firebase.google.com/u/0/)
+- [Gemini API](https://aistudio.google.com/prompts/new_chat)
+- [Google Cloud Speech-to-Text API](https://console.cloud.google.com/apis/api/speech.googleapis.com/metrics?inv=1&invt=Ab3Xzw&project=gen-lang-client-0080872580)
+- [Google Sheets API](https://console.cloud.google.com/apis/api/sheets.googleapis.com/metrics?inv=1&invt=Ab3Xzw&project=gen-lang-client-0080872580)
 
-Create a `.env` file in the project root with the following content:
+Create a `.env` file in the root of the backend directory with the following content:
 
 ```bash
 GENAI_API_KEY=your_gemini_api_key
-GOOGLE_SPEECH_API_KEY=your_google_speech_api_key
-GOOGLE_SHEETS_API_KEY=your_google_sheets_api_key
+GOOGLE_APPLICATION_CREDENTIALS=your_google_speech_api_key
+GOOGLE_CLIENT_ID=from_your_google_sheets_api_key
+GOOGLE_CLIENT_SECRET=from_your_google_sheets_api_key
+GOOGLE_PROJECT_ID=from_your_google_sheets_api_key
 DATABASE_URL=your_postgress_url
+```
+
+Create a `.env` file in the root of the frontend directory with the following content:
+```bash
+VITE_FIREBASE_API_KEY=your_firebase_key
+VITE_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+VITE_FIREBASE_PROJECT_ID=your_firebase_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
+VITE_FIREBASE_APP_ID=your_firebase_app_id
+VITE_FIREBASE_MEASUREMENT_ID=your_firebase_measurement_id
+
+VITE_BACKEND_URL=your_backend_url
 ```
 
 > The application uses [`python-dotenv`](https://pypi.org/project/python-dotenv/) 
@@ -68,7 +83,7 @@ npm install
 ```
 
 ### 4. Environment Configuration
-- Add your API keys to the .env file in `backend/`
+- Add your API keys to the .env files in `backend/` and `frontend/`
 - Configure Firebase in `frontend/src/services/firebase.js`
 
 ### 5. Running the Application
