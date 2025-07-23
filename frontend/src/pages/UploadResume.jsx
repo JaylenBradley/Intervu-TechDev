@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
-const ChangeResume = ({ user }) => {
+const UploadResume = ({ user }) => {
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,16 +47,16 @@ const ChangeResume = ({ user }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center py-16">
+    <div className="min-h-screen bg-app-background flex flex-col items-center justify-center py-20">
       <div className={`w-full max-w-2xl flex flex-col items-center`}>
         <button
-          onClick={() => navigate("/resume")}
+          onClick={() => navigate("/")}
           className="mb-6 bg-white text-app-primary px-6 py-3 text-lg rounded-xl border-2 border-app-primary hover:bg-app-primary hover:text-white transition-colors shadow font-semibold"
         >
           ← Back
         </button>
         <div className="bg-white rounded-2xl shadow-2xl p-10 w-full flex flex-col items-center border-2 border-app-primary">
-          <h1 className="text-3xl font-extrabold text-app-primary mb-8">Change Your Resume</h1>
+          <h1 className="text-3xl font-extrabold text-app-primary mb-8">Upload Your Resume</h1>
           <input
             type="file"
             accept=".pdf,.docx"
@@ -86,4 +86,4 @@ const ChangeResume = ({ user }) => {
   );
 };
 
-export default ChangeResume; 
+export default UploadResume; 

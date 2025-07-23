@@ -54,7 +54,7 @@ const CreateResume = ({ user }) => {
   };
 
   return (
-    <div className="min-h-screen bg-app-background flex flex-col items-center justify-center py-20">
+    <div className="min-h-screen flex flex-col items-center py-16">
       <div className={`w-full max-w-2xl flex flex-col items-center`}>
         <button
           onClick={() => navigate("/resume")}

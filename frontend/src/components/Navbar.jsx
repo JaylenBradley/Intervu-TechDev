@@ -8,6 +8,7 @@ import { AiFillHome } from "react-icons/ai";
 import { FaMapSigns, FaFileAlt, FaRobot } from "react-icons/fa";
 import { MdWork } from "react-icons/md";
 import logo from "../assets/images/intervu-logo-transparent.png";
+import { fetchUserResume } from "../services/resumeServices";
 
 const Navbar = ({ user }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -124,7 +125,7 @@ const Navbar = ({ user }) => {
               </p>
               <button
                 className="btn-primary w-full py-3 text-lg font-semibold rounded-lg cursor-pointer"
-                onClick={() => { setShowResumeModal(false); navigate("/resume/improve"); }}
+                onClick={() => { setShowResumeModal(false); navigate("/resume/upload"); }}
               >
                 Go to Resume Upload
               </button>
