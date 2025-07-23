@@ -13,6 +13,9 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import CodeMirror from "@uiw/react-codemirror";
+import { python } from "@codemirror/lang-python";
+
 
 /*Constants and helpers*/
 const INDENT_WIDTH = 48;
@@ -42,6 +45,7 @@ const genId = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2);
+
 
 export function toLines(problem) {
   return problem.solution
@@ -117,6 +121,8 @@ export default function Blind75Prep({ userId }) {
   const [codeAnswer,    setCodeAnswer]    = useState("");
   const [codeLoading,   setCodeLoading]   = useState(false);
   const [codeFeedback,  setCodeFeedback]  = useState(null);  
+  const [elimCount, setElimCount] = useState(1); 
+  const [elimMode,  setElimMode]  = useState("none");  
 
   /* sensors */
   const sensors = useSensors(
@@ -148,7 +154,16 @@ export default function Blind75Prep({ userId }) {
       const data = await Promise.all(
         Array.from({ length: numQuestions }, fetchOne)
       );
-      setQuestions(data.map((p) => ({ ...p, lines: toLines(p), codeDone: false })));
+setQuestions(
+  data.map((p) => ({
+    ...p,
+    lines: toLines(p),
+    codeDone: false,
+    plainSolution: p.solution.map(
+      (l) => "    ".repeat(l.indentLevel) + l.text.trimStart()
+    ),
+  }))
+);
       setCurrent(0);
       resetStatus();
       setStep("quiz");
@@ -158,6 +173,7 @@ export default function Blind75Prep({ userId }) {
       setStep("config");
     }
   };
+
 
   /* derived helpers */
   const currentLines =
@@ -264,6 +280,20 @@ export default function Blind75Prep({ userId }) {
     setWrongLineIds(new Set());
   };
 
+  const handleTab = (e) => {
+  if (e.key === "Tab") {
+    e.preventDefault();
+    const start = e.target.selectionStart;
+    const end   = e.target.selectionEnd;
+    const newVal =
+      codeAnswer.slice(0, start) + "    " + codeAnswer.slice(end);
+    setCodeAnswer(newVal);
+    setTimeout(() => {
+      e.target.selectionStart = e.target.selectionEnd = start + 4;
+    });
+  }
+};
+
  const move = (dir) => {
   /*  handle back from code view  */
   if (dir === -1 && codeMode) {
@@ -275,6 +305,10 @@ export default function Blind75Prep({ userId }) {
   if (dir === 1 && evaluationMode && !codeMode && !questions[current].codeDone) {
     setCodeMode(true);
     setCodeAnswer("");
+    let initial = "";
+    if (elimMode === "random") initial = buildEliminatedCode("random");
+    if (elimMode === "last")   initial = buildEliminatedCode("last");
+    setCodeAnswer(initial);
     setCodeFeedback(null);
     return;
   }
@@ -287,6 +321,24 @@ export default function Blind75Prep({ userId }) {
   setCurrent((c) => c + dir);
   setCodeMode(false);
   resetStatus();
+};
+
+const buildEliminatedCode = (type) => {
+  const linesArr = [...questions[current].plainSolution];  
+
+  const n = Math.min(elimCount, linesArr.length);
+
+  if (type === "last") {
+    for (let i = 0; i < n; i++) {
+      linesArr[linesArr.length - 1 - i] = "# ???";
+    }
+  } else {                         
+    const idxs = new Set();
+    while (idxs.size < n) idxs.add(Math.floor(Math.random() * linesArr.length));
+    idxs.forEach((i) => (linesArr[i] = "# ???"));
+  }
+
+  return linesArr.join("\n");
 };
 
 const submitCode = async () => {
@@ -361,14 +413,22 @@ const submitCode = async () => {
           )}
         </div>
 
-        {/* code textarea */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <textarea
-            value={codeAnswer}
-            onChange={(e) => setCodeAnswer(e.target.value)}
-            className="w-full h-60 border border-app-primary rounded-lg p-3 font-mono text-sm bg-app-background"
-            placeholder="Paste / write your full solution here…"
-          />
+        {/* code editor */}
+<div className="bg-white rounded-xl shadow-lg p-6 space-y-4">
+  <CodeMirror
+    value={codeAnswer}
+    height="240px"
+    basicSetup={{
+      lineNumbers: true,
+      highlightActiveLine: false,
+      indentWithTab: true,
+    }}
+    extensions={[python()]}
+    onChange={(val) => setCodeAnswer(val)}
+    theme="light"
+    className="border border-app-primary rounded-lg"
+  />
+
           <div className="flex gap-4 mt-4">
             <button
               onClick={submitCode}
@@ -414,53 +474,106 @@ const submitCode = async () => {
 }
   if (step === "config") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-app-background py-16">
-        <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-lg">
-          <h1 className="text-2xl font-bold text-app-primary mb-6 text-center">
-            Blind 75 Reorder Prep
-          </h1>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              startQuiz();
-            }}
-            className="space-y-4"
+       <div className="min-h-screen flex items-center justify-center bg-app-background py-16">
+    <div className="bg-white shadow-xl rounded-2xl w-full max-w-lg p-10">
+      {/* title */}
+      <h1 className="text-center text-3xl font-extrabold text-app-primary mb-8">
+        Blind&nbsp;75 Reorder Prep
+      </h1>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          startQuiz();
+        }}
+        className="space-y-6"
+      >
+        {/* Question count – dropdown (original style) */}
+        <div>
+          <label className="block mb-1 font-medium text-app-text">
+            Number of Questions
+          </label>
+          <select
+            value={numQuestions}
+            onChange={(e) => setNumQuestions(parseInt(e.target.value))}
+            className="w-full px-3 py-2 border border-app-primary rounded-lg focus:outline-none bg-app-background text-app-text"
           >
-            <div>
-              <label className="block mb-2 font-medium text-app-text">
-                Number of Questions
-              </label>
-              <select
-                value={numQuestions}
-                onChange={(e) => setNumQuestions(parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-app-primary rounded-lg focus:outline-none bg-app-background text-app-text"
-              >
-                <option value={3}>3</option>
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-              </select>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="evalMode"
-                checked={evaluationMode}
-                onChange={(e) => setEvaluationMode(e.target.checked)}
-                className="h-4 w-4 text-app-primary"
-              />
-              <label htmlFor="evalMode" className="font-medium text-app-text">
-                Evaluation mode (write code after each reorder)
-              </label>
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-app-primary text-white py-3 rounded-lg font-semibold hover:bg-opacity-90"
-            >
-              Start
-            </button>
-          </form>
+            <option value={3}>3</option>
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+          </select>
         </div>
-      </div>
+
+        {/* Evaluation‑mode toggle */}
+        <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3">
+          <label htmlFor="evalMode" className="font-medium text-app-text">
+            Evaluation mode
+            <br />
+            <span className="text-xs text-gray-500">
+              (write code after each reorder)
+            </span>
+          </label>
+
+          {/* fancy switch */}
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              id="evalMode"
+              type="checkbox"
+              checked={evaluationMode}
+              onChange={(e) => setEvaluationMode(e.target.checked)}
+              className="sr-only peer"
+            />
+            <div
+              className="w-11 h-6 bg-gray-300 rounded-full
+                         peer-focus:outline-none
+                         peer-checked:bg-app-primary
+                         after:absolute after:start-1 after:top-1 after:bg-white
+                         after:h-4 after:w-4 after:rounded-full after:transition-all
+                         peer-checked:after:translate-x-full"
+            />
+          </label>
+        </div>
+
+        {/* Auto‑blank lines */}
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <label className="block font-medium text-app-text mb-2">
+            Auto‑blank lines in solution
+          </label>
+          <div className="flex flex-wrap items-center gap-3">
+            <select
+              value={elimMode}
+              onChange={(e) => setElimMode(e.target.value)}
+              className="px-3 py-2 border rounded-lg bg-white text-app-text focus:outline-none"
+            >
+              <option value="none">Off</option>
+              <option value="random">Random N</option>
+              <option value="last">Last N</option>
+            </select>
+
+            <input
+              type="number"
+              min={1}
+              max={99}
+              disabled={elimMode === "none"}
+              value={elimCount}
+              onChange={(e) => setElimCount(e.target.value)} 
+              className="w-20 px-3 py-2 border rounded-lg bg-white text-app-text
+                         focus:outline-none disabled:opacity-50"
+            />
+            <span className="text-sm text-gray-500">lines</span>
+          </div>
+        </div>
+
+        {/* Start button */}
+        <button
+          type="submit"
+          className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer w-full"
+        >
+          Start Practice
+        </button>
+      </form>
+    </div>
+  </div>
     );
   }
 
