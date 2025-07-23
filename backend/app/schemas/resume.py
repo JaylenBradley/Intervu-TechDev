@@ -27,3 +27,10 @@ class ResumeImproveResponse(BaseModel):
 
 class ResumeFeedbackResponse(BaseModel):
     feedback: str
+
+class ResumeTailorRequest(BaseModel):
+    user_id: int
+    job_description: str
+
+class ResumeTailorResponse(BaseModel):
+    tailored_resume: str

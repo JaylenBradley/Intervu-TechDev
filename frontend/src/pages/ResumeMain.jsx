@@ -3,6 +3,8 @@ import { FaFilePen } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { fetchUserResume } from "../services/resumeServices";
+import { tailorResumeToJobDescription } from "../services/resumeServices";
+import { useRef } from "react";
 
 const ResumeMain = ({ user }) => {
   const navigate = useNavigate();
@@ -11,6 +13,12 @@ const ResumeMain = ({ user }) => {
   const [improvedResume, setImprovedResume] = useState("");
   const [improving, setImproving] = useState(false);
   const [improveError, setImproveError] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
+  const [tailoredResume, setTailoredResume] = useState("");
+  const [tailorLoading, setTailorLoading] = useState(false);
+  const [tailorError, setTailorError] = useState("");
+  const [showTailor, setShowTailor] = useState(false);
+  const jobDescRef = useRef();
 
   useEffect(() => {
     const loadResume = async () => {
@@ -42,6 +50,20 @@ const ResumeMain = ({ user }) => {
       setImproveError("Error improving resume. Please try again.");
     } finally {
       setImproving(false);
+    }
+  };
+
+  const handleTailorResume = async () => {
+    setTailorLoading(true);
+    setTailorError("");
+    setTailoredResume("");
+    try {
+      const data = await tailorResumeToJobDescription(user.id, jobDescription);
+      setTailoredResume(data.tailored_resume);
+    } catch (err) {
+      setTailorError("Error tailoring resume. Please try again.");
+    } finally {
+      setTailorLoading(false);
     }
   };
 
@@ -133,45 +155,36 @@ const ResumeMain = ({ user }) => {
       <div className="w-full max-w-2xl border-t-2 border-app-primary mb-12"></div>
 
       <div className="flex flex-col md:flex-row gap-8 justify-center">
-        <div
-          className="bg-white rounded-xl shadow-lg p-8 w-80 border-2 border-app-primary
-          hover:scale-105 transition-transform flex flex-col items-center"
-        >
+        {/* Build Resume Card */}
+        <div className="bg-white rounded-xl shadow-lg p-8 w-80 border-2 border-app-primary hover:scale-105 transition-transform flex flex-col items-center">
           <FaFilePen className="text-5xl mb-4" />
           <h2 className="text-2xl font-bold text-app-primary mb-2">Build Resume</h2>
           <p className="text-app-text text-center mb-4">
             Improve your uploaded resume with AI-powered suggestions and formatting.
           </p>
-          <button
-            className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
-            onClick={() => navigate("/resume/improve")}
-          >
-            Improve Resume
-          </button>
+          <button className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer" onClick={() => navigate("/resume/improve")}>Improve Resume</button>
           {improveError && <div className="text-red-600 mt-2">{improveError}</div>}
           {improvedResume && (
-            <textarea
-              className="w-full h-72 border-2 border-app-primary rounded-xl p-5 mt-4 text-lg"
-              value={improvedResume}
-              readOnly
-            />
+            <textarea className="w-full h-72 border-2 border-app-primary rounded-xl p-5 mt-4 text-lg" value={improvedResume} readOnly />
           )}
         </div>
-        <div
-          className="bg-white rounded-xl shadow-lg p-8 w-80 border-2 border-app-primary
-          hover:scale-105 transition-transform flex flex-col items-center"
-        >
+        {/* Analyze Resume Card */}
+        <div className="bg-white rounded-xl shadow-lg p-8 w-80 border-2 border-app-primary hover:scale-105 transition-transform flex flex-col items-center">
           <FaSearch className="text-5xl mb-4" />
           <h2 className="text-2xl font-bold text-app-primary mb-2">Analyze Resume</h2>
           <p className="text-app-text text-center mb-4">
             Get instant feedback and optimization tips for your uploaded resume
           </p>
-          <button
-            className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
-            onClick={() => navigate("/resume/feedback")}
-          >
-            Analyze Resume
-          </button>
+          <button className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer" onClick={() => navigate("/resume/feedback")}>Analyze Resume</button>
+        </div>
+        {/* Tailor Resume Card */}
+        <div className="bg-white rounded-xl shadow-lg p-8 w-80 border-2 border-app-primary hover:scale-105 transition-transform flex flex-col items-center">
+          <FaFilePen className="text-5xl mb-4 rotate-45" />
+          <h2 className="text-2xl font-bold text-app-primary mb-2">Tailor Resume</h2>
+          <p className="text-app-text text-center mb-4">
+            Input a job description and get a version of your resume tailored for that role.
+          </p>
+          <button className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer mb-2" onClick={() => navigate("/resume/tailor")}>Tailor Resume</button>
         </div>
       </div>
     </div>

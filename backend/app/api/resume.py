@@ -2,9 +2,9 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Form
 from starlette.responses import FileResponse
 from sqlalchemy.orm import Session
 from app.core.database import SessionLocal
-from app.schemas.resume import ResumeImproveResponse, ResumeFeedbackResponse, ResumeCreate, ResumeResponse
+from app.schemas.resume import ResumeImproveResponse, ResumeFeedbackResponse, ResumeCreate, ResumeResponse, ResumeTailorRequest, ResumeTailorResponse
 from app.crud.resume import upsert_resume, get_resume
-from app.core.prompts import improve_resume_prompt, feedback_resume_prompt, parse_resume_prompt
+from app.core.prompts import improve_resume_prompt, feedback_resume_prompt, parse_resume_prompt, tailor_resume_prompt
 from app.utils.save_resume import save_text_as_pdf, save_text_as_docx
 from PyPDF2 import PdfReader
 import os
@@ -125,6 +125,32 @@ async def feedback_resume(user_id: int, db: Session = Depends(get_db)):
         contents=prompt
     )
     return {"feedback": response.text or ""}
+
+@router.post("/resume/tailor", response_model=ResumeTailorResponse)
+async def tailor_resume(request: ResumeTailorRequest, db: Session = Depends(get_db)):
+    db_obj = get_resume(db, request.user_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Resume not found")
+    import tempfile
+    from PyPDF2 import PdfReader
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        tmp.write(db_obj.file_data)
+        tmp.flush()
+        tmp_path = tmp.name
+    try:
+        reader = PdfReader(tmp_path)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text() or ""
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Resume file is corrupted or not a valid PDF. Please re-upload.")
+    prompt = tailor_resume_prompt(text, request.job_description)
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        config=types.GenerateContentConfig(temperature=0.2),
+        contents=prompt
+    )
+    return {"tailored_resume": response.text}
 
 @router.get("/resume/export")
 async def export_resume(user_id: int, format: str = "pdf", db: Session = Depends(get_db)):

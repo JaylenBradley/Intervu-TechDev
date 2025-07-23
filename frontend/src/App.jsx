@@ -22,6 +22,7 @@ import AiInterviewerMain from "./pages/AiInterviewerMain.jsx";
 import TechnicalPrep from "./pages/TechnicalPrep.jsx";
 import ChangeResume from "./pages/ChangeResume";
 import UploadResume from "./pages/UploadResume.jsx";
+import TailorResume from "./pages/TailorResume.jsx";
 
 const App = () => {
   const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
@@ -117,6 +118,7 @@ const App = () => {
         <Route path="/resume/feedback" element={<ResumeFeedback user={user}/>} />
         <Route path="/resume/change" element={<ChangeResume user={user}/>} />
         <Route path="/resume/upload" element={<UploadResume user={user}/>} />
+        <Route path="/resume/tailor" element={<TailorResume user={user}/>} />
         <Route path="/dashboard" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <JobDashboard user={user}/>
