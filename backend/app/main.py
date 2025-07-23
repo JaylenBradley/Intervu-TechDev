@@ -1,12 +1,16 @@
-
 import os
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(os.path.dirname(__file__), "../app/gen-lang-client-0080872580-2e4a0982c79c.json")
+
+# Use the secret path in production, fallback to local path in development
+if os.path.exists("/etc/secrets/google-application-credentials.json"):
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/etc/secrets/google-application-credentials.json"
+else:
+    local_path = os.path.join(os.path.dirname(__file__), "../app/gen-lang-client-0080872580-2e4a0982c79c.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = local_path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import roadmap, videos, questionnaire, user, jobs, resume, interview, behavioral_prep, blind_75
 from app.core.database import Base, engine
-from dotenv import load_dotenv
 
 app = FastAPI(
     title="Intervu API",
@@ -16,7 +20,12 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:5174"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "https://useintervu.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

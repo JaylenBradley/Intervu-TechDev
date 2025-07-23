@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchQuestionnaire } from "../services/questionnaireServices";
 
-const TechnicalInterview = ({ user }) => {
+const TechnicalPrep = ({ user }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -277,8 +277,9 @@ const TechnicalInterview = ({ user }) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-app-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-opacity-90 transition-colors disabled:opacity-50"
+              className="w-full bg-app-primary btn-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-opacity-90 transition-colors disabled:opacity-50"
             >
+              {loading ? <div className="loader-md mr-2"></div> : null}
               {loading ? "Generating Questions..." : "Generate Questions"}
             </button>
           </form>
@@ -396,6 +397,7 @@ const TechnicalInterview = ({ user }) => {
               disabled={loading || !userAnswer.trim()}
               className="bg-app-primary text-white py-2 px-6 rounded-lg font-semibold hover:bg-opacity-90 transition-colors disabled:opacity-50"
             >
+              {loading ? <div className="loader-md mr-2"></div> : null}
               {loading ? "Evaluating..." : "Submit Answer"}
             </button>
             
@@ -475,4 +477,4 @@ const TechnicalInterview = ({ user }) => {
   );
 };
 
-export default TechnicalInterview; 
+export default TechnicalPrep;
