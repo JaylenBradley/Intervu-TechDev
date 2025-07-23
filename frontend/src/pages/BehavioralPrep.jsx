@@ -284,9 +284,9 @@ const BehavioralPrep = ({ user }) => {
           </div>
           <div className="flex gap-6">
             <div className="min-w-[160px] flex-1">
-              <label className="block mb-2 font-medium">Seniority</label>
+              <label className="block mb-2 font-medium ">Seniority</label>
               <select name="seniority" value={form.seniority} onChange={handleChange}
-                className="w-full px-4 py-3 border border-app-primary rounded-lg bg-app-background text-base">
+                className="w-full px-4 py-3 border border-app-primary rounded-lg bg-app-background text-base cursor-pointer">
                 <option value="Intern">Intern</option>
                 <option value="Junior">Junior</option>
                 <option value="Mid">Mid</option>
@@ -298,7 +298,7 @@ const BehavioralPrep = ({ user }) => {
             <div className="min-w-[160px] flex-1">
               <label className="block mb-2 font-medium">Number of Questions</label>
               <select name="num_questions" value={form.num_questions} onChange={handleChange}
-                className="w-full px-4 py-3 border border-app-primary rounded-lg bg-app-background text-base">
+                className="w-full px-4 py-3 border border-app-primary rounded-lg bg-app-background text-base cursor-pointer">
                 {[...Array(10)].map((_, i) => (
                   <option key={i+1} value={i+1}>{i+1}</option>
                 ))}
@@ -307,7 +307,7 @@ const BehavioralPrep = ({ user }) => {
             <div className="min-w-[160px] flex-1">
               <label className="block mb-2 font-medium">Difficulty</label>
               <select name="difficulty" value={form.difficulty} onChange={handleChange}
-                className="w-full px-4 py-3 border border-app-primary rounded-lg bg-app-background text-base">
+                className="w-full px-4 py-3 border border-app-primary rounded-lg bg-app-background text-base cursor-pointer">
                 <option value="Easy">Easy</option>
                 <option value="Medium">Medium</option>
                 <option value="Hard">Hard</option>
@@ -316,7 +316,7 @@ const BehavioralPrep = ({ user }) => {
           </div>
           <button
             type="submit"
-            className={`btn-primary w-full h-12 text-lg font-semibold py-2 rounded-lg flex items-center justify-center
+            className={`btn-primary w-full h-12 text-lg font-semibold py-2 rounded-lg flex items-center justify-center cursor-pointer
               ${generating ? "bg-app-secondary opacity-60 cursor-not-allowed" : ""}`}
             disabled={generating}
           >
@@ -333,7 +333,7 @@ const BehavioralPrep = ({ user }) => {
             <select
               value={selectedIdx}
               onChange={e => { setSelectedIdx(Number(e.target.value)); setAnswer(""); setFeedback(""); }}
-              className="flex-1 px-1 py-1 ml-1 mb-2 border border-app-primary rounded-lg bg-app-background"
+              className="flex-1 px-1 py-1 ml-1 mb-2 border border-app-primary rounded-lg bg-app-background cursor-pointer"
             >
               {questions.map((q, i) => (
                 <option key={i} value={i}>{`Q${i + 1}`}</option>
@@ -342,7 +342,7 @@ const BehavioralPrep = ({ user }) => {
             <div className="mb-2 p-3 bg-app-background rounded border">{questions[selectedIdx]}</div>
             <div className="flex items-center gap-2 mt-4 mb-2">
               <button type="button" onClick={handleRecord}
-                className={`rounded-full p-3 border border-app-primary flex items-center justify-center
+                className={`rounded-full p-3 border border-app-primary flex items-center justify-center cursor-pointer
                   ${recording ? "bg-app-background text-app-primary" : "bg-app-background text-app-primary"}`}>
                 {recording ? <FaMicrophone /> : <FaMicrophoneSlash />}
               </button>
@@ -359,7 +359,7 @@ const BehavioralPrep = ({ user }) => {
               />
             </div>
             {loading && <div className="loader mb-4"></div>}
-            <button className={`btn w-full h-12 text-lg font-semibold py-2 rounded-lg mt-3 mb-4 flex items-center justify-center
+            <button className={`btn w-full h-12 text-lg font-semibold py-2 rounded-lg mt-3 mb-4 flex items-center justify-center cursor-pointer
               ${loading ? "bg-app-secondary opacity-60 cursor-not-allowed" : ""}`}
               onClick={handleSubmitAnswer}
               disabled={loading || !answer}
@@ -373,7 +373,7 @@ const BehavioralPrep = ({ user }) => {
                 {renderFeedback(feedback)}
                 <div className="flex gap-2 mt-2">
                   <button
-                    className="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 btn-primary"
+                    className="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 btn-primary cursor-pointer"
                     onClick={() => speakFeedback(formatFeedbackForSpeech(feedback))}
                     type="button"
                     disabled={isPlaying}
@@ -383,7 +383,7 @@ const BehavioralPrep = ({ user }) => {
                     </span> Play Feedback
                   </button>
                   <button
-                    className="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 btn-danger"
+                    className="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 btn-danger cursor-pointer"
                     onClick={stopFeedbackSpeech}
                     type="button"
                     disabled={!isPlaying}
@@ -395,7 +395,7 @@ const BehavioralPrep = ({ user }) => {
                 </div>
               </div>
             )}
-            <button className="btn w-full h-12 text-lg font-semibold py-2 rounded-lg mt-3" onClick={() => window.location.href = "/"}>Done</button>
+            <button className="btn w-full h-12 text-lg font-semibold py-2 rounded-lg mt-3 cursor-pointer" onClick={() => window.location.href = "/"}>Done</button>
           </div>
         )}
       </div>

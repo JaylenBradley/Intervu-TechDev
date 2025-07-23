@@ -1,10 +1,10 @@
-# backend/app/schemas/questionnaire.py
 from pydantic import BaseModel
 from typing import List, Optional
 
 class QuestionnaireBase(BaseModel):
     career_goal: str
     major: List[str]
+    minor: Optional[List[str]] = None
     education_level: str
     interests: List[str]
     institution: str

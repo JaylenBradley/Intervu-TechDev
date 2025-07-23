@@ -7,6 +7,7 @@ import { generateRoadmap } from "../services/roadmapServices";
 const initialState = {
   career_goal: "",
   major: "",
+  minor: "",
   education_level: "",
   interests: "",
   institution: "",
@@ -40,6 +41,7 @@ const Questionnaire = ({ onComplete, user }) => {
         setForm({
           ...data,
         major: (data.major || []).join(", "),
+        minor: (data.minor || []).join(", "),
         interests: (data.interests || []).join(", "),
         target_companies: (data.target_companies || []).join(", "),
         skills: (data.skills || []).join(", "),
@@ -92,6 +94,7 @@ const Questionnaire = ({ onComplete, user }) => {
         ...form,
         user_id: user.id,
         major: toArray(form.major),
+        minor: toArray(form.minor),
         interests: toArray(form.interests),
         target_companies: toArray(form.target_companies),
         skills: toArray(form.skills),
@@ -181,6 +184,16 @@ const Questionnaire = ({ onComplete, user }) => {
               className="w-full px-3 py-2 border border-app-primary rounded-lg focus:outline-none bg-app-background text-app-text"
               placeholder="Major(s) - (Ex: Computer Science, Statistics, Business)"
               required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-medium">Minor</label>
+            <input
+              name="minor"
+              value={form.minor}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-app-primary rounded-lg focus:outline-none bg-app-background text-app-text"
+              placeholder="Minor(s) - (Ex: Mathematics, Economics, Psychology)"
             />
           </div>
           <div>

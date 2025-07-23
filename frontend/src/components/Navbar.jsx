@@ -7,7 +7,7 @@ import { RiQuestionnaireFill } from "react-icons/ri";
 import { AiFillHome } from "react-icons/ai";
 import { FaMapSigns, FaFileAlt, FaRobot } from "react-icons/fa";
 import { MdWork } from "react-icons/md";
-import logo from "../assets/images/intervu-logo.png";
+import logo from "../assets/images/intervu-logo-transparent.png";
 
 const Navbar = ({ user }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -39,7 +39,7 @@ const Navbar = ({ user }) => {
   };
 
   return (
-    <nav className="flex items-center justify-between px-6 py-3 shadow bg-app-background">
+    <nav className="flex items-center justify-between px-6 py-3 shadow bg-cyan-50">
       <div className="flex items-center min-w-0">
         <button
           className="flex items-center focus:outline-none cursor-pointer"

@@ -9,6 +9,7 @@ class Questionnaire(Base):
     user_id = Column(Integer, ForeignKey("user.id"), unique=True, nullable=False)
     career_goal = Column(String)
     major = Column(String, nullable=False)
+    minor = Column(String, nullable=True)
     education_level = Column(String)
     interests = Column(String)
     institution = Column(String)

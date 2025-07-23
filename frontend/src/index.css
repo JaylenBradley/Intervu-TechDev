@@ -2,16 +2,16 @@
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  --background: #fff8dc;
-  --primary: #06B6D4;
-  --secondary: #929292;
+  --background: #f1f5f9;
+  --primary: #38bdf8;
+  --secondary: #ecfeff;
   --accent: #ffffff;
   --text: #1F2937;
   --danger: #ef4444;
 }
 
 body {
-  background-color: var(--background);
+  @apply bg-gradient-to-br from-cyan-300 via-gray-200 to-cyan-300;
 }
 
 .bg-app-background { background-color: var(--background); }

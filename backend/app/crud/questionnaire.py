@@ -15,6 +15,7 @@ def upsert_questionnaire(db: Session, data: QuestionnaireCreate):
             **{
                 **data.dict(),
                 "major": ", ".join(data.major),
+                "minor": ", ".join(data.minor),
                 "projects": ", ".join(data.projects),
                 "experience": ", ".join(data.experience),
                 "interests": ", ".join(data.interests),
