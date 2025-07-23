@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { tailorResumeToJobDescription, fetchUserResume } from "../services/resumeServices";
+import { tailorResumeToJobDescription, fetchUserResume, exportTailoredResume } from "../services/resumeServices";
 import { useNavigate } from "react-router-dom";
 
 const TailorResume = ({ user }) => {
@@ -17,7 +17,7 @@ const TailorResume = ({ user }) => {
     const loadResume = async () => {
       if (!user || !user.id) return;
       try {
-        const data = await fetchUserResume(user.id);
+        const data = await fetchUserResume(user.id); // uses service
         // Try to reconstruct the resume as plain text from parsed_data
         if (data && data.parsed_data) {
           let text = "";
@@ -67,7 +67,7 @@ const TailorResume = ({ user }) => {
     setError("");
     setTailoredResume("");
     try {
-      const data = await tailorResumeToJobDescription(user.id, jobDescription);
+      const data = await tailorResumeToJobDescription(user.id, jobDescription); // uses service
       setTailoredResume(data.tailored_resume);
     } catch (err) {
       setError("Error tailoring resume. Please try again.");
@@ -80,11 +80,7 @@ const TailorResume = ({ user }) => {
     setExporting(true);
     setExportFormat(format);
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/resume/export?user_id=${user.id}&format=${format}`
-      );
-      if (!res.ok) throw new Error("Failed to export resume");
-      const blob = await res.blob();
+      const blob = await exportTailoredResume(user.id, format);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;

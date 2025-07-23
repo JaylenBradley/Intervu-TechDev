@@ -19,4 +19,12 @@ export async function tailorResumeToJobDescription(userId, jobDescription) {
     throw new Error("Failed to tailor resume");
   }
   return response.json();
+}
+
+export async function exportTailoredResume(userId, format) {
+  const response = await fetch(`${BASE_URL}/api/resume/export?user_id=${userId}&format=${format}`);
+  if (!response.ok) {
+    throw new Error("Failed to export tailored resume");
+  }
+  return response.blob();
 } 
