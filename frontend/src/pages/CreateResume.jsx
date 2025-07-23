@@ -1,5 +1,6 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { enhanceResume, exportResume } from "../services/resumeServices";
 
 const CreateResume = () => {
   const [file, setFile] = useState(null);
@@ -32,14 +33,7 @@ const CreateResume = () => {
     setError("");
     setEnhancedResume("");
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/resume/improve`, {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) throw new Error("Failed to enhance resume");
-      const data = await res.json();
+      const data = await enhanceResume(file);
       setEnhancedResume(data.improved_resume);
     } catch (err) {
       setError("Error enhancing resume. Please try again.");
@@ -56,15 +50,7 @@ const CreateResume = () => {
     setExporting(true);
     setError("");
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("format", format);
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/resume/export`, {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) throw new Error("Failed to export resume");
-      const blob = await res.blob();
+      const blob = await exportResume(file, format);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;

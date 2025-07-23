@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchRoadmap, generateRoadmap } from "../services/roadmapServices";
 import { parseRoadmapJson } from "../utils/parseRoadmapJson.js";
 
-const Roadmap = ({ user, onRoadmapGenerated }) => {
+const SkillGapRoadmap = ({ user, onRoadmapGenerated }) => {
   const [roadmap, setRoadmap] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -59,7 +59,7 @@ const Roadmap = ({ user, onRoadmapGenerated }) => {
             disabled={generating}
           >
             {generating ? <div className="loader-md mr-2"></div> : null}
-            {generating ? "Generating..." : "Generate Roadmap"}
+            {generating ? "Generating..." : "Generate GeneralRoadmap"}
           </button>
         </div>
       </div>
@@ -155,4 +155,4 @@ const Roadmap = ({ user, onRoadmapGenerated }) => {
   );
 };
 
-export default Roadmap;
+export default SkillGapRoadmap;

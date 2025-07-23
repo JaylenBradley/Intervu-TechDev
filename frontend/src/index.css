@@ -108,7 +108,7 @@ body {
   color: var(--primary);
 }
 .job-edit-button:hover {
-  color: var(--secondary);
+  color: var(--text);
 }
 
 .backdrop-blur-sm {

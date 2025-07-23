@@ -1,5 +1,6 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { getResumeFeedback } from "../services/resumeServices";
 
 // Helper to parse raw feedback string into structured data
 function parseFeedback(raw) {
@@ -61,67 +62,30 @@ const ResumeFeedback = () => {
       setError("Please select a file first.");
       return;
     }
-    
-    // Prevent multiple simultaneous requests
-    if (loading) {
-      return;
-    }
-    
+    if (loading) return;
+
     setLoading(true);
     setError("");
     setFeedback([]);
     setRawFeedback("");
-    
-    console.log("Starting feedback request...");
-    
+
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/resume/feedback`, {
-        method: "POST",
-        body: formData,
-      });
-      console.log("Response status:", res.status);
-      console.log("Response ok:", res.ok);
-      console.log("Response headers:", Object.fromEntries(res.headers.entries()));
-      
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Response not ok:", errorText);
-        throw new Error("Failed to get feedback");
-      }
-      
-      const data = await res.json();
-      console.log("Raw API response:", data); // Debug log
-      console.log("Feedback type:", typeof data.feedback); // Debug log
-      console.log("Feedback length:", data.feedback?.length); // Debug log
-      
-      if (!data.feedback) {
-        console.error("No feedback in response:", data);
-        throw new Error("No feedback received from server");
-      }
-      
+      const data = await getResumeFeedback(file);
+      if (!data.feedback) throw new Error("No feedback received from server");
       let feedbackArr = [];
       if (typeof data.feedback === "string" && data.feedback.trim().startsWith("[")) {
-        // Try to parse as JSON array
         try {
           feedbackArr = JSON.parse(data.feedback);
-          console.log("Parsed as JSON array:", feedbackArr); // Debug log
         } catch {
           feedbackArr = [];
-          console.log("Failed to parse as JSON"); // Debug log
         }
       }
       if (feedbackArr.length > 0 && feedbackArr[0].bullet) {
-        console.log("Setting structured feedback"); // Debug log
         setFeedback(feedbackArr);
       } else {
-        console.log("Setting raw feedback"); // Debug log
         setRawFeedback(data.feedback);
       }
     } catch (err) {
-      console.error("Error in handleGetFeedback:", err); // Debug log
-      console.error("Error stack:", err.stack);
       setError("Error getting feedback. Please try again.");
     } finally {
       setLoading(false);

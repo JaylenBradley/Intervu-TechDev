@@ -1,24 +1,25 @@
-import {Routes, Route, useNavigate} from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { useEffect, useState } from "react";
 import { auth } from "./services/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { fetchQuestionnaireStatus, getUserByFirebaseId } from "./services/userServices";
 import { fetchRoadmap } from "./services/roadmapServices";
+import AiInterviewerMain from "./pages/AiInterviewerMain.jsx";
 import AuthForm from "./containers/AuthForm.jsx";
+import GeneralRoadmap from "./pages/GeneralRoadmap.jsx";
 import BehavioralPrep from "./pages/BehavioralPrep.jsx";
-import JobDashboard from "./pages/JobDashboard.jsx";
+import Blind75Prep from "./pages/Blind75Prep.jsx";
+import CreateResume from "./pages/CreateResume.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
 import Footer from "./components/Footer.jsx";
 import Home from "./pages/Home.jsx";
-import Blind75Prep from "./pages/Blind75Prep.jsx";
+import JobDashboard from "./pages/JobDashboard.jsx";
 import Navbar from "./components/Navbar.jsx";
 import ProtectedRoute from "./containers/ProtectedRoute.jsx";
 import Questionnaire from "./pages/Questionnaire.jsx";
-import Roadmap from "./pages/Roadmap.jsx";
 import ResumeMain from "./pages/ResumeMain.jsx";
-import CreateResume from "./pages/CreateResume.jsx";
 import ResumeFeedback from "./pages/ResumeFeedback.jsx";
-import AiInterviewerMain from "./pages/AiInterviewerMain.jsx";
+import SkillGapRoadmap from "./pages/SkillGapRoadmap.jsx";
 import TechnicalPrep from "./pages/TechnicalPrep.jsx";
 
 const App = () => {
@@ -105,9 +106,16 @@ const App = () => {
             <Questionnaire onComplete={() => setQuestionnaireComplete(true)} user={user}/>
           </ProtectedRoute>
         }/>
+
+
         <Route path="/roadmap" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <Roadmap user={user} onRoadmapGenerated={() => setHasRoadmap(true)}/>
+            <GeneralRoadmap user={user} onRoadmapGenerated={() => setHasRoadmap(true)}/>
+          </ProtectedRoute>
+        }/>
+        <Route path="/skillgap-roadmap" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <SkillGapRoadmap user={user} onRoadmapGenerated={() => setHasRoadmap(true)}/>
           </ProtectedRoute>
         }/>
         <Route path="/resume" element={
@@ -115,8 +123,16 @@ const App = () => {
             <ResumeMain />
           </ProtectedRoute>
         }/>
-        <Route path="/resume/improve" element={<CreateResume/>}/>
-        <Route path="/resume/feedback" element={<ResumeFeedback/>}/>
+        <Route path="/resume/improve" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <CreateResume />
+          </ProtectedRoute>
+        }/>
+        <Route path="/resume/feedback" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <ResumeFeedback />
+          </ProtectedRoute>
+        }/>
         <Route path="/dashboard" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <JobDashboard user={user}/>

@@ -53,7 +53,7 @@ class TestRoadmapAPI(unittest.TestCase):
             
             self.assertEqual(response.status_code, 404)
             data = response.json()
-            self.assertEqual(data["detail"], "Roadmap not found")
+            self.assertEqual(data["detail"], "GeneralRoadmap not found")
     
     def test_roadmap_with_complex_questionnaire_data(self):
         """Test roadmap generation with complex questionnaire data"""

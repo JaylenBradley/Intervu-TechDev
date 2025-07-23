@@ -32,5 +32,5 @@ def generate_and_store_roadmap(user_id: int, db: Session = Depends(get_db)):
 def get_roadmap_endpoint(user_id: int, db: Session = Depends(get_db)):
     db_obj = get_roadmap(db, user_id)
     if not db_obj:
-        raise HTTPException(status_code=404, detail="Roadmap not found")
+        raise HTTPException(status_code=404, detail="GeneralRoadmap not found")
     return RoadmapResponse(roadmap_json=db_obj.roadmap_json)
