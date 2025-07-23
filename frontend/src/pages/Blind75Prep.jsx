@@ -14,7 +14,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-
+/*───────────────────── Constants & helpers ─────────────────────*/
 const INDENT_WIDTH = 48;
 const MAX_INDENT = 4;
 const COMPLEXITIES = [
@@ -27,6 +27,12 @@ const COMPLEXITIES = [
   "O(2^n)",
   "O(n!)",
 ];
+const APPROACHES = [
+  "Two Pointers", "Sliding Window", "Binary Search",
+  "BFS", "Dynamic Programming", "Backtracking", "Tree",
+  "Greedy", "Topological Sort", "Graph",
+  "Heap", "Stack", "Intervals", "Linked List", "Array & Hashing",
+];
 const diffClasses = {
   Easy: "bg-green-100 text-green-800",
   Medium: "bg-yellow-100 text-yellow-800",
@@ -37,21 +43,30 @@ const genId = () =>
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2);
 
-function toLines(problem) {
+export function toLines(problem) {
   return problem.solution
     .map((l, idx) => ({
       id: genId(),
       order: idx,
       text: l.text.trimStart(),
       indentLevel: l.indentLevel,
-      userIndent: Math.floor(Math.random() * (MAX_INDENT + 1)),
     }))
     .sort(() => Math.random() - 0.5);
 }
 
-function SortableLine({ line }) {
-  const { setNodeRef, attributes, listeners, transform, transition, isDragging } =
-    useSortable({ id: line.id, data: { indent: line.userIndent } });
+const isLineCorrect = (line, idx) =>
+  line.userIndent === line.indentLevel && line.order === idx;
+
+/*───────────────────── Sortable line component ───────────────────*/
+function SortableLine({ line, isWrong, highlightCorrect }) {
+  const {
+    setNodeRef,
+    attributes,
+    listeners,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: line.id, data: { indent: line.userIndent } });
 
   const left = line.userIndent * INDENT_WIDTH;
   const style = {
@@ -68,37 +83,64 @@ function SortableLine({ line }) {
       {...attributes}
       {...listeners}
       style={style}
-      className="flex items-center bg-gray-100 rounded p-2 cursor-grab select-none"
+      className={`flex items-center rounded p-2 cursor-grab select-none ${
+        highlightCorrect ? "bg-green-100" : isWrong ? "bg-red-200" : "bg-gray-100"
+      }`}
     >
-      <pre className="font-mono text-sm whitespace-pre overflow-x-auto" style={{ tabSize: 4 }}>
+      <pre
+        className="font-mono text-sm whitespace-pre overflow-x-auto"
+        style={{ tabSize: 4 }}
+      >
         {line.text}
       </pre>
     </div>
   );
 }
 
-export default function Blind75Prep() {
+/*───────────────────── Main component ───────────────────────────*/
+export default function Blind75Prep({ userId }) {
+  /* state */
   const [step, setStep] = useState("config");
   const [numQuestions, setNumQuestions] = useState(3);
   const [questions, setQuestions] = useState([]);
   const [current, setCurrent] = useState(0);
   const [statusLines, setStatusLines] = useState(null);
-  const [statusCx, setStatusCx] = useState(null); 
+  const [statusCx, setStatusCx] = useState(null);
+  const [wrongDetail, setWrongDetail] = useState(null); 
   const [timeSel, setTimeSel] = useState("");
   const [spaceSel, setSpaceSel] = useState("");
+  const [approachSel, setApproachSel] = useState("");
+  const [wrongLineIds, setWrongLineIds] = useState(new Set());
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+  /* sensors */
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } })
+  );
 
+  /* helper to reset status for a new question */
+  const resetStatus = () => {
+    setStatusLines(null);
+    setStatusCx(null);
+    setTimeSel("");
+    setSpaceSel("");
+    setApproachSel("");
+    setWrongLineIds(new Set());
+    setWrongDetail(null); 
+  };
+
+  /* fetch quiz questions */
   const startQuiz = async () => {
     setStep("loading");
     try {
       const BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
       const fetchOne = async () => {
         const r = await fetch(`${BASE}/api/blind75/random`);
-        if (!r.ok) throw new Error();
+        if (!r.ok) throw new Error("Bad response");
         return r.json();
       };
-      const data = await Promise.all(Array.from({ length: numQuestions }, fetchOne));
+      const data = await Promise.all(
+        Array.from({ length: numQuestions }, fetchOne)
+      );
       setQuestions(data.map((p) => ({ ...p, lines: toLines(p) })));
       setCurrent(0);
       resetStatus();
@@ -110,15 +152,10 @@ export default function Blind75Prep() {
     }
   };
 
-  const resetStatus = () => {
-    setStatusLines(null);
-    setStatusCx(null);
-    setTimeSel("");
-    setSpaceSel("");
-  };
+  /* derived helpers */
+  const currentLines =
+    step === "quiz" ? questions[current]?.lines ?? [] : [];
 
-  /* helpers */
-  const currentLines = step === "quiz" ? questions[current]?.lines ?? [] : [];
   const updateLines = (lines) =>
     setQuestions((qs) => {
       const cp = [...qs];
@@ -126,7 +163,13 @@ export default function Blind75Prep() {
       return cp;
     });
 
-  /* drag end */
+  /* drag handling */
+  const handleDragStart = () => {
+    // Clear wrong highlights as soon as the user interacts again
+    setWrongLineIds(new Set());
+    setStatusLines(null);
+  };
+
   const handleDragEnd = ({ active, over, delta }) => {
     if (!active || !over) return;
     let lines = [...currentLines];
@@ -136,31 +179,80 @@ export default function Blind75Prep() {
       lines = arrayMove(lines, oldIdx, newIdx);
     }
     const startIndent = active.data.current?.indent ?? 0;
-    const newIndent = Math.max(0, Math.min(MAX_INDENT, startIndent + Math.round(delta.x / INDENT_WIDTH)));
-    lines = lines.map((l) => (l.id === active.id ? { ...l, userIndent: newIndent } : l));
+    const newIndent = Math.max(
+      0,
+      Math.min(MAX_INDENT, startIndent + Math.round(delta.x / INDENT_WIDTH))
+    );
+    lines = lines.map((l) =>
+      l.id === active.id ? { ...l, userIndent: newIndent } : l
+    );
     updateLines(lines);
   };
 
-  /* checking logic  */
-  const checkLines = () => {
-    let badIndent = false,
-      badOrder = false;
-    currentLines.forEach((l, idx) => {
-      if (l.userIndent !== l.indentLevel) badIndent = true;
-      if (l.order !== idx) badOrder = true;
-    });
-    setStatusLines(!badIndent && !badOrder ? "correct" : "incorrect");
+  /* code order + indent check */
+  const checkLines = async () => {
+      let indentWrong = false;
+  let orderWrong  = false;
+
+  currentLines.forEach((l, idx) => {
+    if (l.userIndent !== l.indentLevel) indentWrong = true;
+    if (l.order       !== idx)          orderWrong  = true;
+  });
+
+  if (!indentWrong && !orderWrong) {
+    setStatusLines("correct");
+    setWrongDetail(null);
+    setWrongLineIds(new Set());
+    return;
+  }
+
+  setStatusLines("incorrect");
+  setWrongDetail(
+    indentWrong && orderWrong ? "both" : indentWrong ? "indent" : "order"
+  );
+  setWrongLineIds(
+    new Set(
+      currentLines
+        .filter((l, idx) => l.userIndent !== l.indentLevel || l.order !== idx)
+        .map((l) => l.id)
+    )
+  );
+
+    /* POST /wrong */
+    try {
+      const BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+      await fetch(`${BASE}/api/blind75/wrong`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: userId,
+          title: questions[current].title,
+          problem_type: questions[current].type,
+          difficulty: questions[current].difficulty,
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to record wrong problem", err);
+    }
   };
 
+  /* complexity check */
   const checkComplexities = () => {
     const q = questions[current];
     const good = timeSel === q.time && spaceSel === q.space;
     setStatusCx(good ? "correct" : "incorrect");
   };
 
+  const checkApproach = () => {
+    const q = questions[current];
+    const good = approachSel === q.type;
+    setStatusCx(good ? "correct" : "incorrect");
+  };
+
   const shuffleCurrent = () => {
     updateLines([...currentLines].sort(() => Math.random() - 0.5));
     setStatusLines(null);
+    setWrongLineIds(new Set());
   };
 
   const move = (dir) => {
@@ -170,11 +262,14 @@ export default function Blind75Prep() {
     resetStatus();
   };
 
+  /*───────────────────────── UI steps ─────────────────────────*/
   if (step === "config") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-app-background py-16">
         <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-lg">
-          <h1 className="text-2xl font-bold text-app-primary mb-6 text-center">Blind 75 Reorder Prep</h1>
+          <h1 className="text-2xl font-bold text-app-primary mb-6 text-center">
+            Blind 75 Reorder Prep
+          </h1>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -183,7 +278,9 @@ export default function Blind75Prep() {
             className="space-y-4"
           >
             <div>
-              <label className="block mb-2 font-medium text-app-text">Number of Questions</label>
+              <label className="block mb-2 font-medium text-app-text">
+                Number of Questions
+              </label>
               <select
                 value={numQuestions}
                 onChange={(e) => setNumQuestions(parseInt(e.target.value))}
@@ -194,7 +291,10 @@ export default function Blind75Prep() {
                 <option value={10}>10</option>
               </select>
             </div>
-            <button type="submit" className="w-full bg-app-primary text-white py-3 rounded-lg font-semibold hover:bg-opacity-90">
+            <button
+              type="submit"
+              className="w-full bg-app-primary text-white py-3 rounded-lg font-semibold hover:bg-opacity-90"
+            >
               Start
             </button>
           </form>
@@ -214,7 +314,7 @@ export default function Blind75Prep() {
     );
   }
 
-  /* quiz */
+  /*──────────────────────── Quiz step ───────────────────────*/
   const q = questions[current];
   const percent = Math.round(((current + 1) / questions.length) * 100);
 
@@ -230,7 +330,10 @@ export default function Blind75Prep() {
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-app-primary h-2 rounded-full transition-all duration-300" style={{ width: `${percent}%` }} />
+            <div
+              className="bg-app-primary h-2 rounded-full transition-all duration-300"
+              style={{ width: `${percent}%` }}
+            />
           </div>
           <div className="flex justify-end text-xs text-gray-500 mt-1">
             <span>{percent}% Complete</span>
@@ -240,55 +343,169 @@ export default function Blind75Prep() {
         {/* problem card */}
         <div className="bg-white rounded-xl shadow-lg p-6 overflow-hidden">
           <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-            <h2 className="text-xl font-semibold text-app-primary mr-4 truncate">{q.title}</h2>
+            <h2 className="text-xl font-semibold text-app-primary mr-4 truncate">
+              {q.title}
+            </h2>
             <div className="flex gap-2 items-center flex-wrap">
-              <span className={`px-3 py-1 rounded-full text-sm ${diffClasses[q.difficulty] || "bg-gray-100 text-gray-800"}`}>
+              <span
+                className={`px-3 py-1 rounded-full text-sm ${
+                  diffClasses[q.difficulty] || "bg-gray-100 text-gray-800"
+                }`}
+              >
                 {q.difficulty}
               </span>
-              <button onClick={() => move(-1)} disabled={current === 0} className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 disabled:opacity-50">
+              <button
+                onClick={() => move(-1)}
+                disabled={current === 0}
+                className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 disabled:opacity-50"
+              >
                 ← Previous
               </button>
-              <button onClick={() => move(1)} disabled={current === questions.length - 1} className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 disabled:opacity-50">
+              <button
+                onClick={() => move(1)}
+                disabled={current === questions.length - 1}
+                className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 disabled:opacity-50"
+              >
                 Next →
               </button>
             </div>
           </div>
 
-          {q.prompt && <p className="text-sm text-gray-700 mb-4 whitespace-pre-wrap">{q.prompt}</p>}
+          {q.prompt && (
+            <p className="text-sm text-gray-700 mb-4 whitespace-pre-wrap">
+              {q.prompt}
+            </p>
+          )}
+        </div>
 
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={currentLines} strategy={verticalListSortingStrategy}>
+        {/* approach card */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h2 className="text-xl font-semibold text-app-primary mb-4">
+            Select Approach
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block mb-1 text-sm font-medium">
+                Type of problem
+              </label>
+              <select
+                value={approachSel}
+                onChange={(e) => setApproachSel(e.target.value)}
+                className="w-full px-3 py-2 border border-app-primary rounded-lg focus:outline-none bg-app-background text-app-text"
+              >
+                <option value="">-- select --</option>
+                {APPROACHES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+           
+          </div>
+
+          <div className="flex flex-wrap mt-4 gap-4">
+            <button
+              onClick={checkApproach}
+              className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
+            >
+              Check Approach
+            </button>
+            {statusCx === "correct" && (
+              <span className="self-center text-sm font-medium text-green-600">
+                ✔ Correct
+              </span>
+            )}
+            {statusCx === "incorrect" && (
+              <span className="self-center text-sm font-medium text-red-600">
+                ✖ Try again
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* problem card */}
+        <div className="bg-white rounded-xl shadow-lg p-6 overflow-hidden">
+          <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
+            <h2 className="text-xl font-semibold text-app-primary mr-4 truncate">
+              Order & Indent Code
+            </h2>
+          </div>
+
+          {q.prompt && (
+            <p className="text-sm text-gray-700 mb-4 whitespace-pre-wrap">
+              {q.prompt}
+            </p>
+          )}
+
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={currentLines}
+              strategy={verticalListSortingStrategy}
+            >
               <div className="space-y-2 mb-6">
                 {currentLines.map((l) => (
-                  <SortableLine key={l.id} line={l} />
+                  <SortableLine
+                    key={l.id}
+                    line={l}
+                    isWrong={wrongLineIds.has(l.id)}
+                    highlightCorrect={statusLines === "correct"}
+                  />
                 ))}
               </div>
             </SortableContext>
           </DndContext>
 
           <div className="flex flex-wrap gap-4">
-            <button onClick={checkLines} className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90">
-              Check Cpde
+            <button
+              onClick={checkLines}
+              className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
+            >
+              Check Code
             </button>
-            <button onClick={shuffleCurrent} className="bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90">
+            <button
+              onClick={shuffleCurrent}
+              className="bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
+            >
               Shuffle Again
             </button>
             {statusLines === "correct" && (
-              <span className="ml-auto self-center text-sm font-medium text-green-600">✔ Order & indent correct</span>
+              <span className="ml-auto self-center text-sm font-medium text-green-600">
+                ✔ Order & indent correct
+              </span>
             )}
             {statusLines === "incorrect" && (
-              <span className="ml-auto self-center text-sm font-medium text-red-600">✖ Code need work</span>
+              <span className="ml-auto self-center text-sm font-medium text-red-600">
+                {wrongDetail === "indent"
+                ? "✖ Indent is wrong"
+                : wrongDetail === "order"
+                ? "✖ Order is wrong"
+                : "✖ Order & indent are wrong"}
+                        </span>
             )}
           </div>
         </div>
 
         {/* complexity card */}
         <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-app-primary mb-4">Select Time & Space Complexities</h2>
+          <h2 className="text-xl font-semibold text-app-primary mb-4">
+            Select Time & Space Complexities
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block mb-1 text-sm font-medium">Time Complexity</label>
-              <select value={timeSel} onChange={(e) => setTimeSel(e.target.value)} className="w-full px-3 py-2 border border-app-primary rounded-lg focus:outline-none bg-app-background text-app-text">
+              <label className="block mb-1 text-sm font-medium">
+                Time Complexity
+              </label>
+              <select
+                value={timeSel}
+                onChange={(e) => setTimeSel(e.target.value)}
+                className="w-full px-3 py-2 border border-app-primary rounded-lg focus:outline-none bg-app-background text-app-text"
+              >
                 <option value="">-- select --</option>
                 {COMPLEXITIES.map((c) => (
                   <option key={c} value={c}>
@@ -298,8 +515,14 @@ export default function Blind75Prep() {
               </select>
             </div>
             <div>
-              <label className="block mb-1 text-sm font-medium">Space Complexity</label>
-              <select value={spaceSel} onChange={(e) => setSpaceSel(e.target.value)} className="w-full px-3 py-2 border border-app-primary rounded-lg focus:outline-none bg-app-background text-app-text">
+              <label className="block mb-1 text-sm font-medium">
+                Space Complexity
+              </label>
+              <select
+                value={spaceSel}
+                onChange={(e) => setSpaceSel(e.target.value)}
+                className="w-full px-3 py-2 border border-app-primary rounded-lg focus:outline-none bg-app-background text-app-text"
+              >
                 <option value="">-- select --</option>
                 {COMPLEXITIES.map((c) => (
                   <option key={c} value={c}>
@@ -311,11 +534,22 @@ export default function Blind75Prep() {
           </div>
 
           <div className="flex flex-wrap mt-4 gap-4">
-            <button onClick={checkComplexities} className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90">
+            <button
+              onClick={checkComplexities}
+              className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
+            >
               Check Complexities
             </button>
-            {statusCx === "correct" && <span className="self-center text-sm font-medium text-green-600">✔ Correct</span>}
-            {statusCx === "incorrect" && <span className="self-center text-sm font-medium text-red-600">✖ Try again</span>}
+            {statusCx === "correct" && (
+              <span className="self-center text-sm font-medium text-green-600">
+                ✔ Correct
+              </span>
+            )}
+            {statusCx === "incorrect" && (
+              <span className="self-center text-sm font-medium text-red-600">
+                ✖ Try again
+              </span>
+            )}
           </div>
         </div>
       </div>
