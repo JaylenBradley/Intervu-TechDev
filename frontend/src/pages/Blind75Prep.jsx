@@ -14,7 +14,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-/*───────────────────── Constants & helpers ─────────────────────*/
+/*Constants and helpers*/
 const INDENT_WIDTH = 48;
 const MAX_INDENT = 4;
 const COMPLEXITIES = [
@@ -57,7 +57,7 @@ export function toLines(problem) {
 const isLineCorrect = (line, idx) =>
   line.userIndent === line.indentLevel && line.order === idx;
 
-/*───────────────────── Sortable line component ───────────────────*/
+/* Sortable line component */
 function SortableLine({ line, isWrong, highlightCorrect }) {
   const {
     setNodeRef,
@@ -97,7 +97,7 @@ function SortableLine({ line, isWrong, highlightCorrect }) {
   );
 }
 
-/*───────────────────── Main component ───────────────────────────*/
+/* Main component */
 export default function Blind75Prep({ userId }) {
   /* state */
   const [step, setStep] = useState("config");
@@ -106,11 +106,17 @@ export default function Blind75Prep({ userId }) {
   const [current, setCurrent] = useState(0);
   const [statusLines, setStatusLines] = useState(null);
   const [statusCx, setStatusCx] = useState(null);
+  const [statusA, setStatusA] = useState(null);
   const [wrongDetail, setWrongDetail] = useState(null); 
   const [timeSel, setTimeSel] = useState("");
   const [spaceSel, setSpaceSel] = useState("");
   const [approachSel, setApproachSel] = useState("");
   const [wrongLineIds, setWrongLineIds] = useState(new Set());
+  const [evaluationMode, setEvaluationMode] = useState(false);   
+  const [codeMode,      setCodeMode]      = useState(false);     
+  const [codeAnswer,    setCodeAnswer]    = useState("");
+  const [codeLoading,   setCodeLoading]   = useState(false);
+  const [codeFeedback,  setCodeFeedback]  = useState(null);  
 
   /* sensors */
   const sensors = useSensors(
@@ -121,6 +127,7 @@ export default function Blind75Prep({ userId }) {
   const resetStatus = () => {
     setStatusLines(null);
     setStatusCx(null);
+    setStatusA(null);
     setTimeSel("");
     setSpaceSel("");
     setApproachSel("");
@@ -141,7 +148,7 @@ export default function Blind75Prep({ userId }) {
       const data = await Promise.all(
         Array.from({ length: numQuestions }, fetchOne)
       );
-      setQuestions(data.map((p) => ({ ...p, lines: toLines(p) })));
+      setQuestions(data.map((p) => ({ ...p, lines: toLines(p), codeDone: false })));
       setCurrent(0);
       resetStatus();
       setStep("quiz");
@@ -165,7 +172,6 @@ export default function Blind75Prep({ userId }) {
 
   /* drag handling */
   const handleDragStart = () => {
-    // Clear wrong highlights as soon as the user interacts again
     setWrongLineIds(new Set());
     setStatusLines(null);
   };
@@ -217,8 +223,11 @@ export default function Blind75Prep({ userId }) {
         .map((l) => l.id)
     )
   );
-
     /* POST /wrong */
+    if (!userId) {
+      console.warn("No userId – skipping /wrong submission");
+      return;
+    }
     try {
       const BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
       await fetch(`${BASE}/api/blind75/wrong`, {
@@ -246,7 +255,7 @@ export default function Blind75Prep({ userId }) {
   const checkApproach = () => {
     const q = questions[current];
     const good = approachSel === q.type;
-    setStatusCx(good ? "correct" : "incorrect");
+    setStatusA(good ? "correct" : "incorrect");
   };
 
   const shuffleCurrent = () => {
@@ -255,14 +264,154 @@ export default function Blind75Prep({ userId }) {
     setWrongLineIds(new Set());
   };
 
-  const move = (dir) => {
-    if (dir === -1 && current === 0) return;
-    if (dir === 1 && current === questions.length - 1) return;
-    setCurrent((c) => c + dir);
-    resetStatus();
-  };
+ const move = (dir) => {
+  /*  handle back from code view  */
+  if (dir === -1 && codeMode) {
+    setCodeMode(false);
+    return;
+  }
 
-  /*───────────────────────── UI steps ─────────────────────────*/
+  /*  going forward  */
+  if (dir === 1 && evaluationMode && !codeMode && !questions[current].codeDone) {
+    setCodeMode(true);
+    setCodeAnswer("");
+    setCodeFeedback(null);
+    return;
+  }
+
+  /*  regular pagination  */
+  const atFirst = current === 0;
+  const atLast  = current === questions.length - 1;
+  if ((dir === -1 && atFirst) || (dir === 1 && atLast)) return;
+
+  setCurrent((c) => c + dir);
+  setCodeMode(false);
+  resetStatus();
+};
+
+const submitCode = async () => {
+  if (!codeAnswer.trim()) return;
+
+  setCodeLoading(true);
+  try {
+    const BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+    const res  = await fetch(`${BASE}/api/interview/technical/evaluate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+      question_id: "1",
+      question: questions[current].prompt,
+      user_answer: codeAnswer,
+      target_company: "generic",
+      difficulty: questions[current].difficulty.toLowerCase()
+      }),
+    });
+    if (!res.ok) throw new Error("bad response");
+    const data = await res.json();           
+    setCodeFeedback(data);
+    setQuestions((qs) => {
+      const cp = [...qs];
+      cp[current] = { ...cp[current], codeDone: true };
+      return cp;
+    });
+  } catch (err) {
+    alert("Evaluation failed. Try again.");
+  } finally {
+    setCodeLoading(false);
+  }
+};
+
+
+  /* UI steps */
+    if (codeMode) {
+  const q = questions[current];
+  return (
+    <div className="min-h-screen bg-app-background py-10">
+      <div className="max-w-4xl mx-auto space-y-6 px-4">
+        {/* header */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="flex justify-between items-center mb-2 flex-wrap">
+            <h1 className="text-2xl font-bold text-app-primary">
+              Write your solution
+            </h1>
+          </div>
+        </div>
+
+        {/* problem card */}
+        <div className="bg-white rounded-xl shadow-lg p-6 overflow-hidden">
+          <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
+            <h2 className="text-xl font-semibold text-app-primary mr-4 truncate">
+              {q.title}
+            </h2>
+            <div className="flex gap-2 items-center flex-wrap">
+              <span
+                className={`px-3 py-1 rounded-full text-sm ${
+                  diffClasses[q.difficulty] || "bg-gray-100 text-gray-800"
+                }`}
+              >
+                {q.difficulty}
+              </span>
+            </div>
+          </div>
+
+          {q.prompt && (
+            <p className="text-sm text-gray-700 mb-4 whitespace-pre-wrap">
+              {q.prompt}
+            </p>
+          )}
+        </div>
+
+        {/* code textarea */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <textarea
+            value={codeAnswer}
+            onChange={(e) => setCodeAnswer(e.target.value)}
+            className="w-full h-60 border border-app-primary rounded-lg p-3 font-mono text-sm bg-app-background"
+            placeholder="Paste / write your full solution here…"
+          />
+          <div className="flex gap-4 mt-4">
+            <button
+              onClick={submitCode}
+              disabled={codeLoading || !codeAnswer.trim()}
+              className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90 disabled:opacity-50"
+            >
+              {codeLoading ? "Evaluating…" : "Submit"}
+            </button>
+            <button
+              onClick={() => move(-1)}
+              className="bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
+            >
+              ← Back
+            </button>
+            {codeFeedback && (
+              <button
+                onClick={() => move(1)}
+                className="bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
+              >
+                Next →
+              </button>
+            )}
+          </div>
+
+          {/* feedback */}
+          {codeFeedback && (
+            <div className="mt-6 space-y-3">
+              <div>
+                <span className="font-medium">Score:</span>{" "}
+                <span className="font-bold">
+                  {codeFeedback.score?.toFixed(1)}/100
+                </span>
+              </div>
+              <pre className="bg-gray-50 p-4 rounded-lg whitespace-pre-wrap">
+                {codeFeedback.feedback}
+              </pre>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
   if (step === "config") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-app-background py-16">
@@ -291,6 +440,18 @@ export default function Blind75Prep({ userId }) {
                 <option value={10}>10</option>
               </select>
             </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="evalMode"
+                checked={evaluationMode}
+                onChange={(e) => setEvaluationMode(e.target.checked)}
+                className="h-4 w-4 text-app-primary"
+              />
+              <label htmlFor="evalMode" className="font-medium text-app-text">
+                Evaluation mode (write code after each reorder)
+              </label>
+            </div>
             <button
               type="submit"
               className="w-full bg-app-primary text-white py-3 rounded-lg font-semibold hover:bg-opacity-90"
@@ -314,7 +475,7 @@ export default function Blind75Prep({ userId }) {
     );
   }
 
-  /*──────────────────────── Quiz step ───────────────────────*/
+  /* Quiz step */
   const q = questions[current];
   const percent = Math.round(((current + 1) / questions.length) * 100);
 
@@ -411,12 +572,12 @@ export default function Blind75Prep({ userId }) {
             >
               Check Approach
             </button>
-            {statusCx === "correct" && (
+            {statusA === "correct" && (
               <span className="self-center text-sm font-medium text-green-600">
                 ✔ Correct
               </span>
             )}
-            {statusCx === "incorrect" && (
+            {statusA === "incorrect" && (
               <span className="self-center text-sm font-medium text-red-600">
                 ✖ Try again
               </span>
