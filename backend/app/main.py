@@ -20,12 +20,16 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
+<<<<<<< HEAD
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:5173",
         "http://localhost:5174",
         "https://useintervu.vercel.app",
     ],
+=======
+    allow_origins=["http://localhost:5173"],
+>>>>>>> justin/dev
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
