@@ -89,70 +89,60 @@ const Navbar = ({ user }) => {
         <NavButton icon={<FaRobot size={24} />} alt="AI Interviewer" onClick={() => navigate('/ai-interviewer')} />
         {/* Dropdown Menu */}
         <div ref={menuRef} className="relative">
-          {user ? (
-            <>
-              <button
-                className="w-12 h-12 rounded-full border-2 border-app-primary cursor-pointer flex items-center justify-center focus:outline-none bg-app-accent ml-1"
-                onClick={() => setMenuOpen((v) => !v)}
-                type="button"
-              >
-                {(user.username && user.username[0].toUpperCase()) || "U"}
-              </button>
-              {menuOpen && (
-                <div className="absolute right-0 top-12 w-44 bg-app-accent rounded-xl shadow-2xl py-3 z-20 text-app-text border border-app-secondary">
-                  {user && (
-                    <button
-                      className="dropdown-btn text-app-primary"
-                      type="button"
-                      // onClick={}
-                    >
-                      {user.username}
-                    </button>
-                  )}
+          <button
+            className="w-12 h-12 rounded-full border-2 border-app-primary cursor-pointer flex items-center justify-center focus:outline-none bg-app-accent ml-1"
+            onClick={() => setMenuOpen((v) => !v)}
+            type="button"
+          >
+            <span style={{ fontSize: 22 }}>
+              {(user?.username && user.username[0].toUpperCase()) || <FaUser/>}
+            </span>
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 mt-2 bg-white border border-app-primary rounded-lg shadow-lg z-50 p-2 min-w-[160px]">
+              {user ? (
+                <>
                   <button
-                    className="dropdown-btn"
+                    className="dropdown-btn text-app-primary w-full text-left"
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      navigate('/profile');
+                    }}
+                  >
+                    {user.username}
+                  </button>
+                  <button
+                    className="dropdown-btn w-full text-left"
+                    type="button"
                     onClick={() => {
                       setMenuOpen(false);
                       navigate('/questionnaire');
                     }}
-                    type="button"
                   >
                     Questionnaire
                   </button>
                   <button
-                    className="dropdown-btn"
-                    onClick={handleAuthClick}
+                    className="dropdown-btn w-full text-left"
                     type="button"
+                    onClick={handleAuthClick}
                   >
                     Sign Out
                   </button>
-                </div>
+                </>
+              ) : (
+                <button
+                  className="dropdown-btn w-full text-left"
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    navigate('/signin');
+                  }}
+                >
+                  Sign In
+                </button>
               )}
-            </>
-          ) : (
-            <>
-              <button
-                className="w-12 h-12 rounded-full border-2 border-app-primary cursor-pointer flex items-center justify-center focus:outline-none bg-app-accent ml-1"
-                onClick={() => setMenuOpen((v) => !v)}
-                type="button"
-              >
-                <FaUser size={22}/>
-              </button>
-              {menuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-app-primary rounded-lg shadow-lg z-50">
-                  <button
-                    className="dropdown-btn"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      navigate('/signin');
-                    }}
-                    type="button"
-                  >
-                    Sign In
-                  </button>
-                </div>
-              )}
-            </>
+            </div>
           )}
         </div>
       </div>

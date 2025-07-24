@@ -27,6 +27,7 @@ import SkillGapRoadmapDetail from "./pages/SkillGapRoadmapDetail.jsx";
 import TailorResume from "./pages/TailorResume.jsx";
 import TechnicalPrep from "./pages/TechnicalPrep.jsx";
 import UploadResume from "./pages/UploadResume.jsx";
+import UserProfile from "./pages/UserProfile.jsx";
 
 const App = () => {
   const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
@@ -107,6 +108,16 @@ const App = () => {
               hasRoadmap={hasRoadmap}
           />
         }/>
+        <Route path="/profile" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <UserProfile user={user}/>
+          </ProtectedRoute>
+        }/>
+        {/*<Route path="/user/:id" element={*/}
+        {/*  <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>*/}
+
+        {/*  </ProtectedRoute>*/}
+        {/*}/>*/}
         <Route path="/questionnaire" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <Questionnaire onComplete={() => setQuestionnaireComplete(true)} user={user}/>

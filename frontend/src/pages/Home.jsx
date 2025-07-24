@@ -109,7 +109,7 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
                   </a>
                 )}
                 {member.github && (
-                  <a href={member.github} target="_blank" rel="noopener noreferrer" className="underline icon-pop">
+                  <a href={member.github} target="_blank" rel="noopener noreferrer" className="text-black underline icon-pop">
                     <FaGithubSquare size={28} />
                   </a>
                 )}
