@@ -1,10 +1,11 @@
-import os
-import json
 import datetime
-from dotenv import load_dotenv
 from google import genai
-from google.genai import types
+import json
+from dotenv import load_dotenv
+import os
+import re
 from app.core.prompts import roadmap_prompt
+from google.genai import types
 
 load_dotenv()
 api_key = os.getenv('GEMINI_API_KEY')
@@ -25,5 +26,13 @@ def get_roadmap(questionnaire_res, current_date = datetime.datetime.now().strfti
         contents=formatted_prompt
     )
 
-    roadmap_text = res.text if hasattr(res, "text") else str(res)
-    return {"roadmap": roadmap_text}
+    text = res.text if hasattr(res, "text") else str(res)
+    match = re.search(r"\{.*\}", text, re.DOTALL)
+    if not match:
+        raise ValueError(f"Gemini did not return JSON. Raw output:\n{text}")
+    json_str = match.group(0)
+    try:
+        roadmap_json = json.loads(json_str)
+    except Exception as e:
+        raise ValueError(f"Failed to parse Gemini output as JSON. Error: {e}\nRaw output:\n{text}")
+    return {"roadmap": roadmap_json}

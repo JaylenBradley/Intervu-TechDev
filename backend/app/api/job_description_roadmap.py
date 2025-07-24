@@ -1,8 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List
 from app.schemas.job_description_roadmap import JobDescriptionRoadmapCreate, JobDescriptionRoadmapOut
-from app.crud import jobdesc_roadmap as crud
+from app.crud.job_description_roadmap import (
+    create_job_description_roadmap,
+    get_job_description_roadmaps_by_user,
+    get_job_description_roadmap,
+    delete_job_description_roadmap
+)
 from app.core.database import SessionLocal
 
 router = APIRouter()
@@ -14,28 +19,24 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/roadmap/jobdesc", response_model=JobDescriptionRoadmapOut)
-def create_jobdesc_roadmap(data: JobDescriptionRoadmapCreate, db: Session = Depends(get_db)):
-    roadmap = crud.create_jobdesc_roadmap(db, data)
-    if not roadmap:
-        raise HTTPException(status_code=400, detail="Failed to create roadmap")
-    return roadmap
+@router.post("/roadmap/jobdesc/generate", response_model=JobDescriptionRoadmapOut)
+def create_job_description_roadmap_endpoint(data: JobDescriptionRoadmapCreate, db: Session = Depends(get_db)):
+    return create_job_description_roadmap(db, data)
 
-@router.get("/roadmap/jobdesc", response_model=List[JobDescriptionRoadmapOut])
-def list_jobdesc_roadmaps(user_id: int = Query(...), db: Session = Depends(get_db)):
-    roadmaps = crud.get_jobdesc_roadmaps_by_user(db, user_id)
-    return roadmaps
+@router.get("/roadmap/jobdesc/{user_id}", response_model=List[JobDescriptionRoadmapOut])
+def list_job_description_roadmaps_endpoint(user_id: int, db: Session = Depends(get_db)):
+    return get_job_description_roadmaps_by_user(db, user_id)
 
-@router.get("/roadmap/jobdesc/{roadmap_id}", response_model=JobDescriptionRoadmapOut)
-def get_jobdesc_roadmap(roadmap_id: str, db: Session = Depends(get_db)):
-    roadmap = crud.get_jobdesc_roadmap(db, roadmap_id)
+@router.get("/roadmap/jobdesc/{user_id}/{roadmap_id}", response_model=JobDescriptionRoadmapOut)
+def get_job_description_roadmap_endpoint(user_id: int, roadmap_id: str, db: Session = Depends(get_db)):
+    roadmap = get_job_description_roadmap(db, roadmap_id)
     if not roadmap:
         raise HTTPException(status_code=404, detail="Roadmap not found")
     return roadmap
 
 @router.delete("/roadmap/jobdesc/{roadmap_id}")
-def delete_jobdesc_roadmap(roadmap_id: str, db: Session = Depends(get_db)):
-    success = crud.delete_jobdesc_roadmap(db, roadmap_id)
+def delete_job_description_roadmap_endpoint(roadmap_id: str, db: Session = Depends(get_db)):
+    success = delete_job_description_roadmap(db, roadmap_id)
     if not success:
         raise HTTPException(status_code=404, detail="Roadmap not found")
     return {"message": "Roadmap deleted successfully"}

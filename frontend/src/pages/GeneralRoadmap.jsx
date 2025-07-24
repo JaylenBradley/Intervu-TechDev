@@ -59,7 +59,7 @@ const GeneralRoadmap = ({ user, onRoadmapGenerated }) => {
             disabled={generating}
           >
             {generating ? <div className="loader-md mr-2"></div> : null}
-            {generating ? "Generating..." : "Generate GeneralRoadmap"}
+            {generating ? "Generating..." : "Generate Roadmap"}
           </button>
         </div>
       </div>

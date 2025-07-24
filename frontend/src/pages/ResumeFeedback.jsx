@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
+
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getResumeFeedback } from "../services/resumeServices";
 
 // Helper to parse raw feedback string into structured data
 function parseFeedback(raw) {
@@ -35,42 +35,26 @@ function parseFeedback(raw) {
   return pairs.filter(pair => pair.options && pair.options.length >= 2);
 }
 
-const ResumeFeedback = () => {
-  const [file, setFile] = useState(null);
-  const [fileName, setFileName] = useState("");
+const ResumeFeedback = ({ user }) => {
   const [feedback, setFeedback] = useState([]);
   const [rawFeedback, setRawFeedback] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const fileInputRef = useRef();
   const navigate = useNavigate();
 
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-      setFileName(e.target.files[0].name);
-      setError("");
-    }
-  };
-
-  const handleChooseFile = () => {
-    fileInputRef.current.click();
-  };
-
   const handleGetFeedback = async () => {
-    if (!file) {
-      setError("Please select a file first.");
+    if (!user || !user.id) {
+      setError("User not found");
       return;
     }
-    if (loading) return;
-
     setLoading(true);
     setError("");
     setFeedback([]);
     setRawFeedback("");
-
     try {
-      const data = await getResumeFeedback(file);
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/resume/feedback?user_id=${user.id}`);
+      if (!res.ok) throw new Error("Failed to get feedback");
+      const data = await res.json();
       if (!data.feedback) throw new Error("No feedback received from server");
       let feedbackArr = [];
       if (typeof data.feedback === "string" && data.feedback.trim().startsWith("[")) {
@@ -104,23 +88,10 @@ const ResumeFeedback = () => {
     </div>
   );
 
-  // Helper to flatten all bullets with their position
-  function flattenBullets(sections) {
-    const result = [];
-    sections.forEach(section => {
-      section.bullets.forEach(bullet => {
-        result.push({ ...bullet, position: section.position });
-      });
-    });
-    return result;
-  }
-
-    // Updated renderParsed for consistent minimal output
   const renderParsed = () => {
     try {
       const pairs = parseFeedback(rawFeedback);
       if (pairs.length === 0) {
-        // Fallback: split raw feedback into paragraphs and show each as a div blurb
         const paras = rawFeedback.split(/\n{2,}|\r{2,}/).filter(p => p.trim());
         return (
           <div className="w-full mt-4">
@@ -150,7 +121,6 @@ const ResumeFeedback = () => {
         </div>
       );
     } catch (error) {
-      console.error("Error rendering parsed feedback:", error);
       return (
         <div className="w-full mt-4 p-4 bg-red-100 border border-red-400 rounded-lg">
           <p className="text-red-700">Error displaying feedback. Showing raw text instead.</p>
@@ -161,7 +131,7 @@ const ResumeFeedback = () => {
   };
 
   return (
-    <div className="min-h-screen bg-app-background flex flex-col items-center justify-center py-20">
+    <div className="min-h-screen flex flex-col items-center py-16">
       <div className={`w-full ${feedback.length > 0 || rawFeedback ? 'max-w-4xl' : 'max-w-2xl'} flex flex-col items-center`}>
         <button
           onClick={() => navigate("/resume")}
@@ -171,26 +141,12 @@ const ResumeFeedback = () => {
         </button>
         <div className="bg-white rounded-2xl shadow-2xl p-10 w-full flex flex-col items-center border-2 border-app-primary">
           <h1 className="text-3xl font-extrabold text-app-primary mb-8">Get Resume Feedback</h1>
-          <input
-            type="file"
-            accept=".pdf,.docx"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            className="hidden"
-          />
-          <button
-            onClick={handleChooseFile}
-            className="bg-app-primary text-white px-8 py-3 text-lg rounded-xl mb-6 hover:bg-app-primary/90 transition-colors font-semibold"
-          >
-            {fileName ? `Selected: ${fileName}` : "Choose File"}
-          </button>
           <button
             onClick={handleGetFeedback}
-            disabled={!file || loading}
-            className="bg-app-primary text-white px-8 py-3 text-lg rounded-xl mb-6 hover:bg-app-primary/90 transition-colors disabled:opacity-50 font-semibold"
+            disabled={loading}
+            className="bg-app-primary text-white px-8 py-3 text-lg rounded-xl mb-6 hover:bg-app-primary/90 transition-colors disabled:opacity-50 font-semibold flex items-center justify-center min-w-[200px] min-h-[56px]"
           >
-            {loading ? <div className="loader-md mr-2"></div> : null}
-            {loading ? "Analyzing..." : "Get Feedback"}
+            {loading ? <div className="loader-md" /> : "Get Feedback"}
           </button>
           {error && (
             <div className="mb-6 text-red-600 font-bold text-lg">{error}</div>

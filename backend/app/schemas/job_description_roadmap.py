@@ -7,7 +7,7 @@ class JobDescriptionRoadmapCreate(BaseModel):
     job_description: str
 
 class JobDescriptionRoadmapOut(BaseModel):
-    id: int
+    id: str
     user_id: int
     job_description: str
     roadmap_json: Any

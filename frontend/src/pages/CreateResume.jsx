@@ -1,73 +1,61 @@
-import { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { enhanceResume, exportResume } from "../services/resumeServices";
 
-const CreateResume = () => {
-  const [file, setFile] = useState(null);
-  const [fileName, setFileName] = useState("");
-  const [enhancedResume, setEnhancedResume] = useState("");
-  const [loading, setLoading] = useState(false);
+const CreateResume = ({ user }) => {
+  const [improvedResume, setImprovedResume] = useState("");
+  const [improving, setImproving] = useState(false);
+  const [improveError, setImproveError] = useState("");
   const [exporting, setExporting] = useState(false);
-  const [error, setError] = useState("");
-  const fileInputRef = useRef();
   const navigate = useNavigate();
 
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-      setFileName(e.target.files[0].name);
-      setError("");
-    }
-  };
-
-  const handleChooseFile = () => {
-    fileInputRef.current.click();
-  };
-
-  const handleEnhance = async () => {
-    if (!file) {
-      setError("Please select a file first.");
-      return;
-    }
-    setLoading(true);
-    setError("");
-    setEnhancedResume("");
+  const handleImproveResume = async () => {
+    setImproving(true);
+    setImproveError("");
+    setImprovedResume("");
     try {
-      const data = await enhanceResume(file);
-      setEnhancedResume(data.improved_resume);
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/resume/improve?user_id=${user.id}`
+      );
+      if (!res.ok) {
+        const data = await res.json();
+        setImproveError(data.detail || "Failed to improve resume.");
+        return;
+      }
+      const data = await res.json();
+      setImprovedResume(data.improved_resume);
     } catch (err) {
-      setError("Error enhancing resume. Please try again.");
+      setImproveError("Error improving resume. Please try again.");
     } finally {
-      setLoading(false);
+      setImproving(false);
     }
   };
 
   const handleExport = async (format) => {
-    if (!file) {
-      setError("Please select a file first.");
-      return;
-    }
     setExporting(true);
-    setError("");
     try {
-      const blob = await exportResume(file, format);
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/resume/export?user_id=${user.id}&format=${format}`
+      );
+      if (!res.ok) throw new Error("Failed to export resume");
+      const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `improved_resume.${format}`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `improved_resume.${format === "pdf" ? "pdf" : "docx"}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
     } catch (err) {
-      setError("Error exporting resume. Please try again.");
+      alert("Error exporting resume. Please try again.");
     } finally {
       setExporting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-app-background flex flex-col items-center justify-center py-20">
-      <div className={`w-full ${enhancedResume ? 'max-w-4xl' : 'max-w-2xl'} flex flex-col items-center`}>
+    <div className="min-h-screen flex flex-col items-center py-16">
+      <div className={`w-full max-w-2xl flex flex-col items-center`}>
         <button
           onClick={() => navigate("/resume")}
           className="mb-6 bg-white text-app-primary px-6 py-3 text-lg rounded-xl border-2 border-app-primary hover:bg-app-primary hover:text-white transition-colors shadow font-semibold"
@@ -75,52 +63,42 @@ const CreateResume = () => {
           ← Back
         </button>
         <div className="bg-white rounded-2xl shadow-2xl p-10 w-full flex flex-col items-center border-2 border-app-primary">
-          <h1 className="text-3xl font-extrabold text-app-primary mb-8">Create or Enhance Your Resume</h1>
-          <input
-            type="file"
-            accept=".pdf,.docx"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            className="hidden"
-          />
+          <h1 className="text-3xl font-extrabold text-app-primary mb-8">Improve Your Resume</h1>
           <button
-            onClick={handleChooseFile}
-            className="bg-app-primary text-white px-8 py-3 text-lg rounded-xl mb-6 hover:bg-app-primary/90 transition-colors font-semibold"
+            onClick={handleImproveResume}
+            disabled={improving}
+            className="bg-app-primary text-white px-8 py-3 text-lg rounded-xl mb-6 hover:bg-app-primary/90 transition-colors font-semibold flex items-center justify-center min-w-[200px] min-h-[56px]"
           >
-            {fileName ? `Selected: ${fileName}` : "Choose File"}
+            {improving ? (
+              <div className="loader-md" />
+            ) : (
+              "Improve Resume"
+            )}
           </button>
-          <button
-            onClick={handleEnhance}
-            disabled={!file || loading}
-            className="bg-app-primary text-white px-8 py-3 text-lg rounded-xl mb-6 hover:bg-app-primary/90 transition-colors disabled:opacity-50 font-semibold"
-          >
-            {loading ? <div className="loader-md mr-2"></div> : null}
-            {loading ? "Enhancing..." : "Enhance with AI"}
-          </button>
-          {error && (
-            <div className="mb-6 text-red-600 font-bold text-lg">{error}</div>
+          {improveError && (
+            <div className="mb-6 text-red-600 font-bold text-lg">{improveError}</div>
           )}
-          {enhancedResume && (
+          {improvedResume && (
             <>
               <textarea
-                className="w-full h-72 border-2 border-app-primary rounded-xl p-5 mb-6 text-lg"
-                value={enhancedResume}
+                className="w-full h-72 border-2 border-app-primary rounded-xl p-5 mt-4 text-lg"
+                value={improvedResume}
                 readOnly
               />
-              <div className="flex gap-6 mt-2">
+              <div className="flex gap-4 mt-6">
                 <button
                   onClick={() => handleExport("pdf")}
                   disabled={exporting}
-                  className="bg-app-primary text-white px-6 py-3 text-lg rounded-xl hover:bg-app-primary/90 transition-colors disabled:opacity-50 font-semibold"
+                  className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-app-primary/90 transition-colors flex items-center justify-center min-w-[160px] min-h-[44px]"
                 >
-                  Export as PDF
+                  {exporting ? <div className="loader-md" /> : "Export as PDF"}
                 </button>
                 <button
                   onClick={() => handleExport("docx")}
                   disabled={exporting}
-                  className="bg-app-primary text-white px-6 py-3 text-lg rounded-xl hover:bg-app-primary/90 transition-colors disabled:opacity-50 font-semibold"
+                  className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-app-primary/90 transition-colors flex items-center justify-center min-w-[160px] min-h-[44px]"
                 >
-                  Export as Word
+                  {exporting ? <div className="loader-md" /> : "Export as Word"}
                 </button>
               </div>
             </>
@@ -131,4 +109,4 @@ const CreateResume = () => {
   );
 };
 
-export default CreateResume; 
+export default CreateResume;

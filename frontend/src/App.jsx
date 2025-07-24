@@ -9,6 +9,7 @@ import AuthForm from "./containers/AuthForm.jsx";
 import GeneralRoadmap from "./pages/GeneralRoadmap.jsx";
 import BehavioralPrep from "./pages/BehavioralPrep.jsx";
 import Blind75Prep from "./pages/Blind75Prep.jsx";
+import ChangeResume from "./pages/ChangeResume";
 import CreateResume from "./pages/CreateResume.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
 import Footer from "./components/Footer.jsx";
@@ -20,7 +21,9 @@ import Questionnaire from "./pages/Questionnaire.jsx";
 import ResumeMain from "./pages/ResumeMain.jsx";
 import ResumeFeedback from "./pages/ResumeFeedback.jsx";
 import SkillGapRoadmap from "./pages/SkillGapRoadmap.jsx";
+import TailorResume from "./pages/TailorResume.jsx";
 import TechnicalPrep from "./pages/TechnicalPrep.jsx";
+import UploadResume from "./pages/UploadResume.jsx";
 
 const App = () => {
   const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
@@ -115,22 +118,37 @@ const App = () => {
         }/>
         <Route path="/skillgap-roadmap" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <SkillGapRoadmap user={user} onRoadmapGenerated={() => setHasRoadmap(true)}/>
+            <SkillGapRoadmap user={user}/>
           </ProtectedRoute>
         }/>
         <Route path="/resume" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <ResumeMain />
+            <ResumeMain user={user}/>
+          </ProtectedRoute>
+        }/>
+        <Route path="/resume/upload" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <UploadResume user={user}/>
+          </ProtectedRoute>
+        }/>
+        <Route path="/resume/change" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <ChangeResume user={user}/>
           </ProtectedRoute>
         }/>
         <Route path="/resume/improve" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <CreateResume />
+            <CreateResume user={user}/>
           </ProtectedRoute>
         }/>
         <Route path="/resume/feedback" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <ResumeFeedback />
+            <ResumeFeedback user={user}/>
+          </ProtectedRoute>
+        }/>
+        <Route path="/resume/tailor" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <TailorResume user={user}/>
           </ProtectedRoute>
         }/>
         <Route path="/dashboard" element={

@@ -1,10 +1,11 @@
-import os
-import json
 import datetime
-from dotenv import load_dotenv
 from google import genai
-from google.genai import types
 from app.core.prompts import job_description_roadmap_prompt
+import json
+from dotenv import load_dotenv
+import os
+import re
+from google.genai import types
 
 load_dotenv()
 api_key = os.getenv('GEMINI_API_KEY')
@@ -12,10 +13,8 @@ genai.api_key = api_key
 
 client = genai.Client(api_key=api_key)
 
-def get_job_description_roadmap(profile, resume, job_description, current_date=None):
-    if not current_date:
-        current_date = datetime.datetime.now().strftime("%B %d, %Y")
-    prompt = job_description_roadmap_prompt(profile, resume, job_description, current_date)
+def generate_job_description_roadmap(profile, skills, job_description, current_date = datetime.datetime.now().strftime("%B %d, %Y")):
+    prompt = job_description_roadmap_prompt(profile, skills, job_description, current_date)
     res = client.models.generate_content(
         model="gemini-2.5-flash",
         config=types.GenerateContentConfig(
@@ -24,5 +23,13 @@ def get_job_description_roadmap(profile, resume, job_description, current_date=N
         contents=prompt
     )
 
-    job_description_roadmap_json = json.loads(res.text if hasattr(res, "text") else str(res))
+    text = res.text if hasattr(res, "text") else str(res)
+    match = re.search(r"\{.*\}", text, re.DOTALL)
+    if not match:
+        raise ValueError(f"Gemini did not return JSON. Raw output:\n{text}")
+    json_str = match.group(0)
+    try:
+        job_description_roadmap_json = json.loads(json_str)
+    except Exception as e:
+        raise ValueError(f"Failed to parse Gemini output as JSON. Error: {e}\nRaw output:\n{text}")
     return job_description_roadmap_json
