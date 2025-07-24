@@ -119,5 +119,100 @@ async def export_to_sheets(user_id: int, request: Request, db: Session = Depends
         valueInputOption='RAW',
         body={'values': data}
     ).execute()
+
+    # Formatting improvements
+    num_rows = len(data)
+    num_cols = len(data[0])
+    requests = [
+        # Bold and color header row
+        {
+            "repeatCell": {
+                "range": {
+                    "sheetId": 0,
+                    "startRowIndex": 0,
+                    "endRowIndex": 1
+                },
+                "cell": {
+                    "userEnteredFormat": {
+                        "backgroundColor": {"red": 0.8, "green": 0.9, "blue": 1},
+                        "textFormat": {"bold": True}
+                    }
+                },
+                "fields": "userEnteredFormat(backgroundColor,textFormat)"
+            }
+        },
+        # Freeze header row
+        {
+            "updateSheetProperties": {
+                "properties": {"sheetId": 0, "gridProperties": {"frozenRowCount": 1}},
+                "fields": "gridProperties.frozenRowCount"
+            }
+        },
+        # Auto-resize columns
+        {
+            "autoResizeDimensions": {
+                "dimensions": {
+                    "sheetId": 0,
+                    "dimension": "COLUMNS",
+                    "startIndex": 0,
+                    "endIndex": num_cols
+                }
+            }
+        },
+        # Add filter to header row
+        {
+            "setBasicFilter": {
+                "filter": {
+                    "range": {
+                        "sheetId": 0,
+                        "startRowIndex": 0,
+                        "endRowIndex": num_rows,
+                        "startColumnIndex": 0,
+                        "endColumnIndex": num_cols
+                    }
+                }
+            }
+        },
+        # Format Applied Date column (index 3) as YYYY-MM-DD
+        {
+            "repeatCell": {
+                "range": {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "endRowIndex": num_rows,
+                    "startColumnIndex": 3,
+                    "endColumnIndex": 4
+                },
+                "cell": {
+                    "userEnteredFormat": {
+                        "numberFormat": {"type": "DATE", "pattern": "yyyy-mm-dd"}
+                    }
+                },
+                "fields": "userEnteredFormat.numberFormat"
+            }
+        },
+        # Add borders to the table
+        {
+            "updateBorders": {
+                "range": {
+                    "sheetId": 0,
+                    "startRowIndex": 0,
+                    "endRowIndex": num_rows,
+                    "startColumnIndex": 0,
+                    "endColumnIndex": num_cols
+                },
+                "top":    {"style": "SOLID", "width": 1, "color": {"red": 0.6, "green": 0.6, "blue": 0.6}},
+                "bottom": {"style": "SOLID", "width": 1, "color": {"red": 0.6, "green": 0.6, "blue": 0.6}},
+                "left":   {"style": "SOLID", "width": 1, "color": {"red": 0.6, "green": 0.6, "blue": 0.6}},
+                "right":  {"style": "SOLID", "width": 1, "color": {"red": 0.6, "green": 0.6, "blue": 0.6}},
+                "innerHorizontal": {"style": "SOLID", "width": 1, "color": {"red": 0.85, "green": 0.85, "blue": 0.85}},
+                "innerVertical":   {"style": "SOLID", "width": 1, "color": {"red": 0.85, "green": 0.85, "blue": 0.85}}
+            }
+        }
+    ]
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=sheet_id,
+        body={"requests": requests}
+    ).execute()
     sheet_url = f'https://docs.google.com/spreadsheets/d/{sheet_id}'
     return RedirectResponse(sheet_url)
