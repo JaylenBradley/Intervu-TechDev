@@ -31,6 +31,5 @@ export const toLines = (problem) =>
       order: idx,
       text: l.text.trimStart(),
       indentLevel: l.indentLevel,
-      userIndent: l.indentLevel   
     }))
     .sort(() => Math.random() - 0.5);
