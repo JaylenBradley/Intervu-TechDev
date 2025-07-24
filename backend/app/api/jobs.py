@@ -130,7 +130,9 @@ async def export_to_sheets(user_id: int, request: Request, db: Session = Depends
                 "range": {
                     "sheetId": 0,
                     "startRowIndex": 0,
-                    "endRowIndex": 1
+                    "endRowIndex": 1,
+                    "startColumnIndex": 0,
+                    "endColumnIndex": num_cols
                 },
                 "cell": {
                     "userEnteredFormat": {
