@@ -143,6 +143,7 @@ You are a resume parser. Given the following resume text, output ONLY valid JSON
 {{
   "education": [{{"institution": str, "degree": str, "start_date": str, "end_date": str}}],
   "experience": [{{"company": str, "title": str, "start_date": str, "end_date": str, "description": str}}],
+  "leadership": [{{"organization": str, "title": str, "start_date": str, "end_date": str, "description": str}}],
   "skills": [str],
   "certifications": [str],
   "projects": [{{"name": str, "description": str}}],
