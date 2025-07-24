@@ -16,8 +16,7 @@ import { CSS } from "@dnd-kit/utilities";
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
 
-
-/*Constants and helpers*/
+// ==================== CONSTANTS ====================
 const INDENT_WIDTH = 48;
 const MAX_INDENT = 4;
 const COMPLEXITIES = [
@@ -41,11 +40,12 @@ const diffClasses = {
   Medium: "bg-yellow-100 text-yellow-800",
   Hard: "bg-red-100 text-red-800",
 };
+
+// ==================== UTILITY FUNCTIONS ====================
 const genId = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2);
-
 
 export function toLines(problem) {
   return problem.solution
@@ -61,6 +61,7 @@ export function toLines(problem) {
 const isLineCorrect = (line, idx) =>
   line.userIndent === line.indentLevel && line.order === idx;
 
+// ==================== COMPONENTS ====================
 /* Sortable line component */
 function SortableLine({ line, isWrong, highlightCorrect }) {
   const {
@@ -297,11 +298,18 @@ setQuestions(
   };
 
   /* complexity check */
-  const checkComplexities = () => {
-    const q = questions[current];
-    const good = timeSel === q.time && spaceSel === q.space;
-    setStatusCx(good ? "correct" : "incorrect");
-  };
+ const checkComplexities = () => {
+  const q = questions[current];
+
+  const timeOK  = timeSel  === q.time;
+  const spaceOK = spaceSel === q.space;
+
+  if (timeOK && spaceOK)          setStatusCx("correct");
+  else if (!timeOK &&  spaceOK)   setStatusCx("time");
+  else if ( timeOK && !spaceOK)   setStatusCx("space");
+  else                            setStatusCx("both");
+};
+
 
   const checkApproach = () => {
     const q = questions[current];
@@ -350,16 +358,24 @@ const move = (dir) => {
     resetStatus();
     return;
   }
-
-  /* dir === -1 : previous */
-  if (current === 0) return;        // already at the first question
-  setCurrent((c) => c - 1);
-  /* land on the code panel of the previous Q if we’re in eval‑mode
-     *and* that panel was already opened once; otherwise reorder stage */
-  setCodeMode(evaluationMode && questions[current - 1]?.codeDone);
-  resetStatus();
 };
 
+
+const canAdvance = () => {
+  /* reorder panel */
+  if (!codeMode) {
+    return (
+      statusLines === "correct" &&
+      statusCx    === "correct" &&
+      statusA     === "correct"
+    );
+  }
+
+  /* code panel (eval‑mode only) */
+  return !evaluationMode || questions[current]?.codeDone;   // true if
+                                                            //   • not in eval‑mode, or
+                                                            //   • code was submitted
+};
 
 const buildEliminatedCode = (type) => {
   const linesArr = [...questions[current].plainSolution];  
@@ -430,25 +446,9 @@ const percent        = Math.round(((pos + 1) / total) * 100);
     <h1 className="text-2xl font-bold text-app-primary">
       Write your solution
     </h1>
-    <span className="text-sm text-app-text">
-      Question {current + 1} of {questions.length}
-    </span>
   </div>
 
-  {/* progress bar */}
-  {/* ░░░ Progress bar + Auto‑blank controls ░░░ */}
 <div>
-  {/* progress bar */}
-  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-    <div
-      className="bg-app-primary h-full rounded-full
-                 transition-[width] duration-500 ease-out"   // smooth slide
-      style={{ width: `${percent}%` }}
-    />
-  </div>
-
-  {/* % label */}
-  <div className="text-xs text-gray-500 mt-1">{percent}% Complete</div>
 
   {/* auto‑blank toolbar */}
   <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -510,27 +510,31 @@ const percent        = Math.round(((pos + 1) / total) * 100);
               {q.title}
             </h2>
             <div className="flex gap-2 items-center flex-wrap">
-              <span
+                <span
                 className={`px-3 py-1 rounded-full text-sm ${
                   diffClasses[q.difficulty] || "bg-gray-100 text-gray-800"
                 }`}
               >
                 {q.difficulty}
               </span>
-              <button
-                onClick={() => move(-1)}
-                className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 disabled:opacity-50"
-              >
-                ← Previous
-              </button>
-              <button
-                onClick={() => move(1)}
-                disabled={current === questions.length - 1}
-                className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 disabled:opacity-50"
-              >
-                Next →
-              </button>
-            </div>
+  <button
+    onClick={() => move(1)}
+    disabled={!canAdvance() || pos === total - 1}
+    className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium
+               hover:bg-gray-300 disabled:opacity-50"
+  >
+    Next →
+  </button>
+
+  <button
+    onClick={() => move(1)}
+    disabled={pos === total - 1}
+    className="px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-sm font-medium
+               hover:bg-gray-200"
+  >
+    Skip →
+  </button>
+</div>
           </div>
           {q.prompt && (
             <p className="text-sm text-gray-700 mb-4 whitespace-pre-wrap">
@@ -749,28 +753,32 @@ const percent        = Math.round(((pos + 1) / total) * 100);
               {q.title}
             </h2>
             <div className="flex gap-2 items-center flex-wrap">
-              <span
+                <span
                 className={`px-3 py-1 rounded-full text-sm ${
                   diffClasses[q.difficulty] || "bg-gray-100 text-gray-800"
                 }`}
               >
                 {q.difficulty}
               </span>
-              <button
-                onClick={() => move(-1)}
-                disabled={pos === 0}
-                className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 disabled:opacity-50"
-              >
-                ← Previous
-              </button>
-              <button
-                onClick={() => move(1)}
-                disabled={pos === total - 1}
-                className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 disabled:opacity-50"
-              >
-                Next →
-              </button>
-            </div>
+  <button
+    onClick={() => move(1)}
+    disabled={!canAdvance() || current === questions.length - 1}
+    className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium
+               hover:bg-gray-300 disabled:opacity-50"
+  >
+    Next →
+  </button>
+
+  <button
+    onClick={() => move(1)}
+    disabled={current === questions.length - 1}
+    className="px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-sm font-medium
+               hover:bg-gray-200"
+  >
+    Skip →
+  </button>
+</div>
+
           </div>
           {q.prompt && (
             <p className="text-sm text-gray-700 mb-4 whitespace-pre-wrap">
@@ -942,15 +950,26 @@ const percent        = Math.round(((pos + 1) / total) * 100);
               Check Complexities
             </button>
             {statusCx === "correct" && (
-              <span className="self-center text-sm font-medium text-green-600">
-                ✔ Correct
-              </span>
-            )}
-            {statusCx === "incorrect" && (
-              <span className="self-center text-sm font-medium text-red-600">
-                ✖ Try again
-              </span>
-            )}
+  <span className="self-center text-sm font-medium text-green-600">
+    ✔ Both complexities correct
+  </span>
+)}
+{statusCx === "time" && (
+  <span className="self-center text-sm font-medium text-red-600">
+    ✖ Time complexity wrong
+  </span>
+)}
+{statusCx === "space" && (
+  <span className="self-center text-sm font-medium text-red-600">
+    ✖ Space complexity wrong
+  </span>
+)}
+{statusCx === "both" && (
+  <span className="self-center text-sm font-medium text-red-600">
+    ✖ Time & space complexities wrong
+  </span>
+)}
+
           </div>
         </div>
       </div>
