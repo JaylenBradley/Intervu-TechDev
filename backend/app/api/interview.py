@@ -6,13 +6,15 @@ from app.schemas.interview import (
     TechnicalInterviewResponse,
     LeetCodeQuestion,
     UserAnswer,
-    AnswerFeedback
+    AnswerFeedback,
+    HintRequest,
+    HintResponse,
 )
 from app.crud.questionnaire import get_questionnaire
-from app.utils.technical_interview import generate_leetcode_questions, evaluate_answer
+from app.utils.technical_interview import generate_leetcode_questions, evaluate_answer, generate_single_hint
 import os
 from google import genai
-from google.genai import types
+
 
 router = APIRouter()
 genai.api_key = os.getenv('GEMINI_API_KEY')
@@ -73,3 +75,23 @@ def evaluate_technical_answer(answer: UserAnswer):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to evaluate answer: {str(e)}") 
+    
+@router.post("/interview/technical/hint", response_model=HintResponse)
+def get_technical_hint(req: HintRequest):
+    """
+    Return ONE constructive hint for the user's current attempt.
+    No full solution is revealed.
+    """
+    try:
+        hint_obj = generate_single_hint(
+            question       = req.question,
+            user_answer    = req.user_answer,
+            target_company = req.target_company,
+            difficulty     = req.difficulty,
+        )
+        return HintResponse(hint=hint_obj.get("hint", "Keep refining your approach."))
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate hint: {e}"
+        )

@@ -5,7 +5,7 @@ import {
   useSensor,
   useSensors,
   closestCenter,
-} from "@dnd-kit/core";
+} from "@dnd-kit/core";   
 import {
   SortableContext,
   useSortable,
@@ -123,6 +123,8 @@ export default function Blind75Prep({ userId }) {
   const [codeFeedback,  setCodeFeedback]  = useState(null);  
   const [elimCount, setElimCount] = useState(1); 
   const [elimMode,  setElimMode]  = useState("none");  
+  const [hintText,     setHintText]     = useState("");  
+  const [hintLoading,  setHintLoading]  = useState(false);
 
   /* sensors */
   const sensors = useSensors(
@@ -140,6 +142,15 @@ export default function Blind75Prep({ userId }) {
     setWrongLineIds(new Set());
     setWrongDetail(null); 
   };
+
+  const getStepInfo = (idx, isCode, evalMode, totalQ) => {
+  if (!evalMode) {
+    return { pos: idx, total: totalQ };                 // simple case
+  }
+  const totalSteps = totalQ * 2;                        // reorder+code per Q
+  const pos        = idx * 2 + (isCode ? 1 : 0);        // 0‑based
+  return { pos, total: totalSteps };
+};
 
   /* fetch quiz questions */
   const startQuiz = async () => {
@@ -174,6 +185,30 @@ setQuestions(
     }
   };
 
+  const fetchHint = async () => {
+  setHintLoading(true);
+  setHintText("");
+  try {
+    const BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+    const res  = await fetch(`${BASE}/api/interview/technical/hint`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        question:       questions[current].prompt,      
+        user_answer:    codeAnswer || "(no answer yet)",
+        target_company: "generic",
+        difficulty:     questions[current].difficulty.toLowerCase(),
+      }),
+    });
+    if (!res.ok) throw new Error("bad response");
+    const data = await res.json();          // {hint: "..."}
+    setHintText(data.hint || "No hint returned.");
+  } catch (e) {
+    setHintText("Could not fetch hint. Please try again.");
+  } finally {
+    setHintLoading(false);
+  }
+};
 
   /* derived helpers */
   const currentLines =
@@ -280,48 +315,51 @@ setQuestions(
     setWrongLineIds(new Set());
   };
 
-  const handleTab = (e) => {
-  if (e.key === "Tab") {
-    e.preventDefault();
-    const start = e.target.selectionStart;
-    const end   = e.target.selectionEnd;
-    const newVal =
-      codeAnswer.slice(0, start) + "    " + codeAnswer.slice(end);
-    setCodeAnswer(newVal);
-    setTimeout(() => {
-      e.target.selectionStart = e.target.selectionEnd = start + 4;
-    });
-  }
-};
-
- const move = (dir) => {
-  /*  handle back from code view  */
-  if (dir === -1 && codeMode) {
+  /* ─── Unified pager ─────────────────────────────────────────── */
+const move = (dir) => {
+  /* in CODE view ─────────────────────────────── */
+  if (codeMode) {
+    if (dir === -1) {
+      /* go back to the reorder stage of the SAME question */
+      setCodeMode(false);
+      return;
+    }
+    /* dir === +1 → next question, reorder stage */
+    if (current === questions.length - 1) return;      // at very last step
+    setCurrent((c) => c + 1);
     setCodeMode(false);
+    resetStatus();
     return;
   }
 
-  /*  going forward  */
-  if (dir === 1 && evaluationMode && !codeMode && !questions[current].codeDone) {
-    setCodeMode(true);
-    setCodeAnswer("");
-    let initial = "";
-    if (elimMode === "random") initial = buildEliminatedCode("random");
-    if (elimMode === "last")   initial = buildEliminatedCode("last");
-    setCodeAnswer(initial);
-    setCodeFeedback(null);
+  /* in REORDER view ───────────────────────────── */
+  if (dir === 1) {
+    /* if evaluation mode, first open its code panel */
+    if (evaluationMode) {
+      setCodeMode(true);
+      setCodeAnswer("");          // fresh editor
+      if (elimMode !== "none") {  // pre‑blank lines if requested
+        setCodeAnswer(buildEliminatedCode(elimMode));
+      }
+      setCodeFeedback(null);
+      return;
+    }
+    /* else jump to next question */
+    if (current === questions.length - 1) return;
+    setCurrent((c) => c + 1);
+    resetStatus();
     return;
   }
 
-  /*  regular pagination  */
-  const atFirst = current === 0;
-  const atLast  = current === questions.length - 1;
-  if ((dir === -1 && atFirst) || (dir === 1 && atLast)) return;
-
-  setCurrent((c) => c + dir);
-  setCodeMode(false);
+  /* dir === -1 : previous */
+  if (current === 0) return;        // already at the first question
+  setCurrent((c) => c - 1);
+  /* land on the code panel of the previous Q if we’re in eval‑mode
+     *and* that panel was already opened once; otherwise reorder stage */
+  setCodeMode(evaluationMode && questions[current - 1]?.codeDone);
   resetStatus();
 };
+
 
 const buildEliminatedCode = (type) => {
   const linesArr = [...questions[current].plainSolution];  
@@ -373,23 +411,99 @@ const submitCode = async () => {
   }
 };
 
-
+const totalSteps   = evaluationMode ? questions.length * 2 : questions.length;
+/* reorder view  → even  step (0, 2, 4 …)
+   code   view   → odd   step (1, 3, 5 …)                       */
+const stepIndex    = codeMode ? current * 2 + 1 : current * 2;
+const { pos, total } = getStepInfo(current, codeMode, evaluationMode, questions.length);
+const percent        = Math.round(((pos + 1) / total) * 100);
   /* UI steps */
     if (codeMode) {
   const q = questions[current];
   return (
     <div className="min-h-screen bg-app-background py-10">
       <div className="max-w-4xl mx-auto space-y-6 px-4">
-        {/* header */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex justify-between items-center mb-2 flex-wrap">
-            <h1 className="text-2xl font-bold text-app-primary">
-              Write your solution
-            </h1>
-          </div>
-        </div>
+        {/* header with progress */}
+        <div className="bg-white rounded-xl shadow-lg p-6 space-y-3">
+  {/* top row: title & question counter */}
+  <div className="flex justify-between items-center flex-wrap gap-4">
+    <h1 className="text-2xl font-bold text-app-primary">
+      Write your solution
+    </h1>
+    <span className="text-sm text-app-text">
+      Question {current + 1} of {questions.length}
+    </span>
+  </div>
 
-        {/* problem card */}
+  {/* progress bar */}
+  {/* ░░░ Progress bar + Auto‑blank controls ░░░ */}
+<div>
+  {/* progress bar */}
+  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+    <div
+      className="bg-app-primary h-full rounded-full
+                 transition-[width] duration-500 ease-out"   // smooth slide
+      style={{ width: `${percent}%` }}
+    />
+  </div>
+
+  {/* % label */}
+  <div className="text-xs text-gray-500 mt-1">{percent}% Complete</div>
+
+  {/* auto‑blank toolbar */}
+  <div className="mt-3 flex flex-wrap items-center gap-3">
+    <span className="font-medium text-app-text text-sm">Auto‑blank:</span>
+
+    {/* toggle (Random / Last) */}
+    <div className="inline-flex rounded-lg shadow-sm overflow-hidden">
+      {["random", "last"].map((m, i) => (
+        <button
+          key={m}
+          onClick={() => setElimMode(m)}
+          className={`px-4 py-1.5 text-sm font-semibold border
+                      ${i === 0 ? "rounded-l-lg" : "rounded-r-lg"}
+                      ${
+                        elimMode === m
+                          ? "bg-app-primary text-white"
+                          : "bg-white text-app-text hover:bg-gray-50"
+                      }`}
+        >
+          {m === "random" ? "Random N" : "Last N"}
+        </button>
+      ))}
+    </div>
+
+    {/* N input */}
+    <input
+      type="number"
+      min={1}
+      max={99}
+      disabled={elimMode === "none"}
+      value={elimCount}
+      onChange={(e) => setElimCount(e.target.value)}
+      className="h-9 w-20 px-3 border rounded-lg text-sm
+                 bg-white focus:ring-app-primary focus:border-app-primary
+                 disabled:opacity-50"
+    />
+
+    {/* Apply */}
+    <button
+      onClick={() =>
+        elimMode !== "none" && setCodeAnswer(buildEliminatedCode(elimMode))
+      }
+      disabled={elimMode === "none"}
+      className="btn-primary px-4 py-1.5 rounded-lg font-semibold
+                 disabled:opacity-50"
+    >
+      Apply
+    </button>
+  </div>
+</div>
+
+  
+</div>
+
+            {/* problem card */}
         <div className="bg-white rounded-xl shadow-lg p-6 overflow-hidden">
           <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
             <h2 className="text-xl font-semibold text-app-primary mr-4 truncate">
@@ -403,9 +517,21 @@ const submitCode = async () => {
               >
                 {q.difficulty}
               </span>
+              <button
+                onClick={() => move(-1)}
+                className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 disabled:opacity-50"
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={() => move(1)}
+                disabled={current === questions.length - 1}
+                className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 disabled:opacity-50"
+              >
+                Next →
+              </button>
             </div>
           </div>
-
           {q.prompt && (
             <p className="text-sm text-gray-700 mb-4 whitespace-pre-wrap">
               {q.prompt}
@@ -413,44 +539,48 @@ const submitCode = async () => {
           )}
         </div>
 
+
         {/* code editor */}
-<div className="bg-white rounded-xl shadow-lg p-6 space-y-4">
-  <CodeMirror
-    value={codeAnswer}
-    height="240px"
-    basicSetup={{
-      lineNumbers: true,
-      highlightActiveLine: false,
-      indentWithTab: true,
-    }}
-    extensions={[python()]}
-    onChange={(val) => setCodeAnswer(val)}
-    theme="light"
-    className="border border-app-primary rounded-lg"
-  />
+        <div className="bg-white rounded-xl shadow-lg p-6 space-y-4">
+          <CodeMirror
+            value={codeAnswer}
+            height="240px"
+            basicSetup={{
+              lineNumbers: true,
+              highlightActiveLine: false,
+              indentWithTab: true,
+            }}
+            extensions={[python()]}
+            onChange={(val) => setCodeAnswer(val)}
+            theme="light"
+            className="border border-app-primary rounded-lg"
+          />
 
           <div className="flex gap-4 mt-4">
             <button
               onClick={submitCode}
               disabled={codeLoading || !codeAnswer.trim()}
-              className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90 disabled:opacity-50"
+          className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
             >
               {codeLoading ? "Evaluating…" : "Submit"}
             </button>
-            <button
-              onClick={() => move(-1)}
-              className="bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
-            >
-              ← Back
-            </button>
-            {codeFeedback && (
+           
+            <div className="flex items-start gap-4">
               <button
-                onClick={() => move(1)}
-                className="bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
+                onClick={fetchHint}
+                disabled={hintLoading}
+                className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
               >
-                Next →
+                {hintLoading ? "Loading…" : "Need a hint?"}
               </button>
-            )}
+
+              {/* show hint once fetched */}
+              {hintText && (
+                <p className="flex-1 text-sm text-app-primary bg-amber-50 border border-amber-200 rounded p-2">
+                  {hintText}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* feedback */}
@@ -590,8 +720,6 @@ const submitCode = async () => {
 
   /* Quiz step */
   const q = questions[current];
-  const percent = Math.round(((current + 1) / questions.length) * 100);
-
   return (
     <div className="min-h-screen bg-app-background py-10">
       <div className="max-w-4xl mx-auto space-y-6 px-4">
@@ -630,21 +758,20 @@ const submitCode = async () => {
               </span>
               <button
                 onClick={() => move(-1)}
-                disabled={current === 0}
+                disabled={pos === 0}
                 className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 disabled:opacity-50"
               >
                 ← Previous
               </button>
               <button
                 onClick={() => move(1)}
-                disabled={current === questions.length - 1}
+                disabled={pos === total - 1}
                 className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 disabled:opacity-50"
               >
                 Next →
               </button>
             </div>
           </div>
-
           {q.prompt && (
             <p className="text-sm text-gray-700 mb-4 whitespace-pre-wrap">
               {q.prompt}
@@ -681,7 +808,7 @@ const submitCode = async () => {
           <div className="flex flex-wrap mt-4 gap-4">
             <button
               onClick={checkApproach}
-              className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
+          className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
             >
               Check Approach
             </button>
@@ -738,13 +865,13 @@ const submitCode = async () => {
           <div className="flex flex-wrap gap-4">
             <button
               onClick={checkLines}
-              className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
-            >
+                className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
+            >  
               Check Code
             </button>
             <button
               onClick={shuffleCurrent}
-              className="bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
+                className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
             >
               Shuffle Again
             </button>
@@ -810,7 +937,7 @@ const submitCode = async () => {
           <div className="flex flex-wrap mt-4 gap-4">
             <button
               onClick={checkComplexities}
-              className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-opacity-90"
+          className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
             >
               Check Complexities
             </button>

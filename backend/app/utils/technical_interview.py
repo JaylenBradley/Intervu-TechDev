@@ -119,6 +119,7 @@ Scoring rules:
 - Deduct up to 20 points for code quality issues (poor readability, bad structure).
 - Deduct up to 10 points for missing edge cases.
 - If the solution is perfect, give 100. If there are minor issues, deduct points as specified above. Be specific and consistent.
+ - If you see a line that says # ??? that means there is a missing line, deduct points accordingly.
 - Do not give arbitrary scores like 85.5 for a perfect solution.
 
 Evaluation criteria:
@@ -171,6 +172,61 @@ Score should be 0-100. Be constructive and specific.
             "time_complexity": "Unknown",
             "space_complexity": "Unknown"
         }
+
+def generate_single_hint(question: str,
+                         user_answer: str,
+                         target_company: str,
+                         difficulty: str) -> dict:
+    """
+    Return ONE constructive hint – no full solution – based on the user's code.
+    """
+    prompt = f"""
+You are a senior software engineer conducting a {difficulty}‑level interview
+for {target_company}. The candidate attempted the following problem:
+
+Problem:
+\"\"\"{question}\"\"\"
+
+Candidate's current answer / notes (may be incomplete):
+\"\"\"{user_answer}\"\"\"
+
+🟢 TASK:
+• Give **one** concise, constructive hint that will help them move forward.
+• Do **NOT** reveal the full solution, optimal algorithm, or code.
+• The hint may point out a weakness (e.g. “Consider using a sliding window…”)
+  or remind them of an edge‑case to handle.
+• Keep it under 40 words.
+
+Return ONLY valid JSON:
+
+{{
+  "hint": "Your single hint here (≤ 40 words)"
+}}
+"""
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.0-flash-exp",
+            config=types.GenerateContentConfig(
+                temperature=0.6,
+                max_output_tokens=200
+            ),
+            contents=prompt
+        )
+
+        text = response.text.strip()
+        if text.startswith("```json"):
+            text = text[7:-3]
+        elif text.startswith("```"):
+            text = text[3:-3]
+
+        data = json.loads(text)
+        data["hint"] = data.get("hint", "").strip().split("\n")[0][:200]
+        return data
+
+    except Exception as e:
+        logging.error(f"Hint‑generation error: {e}")
+        return {"hint": "Think about a different data‑structure or edge‑case you may be missing."}
 
 def get_fallback_questions(difficulty, num_questions):
     """
