@@ -20,6 +20,9 @@ import CreateResume from "./pages/CreateResume.jsx";
 import ResumeFeedback from "./pages/ResumeFeedback.jsx";
 import AiInterviewerMain from "./pages/AiInterviewerMain.jsx";
 import TechnicalPrep from "./pages/TechnicalPrep.jsx";
+import ChangeResume from "./pages/ChangeResume";
+import UploadResume from "./pages/UploadResume.jsx";
+import TailorResume from "./pages/TailorResume.jsx";
 
 const App = () => {
   const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
@@ -110,13 +113,12 @@ const App = () => {
             <Roadmap user={user} onRoadmapGenerated={() => setHasRoadmap(true)}/>
           </ProtectedRoute>
         }/>
-        <Route path="/resume" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <ResumeMain />
-          </ProtectedRoute>
-        }/>
-        <Route path="/resume/improve" element={<CreateResume/>}/>
-        <Route path="/resume/feedback" element={<ResumeFeedback/>}/>
+        <Route path="/resume" element={<ResumeMain user={user}/>} />
+        <Route path="/resume/improve" element={<CreateResume user={user}/>} />
+        <Route path="/resume/feedback" element={<ResumeFeedback user={user}/>} />
+        <Route path="/resume/change" element={<ChangeResume user={user}/>} />
+        <Route path="/resume/upload" element={<UploadResume user={user}/>} />
+        <Route path="/resume/tailor" element={<TailorResume user={user}/>} />
         <Route path="/dashboard" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <JobDashboard user={user}/>

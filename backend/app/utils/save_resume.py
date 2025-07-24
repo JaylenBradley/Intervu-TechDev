@@ -1,6 +1,7 @@
 import re
 from fpdf import FPDF
 from docx import Document
+from docx.shared import Pt
 
 def save_text_as_pdf(text, output_path):
     BOLD_RE = re.compile(r'(\*\*.+\*\*)')
@@ -94,7 +95,7 @@ def save_text_as_docx(text, output_path):
             p = doc.add_paragraph()
             run = p.add_run(line)
             run.bold = True
-            run.font.size = docx.shared.Pt(11)
+            run.font.size = Pt(11)
             continue
 
         # BULLETS

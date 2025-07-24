@@ -136,6 +136,48 @@ Examples of what to ANALYZE:
 Resume text:
 {resume_text}"""
 
+def parse_resume_prompt(resume_text: str) -> str:
+    return f"""
+You are a resume parser. Given the following resume text, output ONLY valid JSON (no markdown, no commentary, no newlines except inside JSON values). Use this schema:
+
+{{
+  "education": [{{"institution": str, "degree": str, "start_date": str, "end_date": str}}],
+  "experience": [{{"company": str, "title": str, "start_date": str, "end_date": str, "description": str}}],
+  "skills": [str],
+  "certifications": [str],
+  "projects": [{{"name": str, "description": str}}],
+  "contact_info": {{"name": str, "email": str, "phone": str}}
+}}
+
+If a field is missing, return an empty list or empty string for that field. Do not invent information. Return only the JSON object.
+
+Resume text:
+{resume_text}
+"""
+
+def tailor_resume_prompt(resume_text: str, job_description: str) -> str:
+    return f"""
+You are a professional resume optimization assistant. Your task is to rewrite the user's resume so it is tailored to the following job description, but you must strictly follow these rules:
+
+STRICT RULES:
+- Only use information that is present in the user's original resume or the provided job description.
+- Do NOT invent, hallucinate, or fabricate any achievements, skills, experiences, or facts that are not explicitly present in the resume or job description.
+- If a required skill or qualification is in the job description but not in the resume, do NOT add it to the resume.
+- You may rephrase, reorganize, or emphasize content from the resume to better match the job description, but do not add new content.
+- If you are unsure about any information, leave it out.
+- Do not make up numbers, companies, or job titles.
+- Use clear, concise bullet points and section headings.
+- The tailored resume should be ATS-friendly and factual.
+
+Job Description:
+{job_description}
+
+Original Resume:
+{resume_text}
+
+Return only the fully rewritten, tailored resume in plain text (no markdown, no commentary, no JSON, no code blocks).
+"""
+
 def roadmap_prompt(profile, current_date):
     return f"""
     You are a professional career roadmap assistant helping users improve their chances of landing their dream job.
@@ -192,7 +234,7 @@ def roadmap_prompt(profile, current_date):
       - Use phrasing like “during your junior year” or “in the upcoming semester” to stay time-accurate.
 
     Output formatting:
-    - The output must be pure, raw JSON (not a string). Do not return the JSON wrapped in quotes or with escaped characters like \n or \". Return an actual JSON object that can be parsed directly.
+    - The output must be pure, raw JSON (not a string). Do not return the JSON wrapped in quotes or with escaped characters like \n or ". Return an actual JSON object that can be parsed directly.
     - Do not include any Markdown, plain text, explanations, commentary, or symbols like asterisks, hash signs, or HTML tags.
     - Do not wrap the JSON in markdown-style code blocks (e.g., triple backticks ``` or ```json).
     - Do not return the JSON as a string (with escaped newlines or quotes).
