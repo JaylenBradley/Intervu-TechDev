@@ -32,14 +32,35 @@ def create_job_description_roadmap(db: Session, data):
         .first()
     )
 
-    skills = ""
+    education_info = []
     if resume_obj and hasattr(resume_obj, "parsed_data") and resume_obj.parsed_data:
-        skills = resume_obj.parsed_data.get("skills", "")
-    skills_str = ", ".join(skills) if isinstance(skills, list) else str(skills)
+        education_list = resume_obj.parsed_data.get("education", [])
+        if isinstance(education_list, list):
+            education_info = [
+                {
+                    "degree": edu.get("degree", ""),
+                    "end_date": edu.get("end_date", "")
+                }
+                for edu in education_list
+                if isinstance(edu, dict)
+            ]
 
-    job_description_roadmap_json = generate_job_description_roadmap(profile, skills_str, data.job_description)
+    skills_str = ""
+    if resume_obj and hasattr(resume_obj, "parsed_data") and resume_obj.parsed_data:
+        skills = resume_obj.parsed_data.get("skills", [])
+        if isinstance(skills, list):
+            skills_str = ", ".join(skills)
+        elif isinstance(skills, str):
+            skills_str = skills
 
-    title = getattr(data, "title", None) or "Untitled Roadmap"
+    job_description_roadmap_json = generate_job_description_roadmap(profile, education_info, skills_str, data.job_description)
+
+    existing_count = db.query(JobDescriptionRoadmap).filter(JobDescriptionRoadmap.user_id == data.user_id).count()
+
+    title = getattr(data, "title", None)
+    if not title or title == "Untitled Roadmap":
+        title = f"Roadmap #{existing_count + 1}"
+
     job_description_roadmap = JobDescriptionRoadmap(
         user_id=data.user_id,
         job_description=data.job_description,

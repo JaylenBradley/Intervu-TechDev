@@ -15,6 +15,10 @@ const TailorResume = ({ user }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const loadResume = async () => {
       if (!user || !user.id) return;
       try {

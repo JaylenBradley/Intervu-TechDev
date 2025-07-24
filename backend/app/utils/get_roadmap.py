@@ -3,7 +3,6 @@ from google import genai
 import json
 from dotenv import load_dotenv
 import os
-import re
 from app.core.prompts import roadmap_prompt
 from google.genai import types
 
@@ -26,11 +25,13 @@ def get_roadmap(questionnaire_res, current_date = datetime.datetime.now().strfti
         contents=formatted_prompt
     )
 
-    text = res.text if hasattr(res, "text") else str(res)
-    match = re.search(r"\{.*\}", text, re.DOTALL)
-    if not match:
+    text = res.candidates[0].content.parts[0].text
+
+    start = text.find('{')
+    end = text.rfind('}')
+    if start == -1 or end == -1 or end <= start:
         raise ValueError(f"Gemini did not return JSON. Raw output:\n{text}")
-    json_str = match.group(0)
+    json_str = text[start:end + 1]
     try:
         roadmap_json = json.loads(json_str)
     except Exception as e:

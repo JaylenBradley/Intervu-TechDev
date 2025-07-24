@@ -6,7 +6,7 @@ import { fetchQuestionnaireStatus, getUserByFirebaseId } from "./services/userSe
 import { fetchRoadmap } from "./services/roadmapServices";
 import AiInterviewerMain from "./pages/AiInterviewerMain.jsx";
 import AuthForm from "./containers/AuthForm.jsx";
-import GeneralRoadmap from "./pages/GeneralRoadmap.jsx";
+import CareerGoalRoadmap from "./pages/CareerGoalRoadmap.jsx";
 import BehavioralPrep from "./pages/BehavioralPrep.jsx";
 import Blind75Prep from "./pages/Blind75Prep.jsx";
 import ChangeResume from "./pages/ChangeResume";
@@ -21,8 +21,9 @@ import Questionnaire from "./pages/Questionnaire.jsx";
 import ResumeMain from "./pages/ResumeMain.jsx";
 import ResumeFeedback from "./pages/ResumeFeedback.jsx";
 import RoadmapMain from "./pages/RoadmapMain.jsx";
+import ScrollToTopButton from "./components/ScrollToTopButton.jsx";
 import SkillGapRoadmap from "./pages/SkillGapRoadmap.jsx";
-// import SkillGapRoadmapDetail from "./pages/SkillGapRoadmapDetail.jsx";
+import SkillGapRoadmapDetail from "./pages/SkillGapRoadmapDetail.jsx";
 import TailorResume from "./pages/TailorResume.jsx";
 import TechnicalPrep from "./pages/TechnicalPrep.jsx";
 import UploadResume from "./pages/UploadResume.jsx";
@@ -116,21 +117,21 @@ const App = () => {
           <RoadmapMain user={user}/>
         </ProtectedRoute>
         }/>
-        <Route path="/roadmaps/careergoal-roadmap" element={
+        <Route path="/roadmaps/career-goal-roadmap" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <GeneralRoadmap user={user} onRoadmapGenerated={() => setHasRoadmap(true)}/>
+            <CareerGoalRoadmap user={user} onRoadmapGenerated={() => setHasRoadmap(true)}/>
           </ProtectedRoute>
         }/>
-        <Route path="/roadmaps/skillgap-roadmap" element={
+        <Route path="/roadmaps/skill-gap-roadmap" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <SkillGapRoadmap user={user}/>
           </ProtectedRoute>
         }/>
-        {/*<Route path="/roadmaps/skillgap-roadmap/:id" element={*/}
-        {/*  <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>*/}
-        {/*    <SkillGapRoadmapDetail user={user}/>*/}
-        {/*  </ProtectedRoute>*/}
-        {/*}/>*/}
+        <Route path="/roadmaps/skill-gap-roadmap/:id" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <SkillGapRoadmapDetail user={user}/>
+          </ProtectedRoute>
+        }/>
         <Route path="/resume" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <ResumeMain user={user}/>
@@ -188,6 +189,7 @@ const App = () => {
         }/>
         <Route path="*" element={<ErrorPage/>}/>
       </Routes>
+      <ScrollToTopButton />
       <Footer/>
     </>
   );

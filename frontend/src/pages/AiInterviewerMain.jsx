@@ -3,9 +3,14 @@ import { GiTalk } from "react-icons/gi";
 import { GrPersonalComputer } from "react-icons/gr";
 import { FaRobot } from "react-icons/fa";
 import { PiBrain } from "react-icons/pi";
+import { useEffect } from "react";
 
 const AiInterviewerMain = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col items-center py-16">

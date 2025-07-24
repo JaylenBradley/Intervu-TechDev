@@ -16,6 +16,7 @@ const ProtectedRoute = ({ user, questionnaireComplete, children }) => {
     }
     return <Navigate to="/signin" />;
   }
+
   if (!questionnaireComplete && location.pathname !== "/questionnaire") {
     if (!alerted.current) {
       alert("Please complete the questionnaire before accessing this page");
@@ -23,6 +24,7 @@ const ProtectedRoute = ({ user, questionnaireComplete, children }) => {
     }
     return <Navigate to="/questionnaire" />;
   }
+
   return children;
 };
 

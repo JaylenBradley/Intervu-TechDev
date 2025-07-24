@@ -1,13 +1,19 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { fetchRoadmap, generateRoadmap } from "../services/roadmapServices";
 import { parseRoadmapJson } from "../utils/parseRoadmapJson.js";
 
-const GeneralRoadmap = ({ user, onRoadmapGenerated }) => {
-  const [roadmap, setRoadmap] = useState(null);
-  const [loading, setLoading] = useState(true);
+const CareerGoalRoadmap = ({ user, onRoadmapGenerated }) => {
+  const [error, setError] = useState("");
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState("");
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [roadmap, setRoadmap] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -38,7 +44,7 @@ const GeneralRoadmap = ({ user, onRoadmapGenerated }) => {
       setGenError(err.message);
       setGenerating(false);
     }
-  };
+  }
 
   if (loading || generating) return (
     <div className="min-h-screen flex items-center justify-center">
@@ -71,6 +77,12 @@ const GeneralRoadmap = ({ user, onRoadmapGenerated }) => {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="bg-app-accent text-app-text border border-app-primary p-8 rounded-xl shadow-lg w-full max-w-4xl mt-16 mb-16">
+        <button
+          className="mb-4 btn-primary px-4 py-2 rounded-md cursor-pointer"
+          onClick={() => navigate("/roadmaps")}
+        >
+          &larr; Back to Roadmap Hub
+        </button>
         <h2 className="text-2xl font-bold mb-6 text-center text-app-primary">Your Personalized Roadmap</h2>
         {roadmap.specific_goals && (
           <>
@@ -107,16 +119,31 @@ const GeneralRoadmap = ({ user, onRoadmapGenerated }) => {
             </div>
           </>
         )}
-        {roadmap.youtube_search_terms && roadmap.youtube_search_terms.length > 0 &&(
+        {roadmap.youtube_videos && roadmap.youtube_videos.length > 0 && (
           <>
-            <h3 className="font-semibold text-lg mt-4 mb-2">YouTube Videos</h3>
+            <h4 className="font-semibold mt-4 mb-2">YouTube Videos</h4>
             <ul className="list-disc ml-6">
-              {roadmap.youtube_search_terms.map((item, i) => (
+              {roadmap.youtube_videos.map((item, i) => (
                 <li key={i}>
-                  <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-app-primary underline">
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-app-primary underline"
+                  >
                     {item.title}
                   </a>
                 </li>
+              ))}
+            </ul>
+          </>
+        )}
+        {roadmap.youtube_search_terms && roadmap.youtube_search_terms.length > 0 && (
+          <>
+            <h4 className="font-semibold mt-4 mb-2">YouTube Search Terms</h4>
+            <ul className="list-disc ml-6">
+              {roadmap.youtube_search_terms.map((term, i) => (
+                <li key={i}>{term}</li>
               ))}
             </ul>
           </>
@@ -155,4 +182,4 @@ const GeneralRoadmap = ({ user, onRoadmapGenerated }) => {
   );
 };
 
-export default GeneralRoadmap;
+export default CareerGoalRoadmap;

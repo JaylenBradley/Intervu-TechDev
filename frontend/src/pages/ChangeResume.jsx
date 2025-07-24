@@ -1,5 +1,4 @@
-
-import React, { useState, useRef } from "react";
+import  {useState, useRef, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 
 const ChangeResume = ({ user }) => {
@@ -9,6 +8,10 @@ const ChangeResume = ({ user }) => {
   const [error, setError] = useState("");
   const fileInputRef = useRef();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {

@@ -35,6 +35,10 @@ const JobDashboard = ({ user }) => {
     status: "applied"
   });
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const loadJobs = async () => {
     try {
       setLoading(true);

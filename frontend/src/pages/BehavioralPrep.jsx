@@ -42,6 +42,10 @@ const BehavioralPrep = ({ user }) => {
   const mediaRecorderRef = useRef(null);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const load = async () => {
       if (!user) return;
 

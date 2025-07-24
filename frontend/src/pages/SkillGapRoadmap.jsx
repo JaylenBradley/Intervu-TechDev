@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   fetchJobDescRoadmaps,
   createJobDescRoadmap,
-  updateJobDescRoadmapTitle,
+  deleteJobDescRoadmap
 } from "../services/roadmapServices";
 import { parseRoadmapJson } from "../utils/parseRoadmapJson.js";
 
@@ -13,11 +14,11 @@ const SkillGapRoadmap = ({ user }) => {
   const [genError, setGenError] = useState("");
   const [error, setError] = useState("");
   const [jobDescription, setJobDescription] = useState("");
-  const [expanded, setExpanded] = useState({});
-  const [editingTitleId, setEditingTitleId] = useState(null);
-  const [titleInput, setTitleInput] = useState("");
-  const [titleLoading, setTitleLoading] = useState(false);
-  const [titleError, setTitleError] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -34,7 +35,7 @@ const SkillGapRoadmap = ({ user }) => {
       }
     };
     getRoadmaps();
-  }, [user, generating, titleLoading]);
+  }, [user, generating]);
 
   const handleGenerateRoadmap = async () => {
     setGenerating(true);
@@ -49,37 +50,14 @@ const SkillGapRoadmap = ({ user }) => {
     }
   };
 
-  const toggleJobDesc = (id) => {
-    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const startEditTitle = (id, currentTitle) => {
-    setEditingTitleId(id);
-    setTitleInput(currentTitle);
-    setTitleError("");
-  };
-
-  const cancelEditTitle = () => {
-    setEditingTitleId(null);
-    setTitleInput("");
-    setTitleError("");
-  };
-
-  const saveTitle = async (id) => {
-    if (!titleInput.trim()) {
-      setTitleError("Title cannot be empty.");
-      return;
-    }
-    setTitleLoading(true);
-    setTitleError("");
+  const handleDeleteRoadmap = async (roadmapId) => {
+    if (!window.confirm("Are you sure you want to delete this roadmap?")) return;
     try {
-      await updateJobDescRoadmapTitle(id, titleInput.trim());
-      setEditingTitleId(null);
-      setTitleInput("");
+      await deleteJobDescRoadmap(roadmapId);
+      setRoadmaps((prev) => prev.filter((r) => r.id !== roadmapId));
+      alert("Roadmap sucessfully deleted");
     } catch (err) {
-      setTitleError(err.message);
-    } finally {
-      setTitleLoading(false);
+      setError(err.message || "Failed to delete roadmap.");
     }
   };
 
@@ -93,222 +71,94 @@ const SkillGapRoadmap = ({ user }) => {
   if (error) return <div className="text-red-600">{error}</div>;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center">
-      <div className="bg-app-accent text-app-text border border-app-primary p-8 rounded-xl shadow-lg w-full max-w-4xl mt-16 mb-16">
-        <h2 className="text-2xl font-bold mb-6 text-center text-app-primary">
-          Job Description Roadmaps
-        </h2>
-        <form
-          className="mb-8 flex flex-col items-center"
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleGenerateRoadmap();
-          }}
+    <div className="min-h-screen flex flex-col items-center">
+      <div className="w-full max-w-5xl mt-16 mb-16">
+        <button
+          className="mb-4 btn-primary px-4 py-2 rounded-md cursor-pointer"
+          onClick={() => navigate("/roadmaps")}
         >
-          <textarea
-            className="w-full border border-app-primary rounded-lg p-3 mb-4"
-            rows={4}
-            placeholder="Paste a job description here to generate a roadmap..."
-            value={jobDescription}
-            onChange={(e) => setJobDescription(e.target.value)}
-            required
-            disabled={generating}
-          />
-          {genError && <div className="text-red-600 mb-2">{genError}</div>}
-          <button
-            className="btn-primary w-full py-3 text-lg font-semibold rounded-lg cursor-pointer"
-            type="submit"
-            disabled={generating || !jobDescription}
+          &larr; Back to Roadmap Hub
+        </button>
+        <h2 className="text-3xl font-bold mb-8 text-center text-app-primary">
+          Skill Gap Roadmaps
+        </h2>
+        {/* Generation Card */}
+        <div className="bg-white border border-app-primary rounded-xl shadow-lg p-8 mb-10 flex flex-col items-center">
+          <h3 className="text-xl font-semibold mb-4 text-app-primary">Generate a New Roadmap</h3>
+          <form
+            className="w-full flex flex-col items-center"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleGenerateRoadmap();
+            }}
           >
-            {generating ? <div className="loader-md mr-2"></div> : null}
-            {generating ? "Generating..." : "Generate Job Description Roadmap"}
-          </button>
-        </form>
-        {roadmaps.length === 0 && (
-          <div className="text-center text-app-primary">
-            No job description roadmaps found.
-          </div>
-        )}
-        {roadmaps.map((roadmapObj) => {
-          const roadmap = parseRoadmapJson(roadmapObj.roadmap_json);
-          return (
-            <div
-              key={roadmapObj.id}
-              className="mb-8 p-6 border rounded-lg bg-white shadow"
+            <textarea
+              className="w-full border-2 border-app-primary rounded-lg p-3 mb-4"
+              rows={4}
+              placeholder="Paste a job description here to generate a roadmap..."
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
+              required
+              disabled={generating}
+            />
+            {genError && <div className="text-red-600 mb-2">{genError}</div>}
+            <button
+              className="btn-primary w-full py-3 text-lg font-semibold rounded-lg cursor-pointer"
+              type="submit"
+              disabled={generating || !jobDescription}
             >
-            <div className="flex items-center justify-between mb-2">
-              {editingTitleId === roadmapObj.id ? (
-                <>
-                  <input
-                    className="border border-app-primary rounded px-2 py-1 w-100"
-                    value={titleInput}
-                    onChange={(e) => setTitleInput(e.target.value)}
-                    disabled={titleLoading}
-                    maxLength={100}
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      className="btn-danger rounded-md min-w-[87px] px-3 py-1 cursor-pointer"
-                      onClick={cancelEditTitle}
-                      disabled={titleLoading}
-                      type="button"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      className="btn-primary rounded-md min-w-[87px] px-3 py-1 cursor-pointer"
-                      onClick={() => saveTitle(roadmapObj.id)}
-                      disabled={titleLoading}
-                      type="button"
-                    >
-                      {titleLoading ? "Saving..." : "Save"}
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <h3 className="font-semibold text-lg truncate max-w-s">
+              {generating ? <div className="loader-md mr-2"></div> : null}
+              {generating ? "Generating..." : "Generate Roadmap"}
+            </button>
+          </form>
+        </div>
+        {/* Roadmap Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {roadmaps.length === 0 && (
+            <div className="col-span-full text-center text-app-primary">
+              No job description roadmaps found
+            </div>
+          )}
+          {roadmaps.map((roadmapObj) => {
+            const roadmap = parseRoadmapJson(roadmapObj.roadmap_json);
+            return (
+              <div
+                key={roadmapObj.id}
+                className="card bg-white border-2 border-app-primary rounded-xl shadow-md p-6 flex flex-col justify-between hover:shadow-xl transition-shadow duration-200"
+              >
+                <div>
+                  <h3 className="font-bold text-lg text-app-primary mb-2 truncate">
                     {roadmapObj.title || roadmap.title || "Untitled Roadmap"}
                   </h3>
+                  <div className="text-sm text-gray-500 gap-1 mb-4">
+                    <span>Created: </span>
+                    {roadmapObj.created_at
+                      ? new Date(roadmapObj.created_at).toLocaleDateString()
+                      : ""}
+                  </div>
+                  <div className="text-app-text text-sm line-clamp-3 mb-4">
+                    {roadmapObj.job_description.slice(0, 120)}...
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2 mt-4">
                   <button
-                    className="btn-primary rounded-md min-w-[87px] px-3 py-1 cursor-pointer"
-                    onClick={() =>
-                      startEditTitle(
-                        roadmapObj.id,
-                        roadmapObj.title || roadmap.title || "Untitled Roadmap"
-                      )
-                    }
+                    className="btn-primary px-4 py-2 rounded-md cursor-pointer w-full"
+                    onClick={() => navigate(`/roadmaps/skill-gap-roadmap/${roadmapObj.id}`)}
+                  >
+                    View Roadmap
+                  </button>
+                  <button
+                    className="btn-danger px-4 py-2 rounded-md cursor-pointer w-full"
+                    onClick={() => handleDeleteRoadmap(roadmapObj.id)}
                     type="button"
                   >
-                    Edit Title
+                    Delete
                   </button>
-                </>
-              )}
-            </div>
-              {editingTitleId === roadmapObj.id && titleError && (
-                <div className="text-red-600 mb-2">{titleError}</div>
-              )}
-              <div className="flex items-center justify-end mb-2">
-              <button
-                className="btn-primary rounded-md min-w-[87px] px-3 py-1 cursor-pointer"
-                onClick={() => toggleJobDesc(roadmapObj.id)}
-                type="button"
-              >
-                {expanded[roadmapObj.id] ? "Hide Job Description" : "Show Job Description"}
-              </button>
+                </div>
               </div>
-              {expanded[roadmapObj.id] && (
-                <pre className="bg-gray-100 p-2 rounded mb-4 whitespace-pre-wrap">
-                  {roadmapObj.job_description}
-                </pre>
-              )}
-              {roadmap.specific_goals && (
-                <>
-                  <h4 className="font-semibold mt-1 mb-2">Specific Goals</h4>
-                  <ul className="list-disc ml-6">
-                    {roadmap.specific_goals.map((goal, i) => (
-                      <li key={i}>{goal}</li>
-                    ))}
-                  </ul>
-                </>
-              )}
-              {roadmap.roadmap && (
-                <>
-                  <h4 className="font-semibold mt-4 mb-2">
-                    Step-by-Step Roadmap
-                  </h4>
-                  <ul className="list-disc ml-6">
-                    {roadmap.roadmap.map((step, i) => (
-                      <li key={i}>{step}</li>
-                    ))}
-                  </ul>
-                </>
-              )}
-              {roadmap.skills && (
-                <>
-                  <h4 className="font-semibold mt-4 mb-2">Skills</h4>
-                  <div className="flex gap-8">
-                    <div>
-                      <strong>Technical:</strong>
-                      <ul className="list-disc ml-6">
-                        {(roadmap.skills.technical || []).map((s, i) => (
-                          <li key={i}>{s}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <strong>Soft:</strong>
-                      <ul className="list-disc ml-6">
-                        {(roadmap.skills.soft || []).map((s, i) => (
-                          <li key={i}>{s}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </>
-              )}
-              {roadmap.youtube_videos && roadmap.youtube_videos.length > 0 && (
-                <>
-                  <h4 className="font-semibold mt-4 mb-2">YouTube Videos</h4>
-                  <ul className="list-disc ml-6">
-                    {roadmap.youtube_videos.map((item, i) => (
-                      <li key={i}>
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-app-primary underline"
-                        >
-                          {item.title}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
-              {roadmap.job_titles && (
-                <>
-                  <h4 className="font-semibold mt-4 mb-2">
-                    Job Titles You Can Apply For
-                  </h4>
-                  <ul className="list-disc ml-6">
-                    {roadmap.job_titles.map((title, i) => (
-                      <li key={i}>{title}</li>
-                    ))}
-                  </ul>
-                </>
-              )}
-              {roadmap.resource_links && (
-                <>
-                  <h4 className="font-semibold mt-4 mb-2">Resource Links</h4>
-                  {Object.entries(roadmap.resource_links).map(
-                    ([cat, items]) =>
-                      items &&
-                      items.length > 0 && (
-                        <div key={cat} className="mb-2">
-                          <strong className="capitalize">{cat}:</strong>
-                          <ul className="list-disc ml-6">
-                            {items.map((item, i) => (
-                              <li key={i}>
-                                <a
-                                  href={item.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-app-primary underline"
-                                >
-                                  {item.title}
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )
-                  )}
-                </>
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

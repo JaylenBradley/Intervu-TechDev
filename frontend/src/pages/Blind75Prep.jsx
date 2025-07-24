@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import {useEffect, useState} from "react";
 import {
   DndContext,
   PointerSensor,
@@ -98,7 +98,7 @@ function SortableLine({ line, isWrong, highlightCorrect }) {
 }
 
 /* Main component */
-export default function Blind75Prep({ userId }) {
+const Blind75Prep = ({ userId }) => {
   /* state */
   const [step, setStep] = useState("config");
   const [numQuestions, setNumQuestions] = useState(3);
@@ -117,6 +117,10 @@ export default function Blind75Prep({ userId }) {
   const [codeAnswer,    setCodeAnswer]    = useState("");
   const [codeLoading,   setCodeLoading]   = useState(false);
   const [codeFeedback,  setCodeFeedback]  = useState(null);  
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   /* sensors */
   const sensors = useSensors(
@@ -716,4 +720,6 @@ const submitCode = async () => {
       </div>
     </div>
   );
-}
+};
+
+export default Blind75Prep

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const CreateResume = ({ user }) => {
@@ -7,6 +7,10 @@ const CreateResume = ({ user }) => {
   const [improveError, setImproveError] = useState("");
   const [exporting, setExporting] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleImproveResume = async () => {
     setImproving(true);

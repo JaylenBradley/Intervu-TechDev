@@ -33,6 +33,10 @@ const Questionnaire = ({ onComplete, user }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const load = async () => {
       if (!user) return;
       setFetching(true);
@@ -130,7 +134,7 @@ const Questionnaire = ({ onComplete, user }) => {
     setGenError("");
     try {
       await generateRoadmap(user.id);
-      navigate("/roadmaps/careergoal-roadmap");
+      navigate("/roadmaps/career-goal-roadmap");
     } catch (err) {
       setGenError(err.message);
     } finally {
@@ -322,7 +326,7 @@ const Questionnaire = ({ onComplete, user }) => {
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="bg-white text-black rounded-xl p-8 shadow-2xl max-w-md w-full border border-app-primary">
               <h3 className="text-xl font-bold mb-4 text-center">Generate Roadmap?</h3>
-              <p className="mb-6 text-center">Would you like to generate your personalized roadmap now?</p>
+              <p className="mb-6 text-center">Would you like to generate your personalized roadmap based on your questionnaire?</p>
               <div className="flex justify-center gap-4">
                 <button
                   onClick={handleModalYes}

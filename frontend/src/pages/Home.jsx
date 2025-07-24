@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BsLinkedin, BsGraphUpArrow } from "react-icons/bs";
 import { FaGithubSquare } from "react-icons/fa";
@@ -57,10 +58,9 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
   const showModal = user && !questionnaireComplete;
   const navigate = useNavigate();
 
-  const goTo = (path) => {
-    navigate(path);
+  useEffect(() => {
     window.scrollTo(0, 0);
-  };
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col items-center">
@@ -74,7 +74,7 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
         </p>
         <button
           className="btn-primary px-8 py-3 text-xl font-semibold rounded-lg mt-2 shadow cursor-pointer"
-          onClick={() => goTo(user ? "/roadmaps" : "/signup")}
+          onClick={() => navigate(user ? "/roadmaps" : "/signup")}
         >
           {user ? (hasRoadmap ? "View Your Roadmaps" : "Create Your Roadmap") : "Get Started"}
         </button>
@@ -125,7 +125,7 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
         </h2>
         <button
           className="btn-primary px-8 py-3 text-xl font-semibold rounded-lg shadow cursor-pointer"
-          onClick={() => goTo(user ? "/roadmaps" : "/signup")}
+          onClick={() => navigate(user ? "/roadmaps" : "/signup")}
         >
           {user ? "Go to Your Roadmaps" : "Sign Up Now"}
         </button>
@@ -143,7 +143,7 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
               </p>
               <button
                 className="btn-primary w-full py-3 text-lg font-semibold rounded-lg cursor-pointer"
-                onClick={() => goTo("/questionnaire")}
+                onClick={() => navigate("/questionnaire")}
               >
                 Go to Questionnaire
               </button>

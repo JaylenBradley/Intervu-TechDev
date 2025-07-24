@@ -4,7 +4,6 @@ from app.core.prompts import job_description_roadmap_prompt
 import json
 from dotenv import load_dotenv
 import os
-import re
 from google.genai import types
 
 load_dotenv()
@@ -13,8 +12,8 @@ genai.api_key = api_key
 
 client = genai.Client(api_key=api_key)
 
-def generate_job_description_roadmap(profile, skills, job_description, current_date = datetime.datetime.now().strftime("%B %d, %Y")):
-    prompt = job_description_roadmap_prompt(profile, skills, job_description, current_date)
+def generate_job_description_roadmap(profile, education, skills, job_description, current_date = datetime.datetime.now().strftime("%B %d, %Y")):
+    prompt = job_description_roadmap_prompt(profile, education, skills, job_description, current_date)
     res = client.models.generate_content(
         model="gemini-2.5-flash",
         config=types.GenerateContentConfig(
@@ -23,11 +22,13 @@ def generate_job_description_roadmap(profile, skills, job_description, current_d
         contents=prompt
     )
 
-    text = res.text if hasattr(res, "text") else str(res)
-    match = re.search(r"\{.*\}", text, re.DOTALL)
-    if not match:
+    text = res.candidates[0].content.parts[0].text
+
+    start = text.find('{')
+    end = text.rfind('}')
+    if start == -1 or end == -1 or end <= start:
         raise ValueError(f"Gemini did not return JSON. Raw output:\n{text}")
-    json_str = match.group(0)
+    json_str = text[start:end + 1]
     try:
         job_description_roadmap_json = json.loads(json_str)
     except Exception as e:
