@@ -259,7 +259,7 @@ async def export_to_sheets(user_id: int, request: Request, db: Session = Depends
                     "booleanRule": {
                         "condition": {
                             "type": "CUSTOM_FORMULA",
-                            "values": [{"userEnteredValue": "=ISEVEN(ROW())"}]
+                            "values": [{"userEnteredValue": "=ISEVEN(ROW(A2))"}]
                         },
                         "format": {
                             "backgroundColor": {"red": 0.96, "green": 0.98, "blue": 1}
