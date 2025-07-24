@@ -329,44 +329,46 @@ const canAdvance = () => {
   );
 };
 
-const buildEliminatedCode = (type) => {
-  const linesArr = [...questions[current].plainSolution];
-  const SAFE_OFFSET = 2;
-  if (linesArr.length <= SAFE_OFFSET) return linesArr.join("\n");
+ const buildEliminatedCode = (type) => {
+  const SAFE_LINES = 2;                               // keep first 2 lines
+  const arr = [...questions[current].plainSolution];
 
-  const n = Math.min(elimCount, linesArr.length - SAFE_OFFSET);
+// Off → return ONLY the first two lines
+  if (type === "none") {
+      return arr.slice(0, SAFE_LINES).join("\n");
+  }
+
+  /* Random N / Last N logic (unchanged) */
+  const n = Math.min(elimCount, arr.length - SAFE_LINES);
 
   if (type === "last") {
     for (let i = 0; i < n; i++) {
-      const idx = linesArr.length - 1 - i;
-      if (idx >= SAFE_OFFSET) linesArr[idx] = "# Type line here";
+      const idx = arr.length - 1 - i;
+      if (idx >= SAFE_LINES) arr[idx] = "# Type answer here";
     }
-  } else {
+  } else { // "random"
     const idxs = new Set();
     while (idxs.size < n) {
-      const randIdx = SAFE_OFFSET + Math.floor(Math.random() * (linesArr.length - SAFE_OFFSET));
-      idxs.add(randIdx);
+      idxs.add(
+        SAFE_LINES + Math.floor(Math.random() * (arr.length - SAFE_LINES))
+      );
     }
-    idxs.forEach((i) => (linesArr[i] = "# Type line here"));
+    idxs.forEach((i) => (arr[i] = "# Type answer here"));
   }
 
-  return linesArr.join("\n");
+  return arr.join("\n");
 };
 
 useEffect(() => {
   if (!showCode) return;
 
   setCodeAnswer(prev => {
-    if (prev.trim() !== "") return prev;
-
-    const draft =
-      elimMode === "none"
-        ? questions[current].plainSolution.join("\n")   
-        : buildEliminatedCode(elimMode);             
-
-    return draft;
+    if (prev.trim() !== "") return prev;       
+    return buildEliminatedCode(elimMode);
   });
-}, [showCode, current, elimMode, elimCount]); 
+}, [showCode, current, elimMode, elimCount]);
+
+
 const submitCode = async () => {
   if (!codeAnswer.trim()) return;
 

@@ -54,10 +54,13 @@ return (
             {/* Apply button (no persistence) */}
             <button
             onClick={() =>
-                elimMode === "none"
-                    ? setCodeAnswer("")                       
-                    : setCodeAnswer(buildEliminatedCode(elimMode))  
+                setCodeAnswer(
+                    elimMode === "none"
+                    ? buildEliminatedCode("none")
+                    : buildEliminatedCode(elimMode)
+                )
             }
+
             className="btn-primary px-4 py-1.5 rounded-lg font-semibold"
             >
             Apply
