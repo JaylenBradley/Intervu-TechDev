@@ -174,7 +174,8 @@ def roadmap_prompt(profile, current_date):
     - "specific_goals": A list of specific goals based on the user's target role. Do not include dates, commentary, or number the items. Use plain bullet-style strings in the list.
         - If the user mentions any target companies (e.g., Google, JPMorgan), at least one goal must reflect the intent to pursue opportunities there.
 
-    - "roadmap": A numbered, step-by-step ordered list of actions the user should take to reach their target role. Include courses, certifications, internships, and projects. Use incrementing numbers in the list as string values, e.g., "1. Complete XYZ certification".
+    - "roadmap": A logically ordered, step-by-step list of actions the user should take to reach their target role. Include courses, certifications, internships, and projects. 
+      - The list should reflect a natural progression but should not include numbers, bullet points, or any formatting markers in the output
 
     - "skills": An object with two subcategories:
       - "technical": A list of technical skills to acquire.
@@ -271,7 +272,8 @@ def job_description_roadmap_prompt(profile, education, skills, job_description, 
     - "specific_goals": A list of specific goals based on the user's target role. Do not include dates, commentary, or number the items. Use plain bullet-style strings in the list.
         - If the user mentions any target companies (e.g., Google, JPMorgan), at least one goal must reflect the intent to pursue opportunities there.
 
-    - "roadmap": A numbered, step-by-step ordered list of actions the user should take to reach their target role. Include courses, certifications, internships, and projects. Use incrementing numbers in the list as string values, e.g., "1. Complete XYZ certification".
+    - "roadmap": A logically ordered, step-by-step list of actions the user should take to reach their target role. Include courses, certifications, internships, and projects. 
+      - The list should reflect a natural progression but should not include numbers, bullet points, or any formatting markers in the output
 
     - "skills": An object with two subcategories:
       - "technical": A list of technical skills to acquire.

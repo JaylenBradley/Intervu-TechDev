@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchRoadmap, generateRoadmap } from "../services/roadmapServices";
 import { parseRoadmapJson } from "../utils/parseRoadmapJson.js";
+import { FaMapSigns } from "react-icons/fa";
 
 const CareerGoalRoadmap = ({ user, onRoadmapGenerated }) => {
   const [error, setError] = useState("");
@@ -46,7 +47,7 @@ const CareerGoalRoadmap = ({ user, onRoadmapGenerated }) => {
     }
   }
 
-  if (loading || generating) return (
+  if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="loader-lg"/>
     </div>
@@ -55,18 +56,32 @@ const CareerGoalRoadmap = ({ user, onRoadmapGenerated }) => {
   if (!roadmap && user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-app-accent text-app-text border border-app-primary p-8 rounded-xl shadow-lg w-full max-w-md mt-16 mb-16 flex flex-col items-center">
-          <h2 className="text-2xl font-bold mb-4 text-center text-app-primary">No Roadmap Found</h2>
-          <p className="mb-6 text-center">You haven't generated a roadmap yet. Would you like to generate one now?</p>
+        <div className="bg-white text-app-text border-2 border-app-primary p-10 rounded-2xl shadow-2xl w-full max-w-lg mt-20 mb-20 flex flex-col items-center">
+          <FaMapSigns className="text-app-primary text-5xl mb-4" />
+          <h2 className="text-3xl font-extrabold mb-3 text-center text-app-primary">No Roadmap Found</h2>
+          <p className="mb-6 text-lg text-center text-gray-600">
+            You haven't generated a roadmap yet.<br />Would you like to generate one now?
+          </p>
           {genError && <div className="text-red-600 mb-2">{genError}</div>}
           <button
-            className="btn-primary w-full py-3 text-lg font-semibold rounded-lg"
+            className="btn-primary w-full py-3 text-lg font-semibold rounded-lg cursor-pointer mt-2"
             onClick={handleGenerateRoadmap}
             disabled={generating}
           >
-            {generating ? <div className="loader-md mr-2"></div> : null}
-            {generating ? "Generating..." : "Generate Roadmap"}
+            Generate Roadmap
           </button>
+          {generating && (
+            <>
+              <div className="fixed inset-0 z-40 backdrop-blur-sm pointer-events-auto"></div>
+              <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="bg-white text-black rounded-xl p-8 shadow-2xl max-w-md w-full border border-app-primary flex flex-col items-center">
+                  <div className="loader-md mb-4"></div>
+                  <span className="font-semibold text-lg">Generating your roadmap...</span>
+                  {genError && <div className="text-red-600 mt-4">{genError}</div>}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );

@@ -39,6 +39,7 @@ const SkillGapRoadmap = ({ user }) => {
 
   const handleGenerateRoadmap = async () => {
     setGenerating(true);
+    setLoading(false);
     setGenError("");
     try {
       await createJobDescRoadmap(user.id, jobDescription);
@@ -61,7 +62,7 @@ const SkillGapRoadmap = ({ user }) => {
     }
   };
 
-  if (loading || generating)
+  if (loading && !generating)
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="loader-lg" />
@@ -107,9 +108,20 @@ const SkillGapRoadmap = ({ user }) => {
               type="submit"
               disabled={generating || !jobDescription}
             >
-              {generating ? <div className="loader-md mr-2"></div> : null}
-              {generating ? "Generating..." : "Generate Roadmap"}
+              Generate Roadmap
             </button>
+            {generating && (
+              <>
+                <div className="fixed inset-0 z-40 backdrop-blur-sm pointer-events-auto"></div>
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                  <div className="bg-white text-black rounded-xl p-8 shadow-2xl max-w-md w-full border border-app-primary flex flex-col items-center">
+                    <div className="loader-md mb-4"></div>
+                    <span className="font-semibold text-lg">Generating your roadmap...</span>
+                    {genError && <div className="text-red-600 mt-4">{genError}</div>}
+                  </div>
+                </div>
+              </>
+          )}
           </form>
         </div>
         {/* Roadmap Cards */}
