@@ -3,7 +3,7 @@ from typing import List, Optional
 from enum import Enum
 
 class HintRequest(BaseModel):
-    question_id: str | None = None   
+    question: str | None = None 
     user_answer: str
     target_company: str
     difficulty: str                 

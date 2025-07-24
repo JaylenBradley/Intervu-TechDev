@@ -28,12 +28,12 @@ const AiInterviewerMain = () => {
           <GrPersonalComputer className="text-5xl mb-4" />
           <h2 className="text-2xl font-bold text-app-primary mb-2">Technical Interview</h2>
           <p className="text-app-text text-center mb-4">
-            Practice coding questions, system design, and algorithmic problems tailored
-            to your background and target companies
+            Practice Leetcode by figuring out the approach, arranging code blocks
+        and identifying time and space complexities.
           </p>
           <button
             className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
-            onClick={() => navigate("/ai-interviewer/technical")}
+            onClick={() => navigate("/ai-interviewer/blind75")}
           >
             Start Technical Prep
           </button>
@@ -44,28 +44,12 @@ const AiInterviewerMain = () => {
           <GiTalk className="text-5xl mb-4" />
           <h2 className="text-2xl font-bold text-app-primary mb-2">Behavioral Interview</h2>
           <p className="text-app-text text-center mb-4">
-            Practice behavioral questions, STAR method responses, and
+            Practice answering behavioral questions, STAR method responses, and
             situational scenarios with AI feedback
           </p>
           <button
             className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
             onClick={() => navigate("/ai-interviewer/behavioral")}
-          >
-            Start Behavioral Prep
-          </button>
-        </div>
-        <div
-          className="bg-white rounded-xl shadow-lg p-8 w-80 border-2 border-app-primary hover:scale-105 transition-transform flex flex-col items-center"
-        >
-          <PiBrain className="text-5xl mb-4" />
-          <h2 className="text-2xl font-bold text-app-primary mb-2">Blind 75 Test</h2>
-          <p className="text-app-text text-center mb-4">
-            Solve Blind 75 problems by arranging code blocks in the
-            correct order and identifying time and space complexities.
-          </p>
-          <button
-            className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
-            onClick={() => navigate("/ai-interviewer/blind75")}
           >
             Start Behavioral Prep
           </button>

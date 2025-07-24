@@ -1,138 +1,72 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  DndContext,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  closestCenter,
-} from "@dnd-kit/core";   
+  DndContext, PointerSensor, useSensor, useSensors, closestCenter,
+} from "@dnd-kit/core";
 import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-  arrayMove,
+  SortableContext, arrayMove, verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import CodeMirror from "@uiw/react-codemirror";
-import { python } from "@codemirror/lang-python";
 
-// ==================== CONSTANTS ====================
-const INDENT_WIDTH = 48;
-const MAX_INDENT = 4;
-const COMPLEXITIES = [
-  "O(1)",
-  "O(log n)",
-  "O(n)",
-  "O(n log n)",
-  "O(n^2)",
-  "O(n^3)",
-  "O(2^n)",
-  "O(n!)",
-];
-const APPROACHES = [
-  "Two Pointers", "Sliding Window", "Binary Search",
-  "BFS", "Dynamic Programming", "Backtracking", "Tree",
-  "Greedy", "Topological Sort", "Graph",
-  "Heap", "Stack", "Intervals", "Linked List", "Array & Hashing",
-];
-const diffClasses = {
-  Easy: "bg-green-100 text-green-800",
-  Medium: "bg-yellow-100 text-yellow-800",
-  Hard: "bg-red-100 text-red-800",
-};
+import PracticePanel from "../components/PracticePanel";
+import CodePanel     from "../components/CodePanel";
+import {
+  toLines, MAX_INDENT, INDENT_WIDTH, diffClasses,
+} from "../utils/constants";
 
-// ==================== UTILITY FUNCTIONS ====================
-const genId = () =>
-  typeof crypto !== "undefined" && crypto.randomUUID
-    ? crypto.randomUUID()
-    : Math.random().toString(36).slice(2);
+function useLocalStorage(key, fallback) {
+  const [value, setValue] = useState(() => {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch {
+      return fallback;
+    }
+  });
 
-export function toLines(problem) {
-  return problem.solution
-    .map((l, idx) => ({
-      id: genId(),
-      order: idx,
-      text: l.text.trimStart(),
-      indentLevel: l.indentLevel,
-    }))
-    .sort(() => Math.random() - 0.5);
-}
-
-const isLineCorrect = (line, idx) =>
-  line.userIndent === line.indentLevel && line.order === idx;
-
-// ==================== COMPONENTS ====================
-/* Sortable line component */
-function SortableLine({ line, isWrong, highlightCorrect }) {
-  const {
-    setNodeRef,
-    attributes,
-    listeners,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: line.id, data: { indent: line.userIndent } });
-
-  const left = line.userIndent * INDENT_WIDTH;
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    marginLeft: left,
-    width: `calc(100% - ${left}px)`,
-    opacity: isDragging ? 0.7 : 1,
+  const persist = (next) => {
+    setValue(next);
+    localStorage.setItem(key, JSON.stringify(next));
   };
 
-  return (
-    <div
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      style={style}
-      className={`flex items-center rounded p-2 cursor-grab select-none ${
-        highlightCorrect ? "bg-green-100" : isWrong ? "bg-red-200" : "bg-gray-100"
-      }`}
-    >
-      <pre
-        className="font-mono text-sm whitespace-pre overflow-x-auto"
-        style={{ tabSize: 4 }}
-      >
-        {line.text}
-      </pre>
-    </div>
-  );
+  return [value, persist];
 }
 
-/* Main component */
 export default function Blind75Prep({ userId }) {
-  /* state */
-  const [step, setStep] = useState("config");
+  const [savedCfg, saveCfg] = useLocalStorage("blind75-settings", {
+    evaluationMode : false,
+    elimMode       : "none",
+    elimCount      : 1,
+  });
+
+  /* ── per‑session / runtime copy ──────────────────────── */
+  const [evaluationMode, setEvaluationMode] = useState(savedCfg.evaluationMode);
+  const [elimMode,       setElimMode]       = useState(savedCfg.elimMode);
+  const [elimCount,      setElimCount]      = useState(savedCfg.elimCount);
+
+  /* ── ui state ────────────────────────────────────────── */
+  const [showConfig , setShowConfig ] = useState(false);
+  const [uiStep     , setUiStep     ] = useState("config");
   const [numQuestions, setNumQuestions] = useState(3);
-  const [questions, setQuestions] = useState([]);
-  const [current, setCurrent] = useState(0);
-  const [statusLines, setStatusLines] = useState(null);
-  const [statusCx, setStatusCx] = useState(null);
-  const [statusA, setStatusA] = useState(null);
-  const [wrongDetail, setWrongDetail] = useState(null); 
-  const [timeSel, setTimeSel] = useState("");
-  const [spaceSel, setSpaceSel] = useState("");
-  const [approachSel, setApproachSel] = useState("");
+  const [questions    , setQuestions    ] = useState([]);
+  const [current      , setCurrent      ] = useState(0);
+  const [showCode     , setShowCode     ] = useState(false);
+
+  /* ── per‑question state ─────────────────── */
+  const [statusLines , setStatusLines ] = useState(null);
+  const [statusCx    , setStatusCx    ] = useState(null);
+  const [statusA     , setStatusA     ] = useState(null);
+  const [wrongDetail , setWrongDetail ] = useState(null);
+  const [timeSel     , setTimeSel     ] = useState("");
+  const [spaceSel    , setSpaceSel    ] = useState("");
+  const [approachSel , setApproachSel ] = useState("");
   const [wrongLineIds, setWrongLineIds] = useState(new Set());
-  const [evaluationMode, setEvaluationMode] = useState(false);   
-  const [codeMode,      setCodeMode]      = useState(false);     
-  const [codeAnswer,    setCodeAnswer]    = useState("");
-  const [codeLoading,   setCodeLoading]   = useState(false);
-  const [codeFeedback,  setCodeFeedback]  = useState(null);  
-  const [elimCount, setElimCount] = useState(1); 
-  const [elimMode,  setElimMode]  = useState("none");  
-  const [hintText,     setHintText]     = useState("");  
-  const [hintLoading,  setHintLoading]  = useState(false);
+  const [codeAnswer  , setCodeAnswer  ] = useState("");
+  const [codeLoading , setCodeLoading ] = useState(false);
+  const [codeFeedback, setCodeFeedback] = useState(null);
+  const [hintText    , setHintText    ] = useState("");
+  const [hintLoading , setHintLoading ] = useState(false);
 
-  /* sensors */
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 4 } })
-  );
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
-  /* helper to reset status for a new question */
   const resetStatus = () => {
     setStatusLines(null);
     setStatusCx(null);
@@ -141,21 +75,34 @@ export default function Blind75Prep({ userId }) {
     setSpaceSel("");
     setApproachSel("");
     setWrongLineIds(new Set());
-    setWrongDetail(null); 
+    setWrongDetail(null);
+    setCodeAnswer("");
+    setCodeFeedback(null);
+    setHintText("");
   };
 
-  const getStepInfo = (idx, isCode, evalMode, totalQ) => {
-  if (!evalMode) {
-    return { pos: idx, total: totalQ };                 // simple case
-  }
-  const totalSteps = totalQ * 2;                        // reorder+code per Q
-  const pos        = idx * 2 + (isCode ? 1 : 0);        // 0‑based
-  return { pos, total: totalSteps };
-};
+  /* ── navigation helpers ─────────────────────────────── */
+  const next = () => {
+    if (!showCode && evaluationMode) { setShowCode(true); return; }
+    if (current < questions.length - 1) {
+      setCurrent((c) => c + 1);
+      setShowCode(false);
+      resetStatus();
+    }
+  };
 
-  /* fetch quiz questions */
+  const skip = () => {
+    if (!showCode && evaluationMode) { setShowCode(true); return; }
+    if (current < questions.length - 1) {
+      setCurrent((c) => c + 1);
+      setShowCode(false);
+      resetStatus();
+    }
+  };
+
+  /* ── load questions ─────────────────────────────────── */
   const startQuiz = async () => {
-    setStep("loading");
+    setUiStep("loading");
     try {
       const BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
       const fetchOne = async () => {
@@ -163,26 +110,22 @@ export default function Blind75Prep({ userId }) {
         if (!r.ok) throw new Error("Bad response");
         return r.json();
       };
-      const data = await Promise.all(
-        Array.from({ length: numQuestions }, fetchOne)
+      const data = await Promise.all(Array.from({ length: numQuestions }, fetchOne));
+      setQuestions(
+        data.map((p) => ({
+          ...p,
+          lines        : toLines(p),
+          codeDone     : false,
+          plainSolution: p.solution.map((l) => "    ".repeat(l.indentLevel) + l.text.trimStart()),
+        })),
       );
-setQuestions(
-  data.map((p) => ({
-    ...p,
-    lines: toLines(p),
-    codeDone: false,
-    plainSolution: p.solution.map(
-      (l) => "    ".repeat(l.indentLevel) + l.text.trimStart()
-    ),
-  }))
-);
       setCurrent(0);
       resetStatus();
-      setStep("quiz");
-    } catch (e) {
-      console.error(e);
+      setUiStep("quiz");
+    } catch (err) {
+      console.error(err);
       alert("Failed to load problems");
-      setStep("config");
+      setUiStep("config");
     }
   };
 
@@ -202,18 +145,18 @@ setQuestions(
       }),
     });
     if (!res.ok) throw new Error("bad response");
-    const data = await res.json();          // {hint: "..."}
+    const data = await res.json();         
     setHintText(data.hint || "No hint returned.");
   } catch (e) {
+    console.log(e)
     setHintText("Could not fetch hint. Please try again.");
   } finally {
     setHintLoading(false);
   }
 };
 
-  /* derived helpers */
   const currentLines =
-    step === "quiz" ? questions[current]?.lines ?? [] : [];
+    uiStep === "quiz" ? questions[current]?.lines ?? [] : [];
 
   const updateLines = (lines) =>
     setQuestions((qs) => {
@@ -274,30 +217,8 @@ setQuestions(
         .filter((l, idx) => l.userIndent !== l.indentLevel || l.order !== idx)
         .map((l) => l.id)
     )
-  );
-    /* POST /wrong */
-    if (!userId) {
-      console.warn("No userId – skipping /wrong submission");
-      return;
-    }
-    try {
-      const BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
-      await fetch(`${BASE}/api/blind75/wrong`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: userId,
-          title: questions[current].title,
-          problem_type: questions[current].type,
-          difficulty: questions[current].difficulty,
-        }),
-      });
-    } catch (err) {
-      console.error("Failed to record wrong problem", err);
-    }
-  };
+  );}
 
-  /* complexity check */
  const checkComplexities = () => {
   const q = questions[current];
 
@@ -323,58 +244,21 @@ setQuestions(
     setWrongLineIds(new Set());
   };
 
-  /* ─── Unified pager ─────────────────────────────────────────── */
-const move = (dir) => {
-  /* in CODE view ─────────────────────────────── */
-  if (codeMode) {
-    if (dir === -1) {
-      /* go back to the reorder stage of the SAME question */
-      setCodeMode(false);
-      return;
-    }
-    /* dir === +1 → next question, reorder stage */
-    if (current === questions.length - 1) return;      // at very last step
-    setCurrent((c) => c + 1);
-    setCodeMode(false);
-    resetStatus();
-    return;
-  }
-
-  /* in REORDER view ───────────────────────────── */
-  if (dir === 1) {
-    /* if evaluation mode, first open its code panel */
-    if (evaluationMode) {
-      setCodeMode(true);
-      setCodeAnswer("");          // fresh editor
-      if (elimMode !== "none") {  // pre‑blank lines if requested
-        setCodeAnswer(buildEliminatedCode(elimMode));
-      }
-      setCodeFeedback(null);
-      return;
-    }
-    /* else jump to next question */
-    if (current === questions.length - 1) return;
-    setCurrent((c) => c + 1);
-    resetStatus();
-    return;
-  }
-};
 
 
 const canAdvance = () => {
-  /* reorder panel */
-  if (!codeMode) {
+  if (!showCode) {
     return (
-      statusLines === "correct" &&
-      statusCx    === "correct" &&
-      statusA     === "correct"
+      statusLines === "correct" &&  
+      statusCx    === "correct" &&  
+      statusA     === "correct"     
     );
   }
 
-  /* code panel (eval‑mode only) */
-  return !evaluationMode || questions[current]?.codeDone;   // true if
-                                                            //   • not in eval‑mode, or
-                                                            //   • code was submitted
+  return (
+    !evaluationMode ||
+    questions[current]?.codeDone === true
+  );
 };
 
 const buildEliminatedCode = (type) => {
@@ -394,7 +278,20 @@ const buildEliminatedCode = (type) => {
 
   return linesArr.join("\n");
 };
+useEffect(() => {
+  if (!showCode) return;
 
+  setCodeAnswer(prev => {
+    if (prev.trim() !== "") return prev;
+
+    const draft =
+      elimMode === "none"
+        ? questions[current].plainSolution.join("\n")   
+        : buildEliminatedCode(elimMode);             
+
+    return draft;
+  });
+}, [showCode, current, elimMode, elimCount]); 
 const submitCode = async () => {
   if (!codeAnswer.trim()) return;
 
@@ -427,291 +324,169 @@ const submitCode = async () => {
   }
 };
 
-const totalSteps   = evaluationMode ? questions.length * 2 : questions.length;
-/* reorder view  → even  step (0, 2, 4 …)
-   code   view   → odd   step (1, 3, 5 …)                       */
-const stepIndex    = codeMode ? current * 2 + 1 : current * 2;
-const { pos, total } = getStepInfo(current, codeMode, evaluationMode, questions.length);
-const percent        = Math.round(((pos + 1) / total) * 100);
-  /* UI steps */
-    if (codeMode) {
-  const q = questions[current];
-  return (
-    <div className="min-h-screen bg-app-background py-10">
-      <div className="max-w-4xl mx-auto space-y-6 px-4">
-        {/* header with progress */}
-        <div className="bg-white rounded-xl shadow-lg p-6 space-y-3">
-  {/* top row: title & question counter */}
-  <div className="flex justify-between items-center flex-wrap gap-4">
-    <h1 className="text-2xl font-bold text-app-primary">
-      Write your solution
-    </h1>
-  </div>
+const totalSteps = evaluationMode ? questions.length * 2 : questions.length;
+const stepIndex  = showCode ? current * 2 + 1 : current * 2;
+const percent    = Math.round(((stepIndex + 1) / totalSteps) * 100);
 
-<div>
 
-  {/* auto‑blank toolbar */}
-  <div className="mt-3 flex flex-wrap items-center gap-3">
-    <span className="font-medium text-app-text text-sm">Auto‑blank:</span>
-
-    {/* toggle (Random / Last) */}
-    <div className="inline-flex rounded-lg shadow-sm overflow-hidden">
-      {["random", "last"].map((m, i) => (
-        <button
-          key={m}
-          onClick={() => setElimMode(m)}
-          className={`px-4 py-1.5 text-sm font-semibold border
-                      ${i === 0 ? "rounded-l-lg" : "rounded-r-lg"}
-                      ${
-                        elimMode === m
-                          ? "bg-app-primary text-white"
-                          : "bg-white text-app-text hover:bg-gray-50"
-                      }`}
-        >
-          {m === "random" ? "Random N" : "Last N"}
-        </button>
-      ))}
+const header = (
+  <div className="bg-white rounded-xl shadow-lg p-6">
+    <div className="flex justify-between items-center mb-2 flex-wrap">
+      <h1 className="text-2xl font-bold text-app-primary">
+        {showCode ? "Write your solution" : "Blind 75 Prep"}
+      </h1>
+      <span className="text-sm text-app-text">
+        Question {current + 1} of {questions.length}
+      </span>
     </div>
-
-    {/* N input */}
-    <input
-      type="number"
-      min={1}
-      max={99}
-      disabled={elimMode === "none"}
-      value={elimCount}
-      onChange={(e) => setElimCount(e.target.value)}
-      className="h-9 w-20 px-3 border rounded-lg text-sm
-                 bg-white focus:ring-app-primary focus:border-app-primary
-                 disabled:opacity-50"
-    />
-
-    {/* Apply */}
-    <button
-      onClick={() =>
-        elimMode !== "none" && setCodeAnswer(buildEliminatedCode(elimMode))
-      }
-      disabled={elimMode === "none"}
-      className="btn-primary px-4 py-1.5 rounded-lg font-semibold
-                 disabled:opacity-50"
-    >
-      Apply
-    </button>
+    <div className="w-full bg-gray-200 rounded-full h-2">
+      <div
+        className="bg-app-primary h-2 rounded-full transition-[width] duration-500 ease-out"
+        style={{ width: `${percent}%` }}
+      />
+    </div>
+    <div className="flex justify-end text-xs text-gray-500 mt-1">
+      {percent}% Complete
+    </div>
   </div>
-</div>
+);
 
-  
-</div>
+  const handleSaveCfg = () => {
+    saveCfg({ evaluationMode, elimMode, elimCount });   
+    setShowConfig(false);
+  };
+  const handleCancelCfg = () => {
+    setEvaluationMode(savedCfg.evaluationMode);
+    setElimMode(savedCfg.elimMode);
+    setElimCount(savedCfg.elimCount);
+    setShowConfig(false);
+  };
 
-            {/* problem card */}
-        <div className="bg-white rounded-xl shadow-lg p-6 overflow-hidden">
-          <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-            <h2 className="text-xl font-semibold text-app-primary mr-4 truncate">
-              {q.title}
-            </h2>
-            <div className="flex gap-2 items-center flex-wrap">
-                <span
-                className={`px-3 py-1 rounded-full text-sm ${
-                  diffClasses[q.difficulty] || "bg-gray-100 text-gray-800"
-                }`}
-              >
-                {q.difficulty}
-              </span>
-  <button
-    onClick={() => move(1)}
-    disabled={!canAdvance() || pos === total - 1}
-    className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium
-               hover:bg-gray-300 disabled:opacity-50"
-  >
-    Next →
-  </button>
+useEffect(() => {
+  const { elimMode: dMode, elimCount: dCount } = savedCfg;
+  setElimMode(dMode);
+  setElimCount(dCount);
+}, [current, savedCfg]);   
 
-  <button
-    onClick={() => move(1)}
-    disabled={pos === total - 1}
-    className="px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-sm font-medium
-               hover:bg-gray-200"
-  >
-    Skip →
-  </button>
-</div>
-          </div>
-          {q.prompt && (
-            <p className="text-sm text-gray-700 mb-4 whitespace-pre-wrap">
-              {q.prompt}
-            </p>
-          )}
-        </div>
+  /* ====== MAIN RENDER ====== */
+  if (uiStep === "config") {
+    return (
+      <div className="min-h-screen flex items-center justify-center py-16">
+        <div className="bg-white shadow-xl rounded-2xl w-full max-w-lg p-10 space-y-6">
+          <h1 className="text-center text-3xl font-extrabold text-app-primary">
+            Technical Prep
+          </h1>
 
-
-        {/* code editor */}
-        <div className="bg-white rounded-xl shadow-lg p-6 space-y-4">
-          <CodeMirror
-            value={codeAnswer}
-            height="240px"
-            basicSetup={{
-              lineNumbers: true,
-              highlightActiveLine: false,
-              indentWithTab: true,
-            }}
-            extensions={[python()]}
-            onChange={(val) => setCodeAnswer(val)}
-            theme="light"
-            className="border border-app-primary rounded-lg"
-          />
-
-          <div className="flex gap-4 mt-4">
+          {/* toggle config panel */}
+          <div className="flex justify-center">
             <button
-              onClick={submitCode}
-              disabled={codeLoading || !codeAnswer.trim()}
-          className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
-            >
-              {codeLoading ? "Evaluating…" : "Submit"}
+              type="button"
+              onClick={() => setShowConfig((v) => !v)}
+              className="flex items-center gap-1 text-app-primary text-sm
+                         px-3 py-1 border border-app-primary rounded-lg
+                         hover:bg-app-primary hover:text-white transition">
+              Settings
             </button>
-           
-            <div className="flex items-start gap-4">
-              <button
-                onClick={fetchHint}
-                disabled={hintLoading}
-                className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
-              >
-                {hintLoading ? "Loading…" : "Need a hint?"}
-              </button>
-
-              {/* show hint once fetched */}
-              {hintText && (
-                <p className="flex-1 text-sm text-app-primary bg-amber-50 border border-amber-200 rounded p-2">
-                  {hintText}
-                </p>
-              )}
-            </div>
           </div>
 
-          {/* feedback */}
-          {codeFeedback && (
-            <div className="mt-6 space-y-3">
-              <div>
-                <span className="font-medium">Score:</span>{" "}
-                <span className="font-bold">
-                  {codeFeedback.score?.toFixed(1)}/100
-                </span>
-              </div>
-              <pre className="bg-gray-50 p-4 rounded-lg whitespace-pre-wrap">
-                {codeFeedback.feedback}
-              </pre>
+          {/* form */}
+          <form
+            onSubmit={(e) => { e.preventDefault(); startQuiz(); }}
+            className="space-y-6">
+
+            {/* always‑visible field */}
+            <div>
+              <label className="block mb-1 font-medium text-app-text">
+                Number of Questions
+              </label>
+              <select
+                value={numQuestions}
+                onChange={(e) => setNumQuestions(+e.target.value)}
+                className="w-full px-3 py-2 border border-app-primary rounded-lg
+                           bg-app-background focus:outline-none">
+                {[3, 5, 10].map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
             </div>
-          )}
+
+            {/* advanced settings */}
+            {showConfig && (
+              <>
+                {/* evaluation mode */}
+                <div className="flex items-center justify-between bg-gray-50
+                                border border-gray-200 rounded-lg p-3">
+                  <label className="font-medium text-app-text">
+                    Evaluation mode
+                    <br />
+                    <span className="text-xs text-gray-500">
+                      (write code after each reorder)
+                    </span>
+                  </label>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={evaluationMode}
+                      onChange={(e) => setEvaluationMode(e.target.checked)}
+                      className="sr-only peer" />
+                    <div className="w-11 h-6 bg-gray-300 rounded-full
+                                    peer-checked:bg-app-primary
+                                    after:absolute after:start-1 after:top-1
+                                    after:bg-white after:h-4 after:w-4 after:rounded-full
+                                    after:transition-all peer-checked:after:translate-x-full" />
+                  </label>
+                </div>
+
+                {/* auto‑blank */}
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <label className="block font-medium text-app-text mb-2">
+                    Auto‑blank lines in solution
+                  </label>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <select
+                      value={elimMode}
+                      onChange={(e) => setElimMode(e.target.value)}
+                      className="px-3 py-2 border rounded-lg bg-white focus:outline-none">
+                      <option value="none">Off</option>
+                      <option value="random">Random N</option>
+                      <option value="last">Last N</option>
+                    </select>
+                    <input
+                      type="number"
+                      min={1} max={99}
+                      disabled={elimMode === "none"}
+                      value={elimCount}
+                      onChange={(e) => setElimCount(+e.target.value)}
+                      className="w-20 px-3 py-2 border rounded-lg bg-white
+                                 focus:outline-none disabled:opacity-50" />
+                    <span className="text-sm text-gray-500">lines</span>
+                  </div>
+                </div>
+
+                {/* save / cancel */}
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCancelCfg}
+                    className="px-4 py-1 rounded-lg text-sm border">Cancel</button>
+                  <button
+                    type="button"
+                    onClick={handleSaveCfg}
+                    className="btn-primary px-4 py-1 rounded-lg text-sm">Save</button>
+                </div>
+              </>
+            )}
+
+            <button className="btn-primary w-full py-2 rounded-lg font-semibold">
+              Start Practice
+            </button>
+          </form>
         </div>
       </div>
-    </div>
-  );
-}
-  if (step === "config") {
-    return (
-       <div className="min-h-screen flex items-center justify-center bg-app-background py-16">
-    <div className="bg-white shadow-xl rounded-2xl w-full max-w-lg p-10">
-      {/* title */}
-      <h1 className="text-center text-3xl font-extrabold text-app-primary mb-8">
-        Blind&nbsp;75 Reorder Prep
-      </h1>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          startQuiz();
-        }}
-        className="space-y-6"
-      >
-        {/* Question count – dropdown (original style) */}
-        <div>
-          <label className="block mb-1 font-medium text-app-text">
-            Number of Questions
-          </label>
-          <select
-            value={numQuestions}
-            onChange={(e) => setNumQuestions(parseInt(e.target.value))}
-            className="w-full px-3 py-2 border border-app-primary rounded-lg focus:outline-none bg-app-background text-app-text"
-          >
-            <option value={3}>3</option>
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-          </select>
-        </div>
-
-        {/* Evaluation‑mode toggle */}
-        <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3">
-          <label htmlFor="evalMode" className="font-medium text-app-text">
-            Evaluation mode
-            <br />
-            <span className="text-xs text-gray-500">
-              (write code after each reorder)
-            </span>
-          </label>
-
-          {/* fancy switch */}
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              id="evalMode"
-              type="checkbox"
-              checked={evaluationMode}
-              onChange={(e) => setEvaluationMode(e.target.checked)}
-              className="sr-only peer"
-            />
-            <div
-              className="w-11 h-6 bg-gray-300 rounded-full
-                         peer-focus:outline-none
-                         peer-checked:bg-app-primary
-                         after:absolute after:start-1 after:top-1 after:bg-white
-                         after:h-4 after:w-4 after:rounded-full after:transition-all
-                         peer-checked:after:translate-x-full"
-            />
-          </label>
-        </div>
-
-        {/* Auto‑blank lines */}
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <label className="block font-medium text-app-text mb-2">
-            Auto‑blank lines in solution
-          </label>
-          <div className="flex flex-wrap items-center gap-3">
-            <select
-              value={elimMode}
-              onChange={(e) => setElimMode(e.target.value)}
-              className="px-3 py-2 border rounded-lg bg-white text-app-text focus:outline-none"
-            >
-              <option value="none">Off</option>
-              <option value="random">Random N</option>
-              <option value="last">Last N</option>
-            </select>
-
-            <input
-              type="number"
-              min={1}
-              max={99}
-              disabled={elimMode === "none"}
-              value={elimCount}
-              onChange={(e) => setElimCount(e.target.value)} 
-              className="w-20 px-3 py-2 border rounded-lg bg-white text-app-text
-                         focus:outline-none disabled:opacity-50"
-            />
-            <span className="text-sm text-gray-500">lines</span>
-          </div>
-        </div>
-
-        {/* Start button */}
-        <button
-          type="submit"
-          className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer w-full"
-        >
-          Start Practice
-        </button>
-      </form>
-    </div>
-  </div>
     );
   }
 
-  if (step === "loading") {
+  if (uiStep === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-app-background py-16">
         <div className="bg-white rounded-xl shadow-lg p-8 text-center">
@@ -722,257 +497,121 @@ const percent        = Math.round(((pos + 1) / total) * 100);
     );
   }
 
-  /* Quiz step */
-  const q = questions[current];
-  return (
-    <div className="min-h-screen bg-app-background py-10">
-      <div className="max-w-4xl mx-auto space-y-6 px-4">
-        {/* header */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex justify-between items-center mb-2 flex-wrap">
-            <h1 className="text-2xl font-bold text-app-primary">Blind 75 Prep</h1>
-            <span className="text-sm text-app-text">
-              Question {current + 1} of {questions.length}
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-app-primary h-2 rounded-full transition-all duration-300"
-              style={{ width: `${percent}%` }}
-            />
-          </div>
-          <div className="flex justify-end text-xs text-gray-500 mt-1">
-            <span>{percent}% Complete</span>
-          </div>
-        </div>
-
-        {/* problem card */}
-        <div className="bg-white rounded-xl shadow-lg p-6 overflow-hidden">
-          <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-            <h2 className="text-xl font-semibold text-app-primary mr-4 truncate">
-              {q.title}
-            </h2>
-            <div className="flex gap-2 items-center flex-wrap">
-                <span
-                className={`px-3 py-1 rounded-full text-sm ${
-                  diffClasses[q.difficulty] || "bg-gray-100 text-gray-800"
-                }`}
-              >
-                {q.difficulty}
-              </span>
-  <button
-    onClick={() => move(1)}
-    disabled={!canAdvance() || current === questions.length - 1}
-    className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium
-               hover:bg-gray-300 disabled:opacity-50"
-  >
-    Next →
-  </button>
-
-  <button
-    onClick={() => move(1)}
-    disabled={current === questions.length - 1}
-    className="px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-sm font-medium
-               hover:bg-gray-200"
-  >
-    Skip →
-  </button>
-</div>
-
-          </div>
-          {q.prompt && (
-            <p className="text-sm text-gray-700 mb-4 whitespace-pre-wrap">
-              {q.prompt}
-            </p>
-          )}
-        </div>
-
-        {/* approach card */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-app-primary mb-4">
-            Select Approach
+  if (uiStep === "quiz") {
+    const q = questions[current];
+    const atLastQ = current === questions.length - 1;
+    const problem = (
+      <div className="bg-white rounded-xl shadow-lg p-6 overflow-hidden">
+        <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
+          <h2 className="text-xl font-semibold text-app-primary truncate">
+            {q.title}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1 text-sm font-medium">
-                Type of problem
-              </label>
-              <select
-                value={approachSel}
-                onChange={(e) => setApproachSel(e.target.value)}
-                className="w-full px-3 py-2 border border-app-primary rounded-lg focus:outline-none bg-app-background text-app-text"
-              >
-                <option value="">-- select --</option>
-                {APPROACHES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </div>
-           
-          </div>
 
-          <div className="flex flex-wrap mt-4 gap-4">
-            <button
-              onClick={checkApproach}
-          className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
+          <div className="flex gap-2 items-center flex-wrap">
+            <span
+              className={`px-3 py-1 rounded-full text-sm ${
+                diffClasses[q.difficulty] || "bg-gray-100 text-gray-800"
+              }`}
             >
-              Check Approach
-            </button>
-            {statusA === "correct" && (
-              <span className="self-center text-sm font-medium text-green-600">
-                ✔ Correct
-              </span>
-            )}
-            {statusA === "incorrect" && (
-              <span className="self-center text-sm font-medium text-red-600">
-                ✖ Try again
-              </span>
-            )}
+              {q.difficulty}
+            </span>           
           </div>
         </div>
 
-        {/* problem card */}
-        <div className="bg-white rounded-xl shadow-lg p-6 overflow-hidden">
-          <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-            <h2 className="text-xl font-semibold text-app-primary mr-4 truncate">
-              Order & Indent Code
-            </h2>
-          </div>
+        {q.prompt && (
+          <p className="text-sm text-gray-700 mb-4 whitespace-pre-wrap">
+            {q.prompt}
+          </p>
+        )}
+      </div>
+    );
+  
 
-          {q.prompt && (
-            <p className="text-sm text-gray-700 mb-4 whitespace-pre-wrap">
-              {q.prompt}
-            </p>
-          )}
+return (
+  <div className="min-h-screen py-10">
+    <div className="max-w-4xl mx-auto space-y-6 px-4">
+      {header}
+      {problem}
+      
 
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={currentLines}
-              strategy={verticalListSortingStrategy}
-            >
-              <div className="space-y-2 mb-6">
-                {currentLines.map((l) => (
-                  <SortableLine
-                    key={l.id}
-                    line={l}
-                    isWrong={wrongLineIds.has(l.id)}
-                    highlightCorrect={statusLines === "correct"}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
+      {showCode ? (
+        <CodePanel
+          question={questions[current]}
+          codeAnswer={codeAnswer}
+          setCodeAnswer={setCodeAnswer}
+          codeLoading={codeLoading}
+          onSubmit={submitCode}
+          fetchHint={fetchHint}
+          hintLoading={hintLoading}
+          hintText={hintText}
+          codeFeedback={codeFeedback}
+          elimMode={elimMode}
+          setElimMode={setElimMode}
+          elimCount={elimCount}
+          setElimCount={setElimCount}
+          buildEliminatedCode={buildEliminatedCode}
 
-          <div className="flex flex-wrap gap-4">
-            <button
-              onClick={checkLines}
-                className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
-            >  
-              Check Code
-            </button>
-            <button
-              onClick={shuffleCurrent}
-                className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
-            >
-              Shuffle Again
-            </button>
-            {statusLines === "correct" && (
-              <span className="ml-auto self-center text-sm font-medium text-green-600">
-                ✔ Order & indent correct
-              </span>
-            )}
-            {statusLines === "incorrect" && (
-              <span className="ml-auto self-center text-sm font-medium text-red-600">
-                {wrongDetail === "indent"
-                ? "✖ Indent is wrong"
-                : wrongDetail === "order"
-                ? "✖ Order is wrong"
-                : "✖ Order & indent are wrong"}
-                        </span>
-            )}
-          </div>
-        </div>
+          next={next}
+          skip={skip}
+          canAdvance={canAdvance()}
+          atLastQ={current === questions.length - 1}
+        />
+      ) : (
+        <PracticePanel
+          question={{ ...questions[current], index: current }}
 
-        {/* complexity card */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-app-primary mb-4">
-            Select Time & Space Complexities
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1 text-sm font-medium">
-                Time Complexity
-              </label>
-              <select
-                value={timeSel}
-                onChange={(e) => setTimeSel(e.target.value)}
-                className="w-full px-3 py-2 border border-app-primary rounded-lg focus:outline-none bg-app-background text-app-text"
-              >
-                <option value="">-- select --</option>
-                {COMPLEXITIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block mb-1 text-sm font-medium">
-                Space Complexity
-              </label>
-              <select
-                value={spaceSel}
-                onChange={(e) => setSpaceSel(e.target.value)}
-                className="w-full px-3 py-2 border border-app-primary rounded-lg focus:outline-none bg-app-background text-app-text"
-              >
-                <option value="">-- select --</option>
-                {COMPLEXITIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+          /* approach */
+          approachSel={approachSel}
+          setApproachSel={setApproachSel}
+          statusA={statusA}
+          checkApproach={checkApproach}
 
-          <div className="flex flex-wrap mt-4 gap-4">
-            <button
-              onClick={checkComplexities}
-          className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
-            >
-              Check Complexities
-            </button>
-            {statusCx === "correct" && (
-  <span className="self-center text-sm font-medium text-green-600">
-    ✔ Both complexities correct
-  </span>
-)}
-{statusCx === "time" && (
-  <span className="self-center text-sm font-medium text-red-600">
-    ✖ Time complexity wrong
-  </span>
-)}
-{statusCx === "space" && (
-  <span className="self-center text-sm font-medium text-red-600">
-    ✖ Space complexity wrong
-  </span>
-)}
-{statusCx === "both" && (
-  <span className="self-center text-sm font-medium text-red-600">
-    ✖ Time & space complexities wrong
-  </span>
-)}
+          /* reorder */
+          sensors={sensors}
+          currentLines={currentLines}
+          handleDragStart={handleDragStart}
+          handleDragEnd={handleDragEnd}
+          wrongLineIds={wrongLineIds}
+          statusLines={statusLines}
+          wrongDetail={wrongDetail}
+          checkLines={checkLines}
+          shuffleCurrent={shuffleCurrent}
 
-          </div>
-        </div>
+          /* complexities */
+          timeSel={timeSel}
+          setTimeSel={setTimeSel}
+          spaceSel={spaceSel}
+          setSpaceSel={setSpaceSel}
+          statusCx={statusCx}
+          checkComplexities={checkComplexities}
+
+          next={next}
+          skip={skip}
+          canAdvance={canAdvance()}
+          atLastQ={current === questions.length - 1}
+        />
+      )}
+
+        {/* ───────────── bottom navigation ───────────── */}
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={skip}
+          disabled={atLastQ && showCode}
+          className="btn-primary w-full py-2 rounded-lg font-semibold"
+        >
+          Skip →
+        </button>
+        <button
+          onClick={next}
+          disabled={!canAdvance()}
+          className="btn-primary w-full py-2 rounded-lg font-semibold"
+        >
+          Next →
+        </button>
       </div>
     </div>
-  );
+  </div>
+);
+}
+return null;
 }
