@@ -91,12 +91,13 @@ export default function CodePanel({
             {hintLoading ? "Loading…" : "Need a hint?"}
           </button>
 
-          {hintText && (
-            <p className="flex-1 text-sm text-app-primary bg-amber-50 border border-amber-200 rounded p-2">
+         
+        </div>
+         {hintText && (
+            <p className="flex-1 text-sm text-gray-600 border border-gray-300 rounded p-2 mt-4">
               {hintText}
             </p>
           )}
-        </div>
 
         {/* feedback */}
         {codeFeedback && (

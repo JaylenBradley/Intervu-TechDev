@@ -22,6 +22,7 @@ export default function PracticePanel({
   handleDragStart,
   handleDragEnd,
   wrongLineIds,
+  fetchExplanation,
   statusLines,
   wrongDetail,
   checkLines,
@@ -32,13 +33,19 @@ export default function PracticePanel({
   setSpaceSel,
   statusCx,
   checkComplexities,
-
+  explain
 }) {
 const q = question;
 const borderA =
   statusA === "correct"   ? "border-green-500"
 : statusA === "incorrect" ? "border-red-500"
                            : "border-app-primary";
+
+                           const {
+  approach   : { text: explainA,  loading: loadA  },
+  indent     : { text: explainI,  loading: loadI  },
+  complexity : { text: explainCx, loading: loadCx },
+} = explain;
 
 const borderTime =
   statusCx === "correct" || statusCx === "space" ? "border-green-500"
@@ -79,6 +86,17 @@ const borderSpace =
           >
             Check
           </button>
+            <button
+             onClick={() => fetchExplanation("approach")}
+            className="btn-secondary px-6 py-2 rounded-lg font-semibold border border-app-primary hover:bg-black hover:text-white  transition-colors"
+            >
+            Explain Answer 
+            </button>
+            {loadA ? (
+            <p className="mt-2 text-sm text-gray-600 italic">Generating explanation…</p>
+            ) : explainA && (
+            <p className="mt-2 text-sm text-gray-600 border border-gray-300 rounded p-2">{explainA}</p>
+            )}
 
           {statusA === "correct" && (
             <span className="self-center text-sm font-medium text-green-600">
@@ -136,6 +154,17 @@ const borderSpace =
           >
             Shuffle
           </button>
+            <button
+             onClick={() => fetchExplanation("indent")}
+            className="btn-secondary px-6 py-2 rounded-lg font-semibold border border-app-primary hover:bg-black hover:text-white  transition-colors"
+            >
+            Explain Answer 
+            </button>
+            {loadI ? (
+            <p className="mt-2 text-sm text-gray-600 italic">Generating explanation…</p>
+            ) : explainI && (
+            <p className="mt-2 text-sm text-gray-600 border border-gray-300 rounded p-2">{explainI}</p>
+            )}
 
           {statusLines === "correct" && (
             <span className="ml-auto self-center text-sm font-medium text-green-600">
@@ -195,6 +224,17 @@ const borderSpace =
           >
             Check
           </button>
+          <button
+             onClick={() => fetchExplanation("complexity")}
+            className="btn-secondary px-6 py-2 rounded-lg font-semibold border border-app-primary hover:bg-black hover:text-white  transition-colors"
+            >
+            Explain Answer 
+            </button>
+           {loadCx ? (
+            <p className="mt-2 text-sm text-gray-600 italic">Generating explanation…</p>
+            ) : explainCx && (
+            <p className="mt-2 text-sm text-gray-600 border border-gray-300 rounded p-2">{explainCx}</p>
+            )}
 
           {statusCx === "correct" && (
             <span className="self-center text-sm font-medium text-green-600">

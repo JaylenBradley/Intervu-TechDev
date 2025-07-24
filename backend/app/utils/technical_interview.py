@@ -228,6 +228,64 @@ Return ONLY valid JSON:
         logging.error(f"Hint‑generation error: {e}")
         return {"hint": "Think about a different data‑structure or edge‑case you may be missing."}
 
+def generate_explanation(
+    question: str,
+    correct_answer: str,
+    answer_type: str,      # "complexity" | "approach" | "indent"
+    difficulty: str        # easy | medium | hard
+) -> dict:
+    """
+    Return ONE concise explanation (< 80 words) of *why* the provided answer / code is correct.
+    `correct_answer` should be:
+        • time & space string  → when answer_type == "complexity"  (e.g. "O(n), O(1)")
+        • chosen approach      → when answer_type == "approach"    (e.g. "Sliding Window")
+        • full solution code, this one can be longer than 80 words   → when answer_type == "indent"
+    """
+
+    type_blurb = {
+        "complexity": "why this time/space complexity is correct",
+        "approach"  : "why this high‑level approach is appropriate",
+        "indent"    : "a brief walk‑through of the solution code (no full rewrite)",
+    }[answer_type]
+
+    prompt = f"""
+You are a senior software engineer conducting a {difficulty}-level interview.
+
+Problem:
+\"\"\"{question}\"\"\"
+
+Reference answer to explain:
+\"\"\"{correct_answer}\"\"\"
+
+ TASK: In ≤ 80 words, explain {type_blurb}. Be clear but concise.
+Return ONLY valid JSON:
+
+{{
+  "explanation": "Your explanation here (≤ 80 words)"
+}}
+"""
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.0-flash-exp",
+            config=types.GenerateContentConfig(temperature=0.5, max_output_tokens=250),
+            contents=prompt
+        )
+
+        text = response.text.strip()
+        if text.startswith("```json"):
+            text = text[7:-3]
+        elif text.startswith("```"):
+            text = text[3:-3]
+
+        data = json.loads(text)
+        data["explanation"] = data.get("explanation", "").strip().split("\n")[0][:350]
+        return data
+
+    except Exception as e:
+        logging.error(f"Explanation‑generation error: {e}")
+        return {"explanation": "Focus on the core idea: how the algorithm works and why its complexity is as stated."}
+    
 def get_fallback_questions(difficulty, num_questions):
     """
     Fallback questions if Gemini generation fails. Randomly select from a pool for each difficulty.

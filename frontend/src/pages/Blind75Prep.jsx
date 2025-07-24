@@ -64,6 +64,11 @@ export default function Blind75Prep({ userId }) {
   const [codeFeedback, setCodeFeedback] = useState(null);
   const [hintText    , setHintText    ] = useState("");
   const [hintLoading , setHintLoading ] = useState(false);
+  const [explain, setExplain] = useState({
+  approach   : { text: "", loading: false },
+  complexity : { text: "", loading: false },
+  indent     : { text: "", loading: false },
+});
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
@@ -79,6 +84,11 @@ export default function Blind75Prep({ userId }) {
     setCodeAnswer("");
     setCodeFeedback(null);
     setHintText("");
+    setExplain({
+    approach   : { text: "", loading: false },
+    complexity : { text: "", loading: false },
+    indent     : { text: "", loading: false },
+  });
   };
 
   /* ── navigation helpers ─────────────────────────────── */
@@ -154,6 +164,54 @@ export default function Blind75Prep({ userId }) {
     setHintLoading(false);
   }
 };
+
+const fetchExplanation = async (answerType) => {
+  setExplain((prev) => ({
+    ...prev,
+    [answerType]: { text: "", loading: true },
+  }));
+
+  try {
+    const BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+    const q    = questions[current];      
+
+    let correctAnswer;
+    if (answerType === "complexity") {
+      correctAnswer = `${q.time}, ${q.space}`;          
+    } else if (answerType === "approach") {
+      correctAnswer = q.type;                        
+    } else {
+      correctAnswer = q.plainSolution.join("\n");      
+    }
+
+    const res = await fetch(`${BASE}/api/interview/technical/explanation`, {
+      method : "POST",
+      headers: { "Content-Type": "application/json" },
+      body   : JSON.stringify({
+        question       : q.prompt,
+        answer_type    : answerType,
+        correct_answer : correctAnswer,
+        difficulty     : q.difficulty.toLowerCase(),
+        target_company : "generic",
+      }),
+    });
+    if (!res.ok) throw new Error("bad response");
+
+    const { explanation } = await res.json();
+
+    setExplain((prev) => ({
+      ...prev,
+      [answerType]: { text: explanation || "No explanation returned.", loading: false },
+    }));
+  } catch (e) {
+    console.error(e);
+    setExplain((prev) => ({
+      ...prev,
+      [answerType]: { text: "Could not fetch explanation. Please try again.", loading: false },
+    }));
+  }
+};
+
 
   const currentLines =
     uiStep === "quiz" ? questions[current]?.lines ?? [] : [];
@@ -571,6 +629,7 @@ return (
           currentLines={currentLines}
           handleDragStart={handleDragStart}
           handleDragEnd={handleDragEnd}
+          fetchExplanation={fetchExplanation}
           wrongLineIds={wrongLineIds}
           statusLines={statusLines}
           wrongDetail={wrongDetail}
@@ -584,6 +643,8 @@ return (
           setSpaceSel={setSpaceSel}
           statusCx={statusCx}
           checkComplexities={checkComplexities}
+
+          explain={explain} 
 
           next={next}
           skip={skip}

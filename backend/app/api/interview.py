@@ -9,9 +9,11 @@ from app.schemas.interview import (
     AnswerFeedback,
     HintRequest,
     HintResponse,
+    ExplanationRequest,
+    ExplanationResponse
 )
 from app.crud.questionnaire import get_questionnaire
-from app.utils.technical_interview import generate_leetcode_questions, evaluate_answer, generate_single_hint
+from app.utils.technical_interview import generate_leetcode_questions, evaluate_answer,generate_explanation, generate_single_hint
 import os
 from google import genai
 
@@ -95,3 +97,28 @@ def get_technical_hint(req: HintRequest):
             status_code=500,
             detail=f"Failed to generate hint: {e}"
         )
+
+@router.post("/interview/technical/explanation", response_model=ExplanationResponse)
+def get_technical_explanation(req: ExplanationRequest):
+    """
+    Return ONE concise explanation (≤ 80 words) of why the specified
+    answer / code is correct. Never reveals the full solution.
+    """
+    try:
+        if not req.correct_answer:
+            raise ValueError("correct_answer must be provided")
+        answer = req.correct_answer
+
+        exp_obj = generate_explanation(
+            question       = req.question,
+            correct_answer = answer,
+            answer_type    = req.answer_type,
+            difficulty     = req.difficulty,
+        )
+        return ExplanationResponse(explanation=exp_obj.get("explanation",
+                                    "Focus on why this approach & complexity are correct."))
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate explanation: {e}")

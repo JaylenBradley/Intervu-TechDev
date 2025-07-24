@@ -1,6 +1,16 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Literal
 from enum import Enum
+
+class ExplanationRequest(BaseModel):
+    question: str
+    answer_type: Literal["complexity", "approach", "indent"]
+    correct_answer: Optional[str] = None
+    difficulty: str
+    target_company: str = "generic"
+
+class ExplanationResponse(BaseModel):
+    explanation: str
 
 class HintRequest(BaseModel):
     question: str | None = None 
