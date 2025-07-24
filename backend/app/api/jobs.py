@@ -124,7 +124,7 @@ async def export_to_sheets(user_id: int, request: Request, db: Session = Depends
     num_rows = len(data)
     num_cols = len(data[0])
     requests = [
-        # Bold and color header row
+        # Bold and color header row (deeper blue, white text)
         {
             "repeatCell": {
                 "range": {
@@ -134,8 +134,8 @@ async def export_to_sheets(user_id: int, request: Request, db: Session = Depends
                 },
                 "cell": {
                     "userEnteredFormat": {
-                        "backgroundColor": {"red": 0.8, "green": 0.9, "blue": 1},
-                        "textFormat": {"bold": True}
+                        "backgroundColor": {"red": 0.22, "green": 0.45, "blue": 0.75},
+                        "textFormat": {"bold": True, "foregroundColor": {"red": 1, "green": 1, "blue": 1}}
                     }
                 },
                 "fields": "userEnteredFormat(backgroundColor,textFormat)"
@@ -245,7 +245,7 @@ async def export_to_sheets(user_id: int, request: Request, db: Session = Depends
                 "innerVertical":   {"style": "SOLID", "width": 1, "color": {"red": 0.85, "green": 0.85, "blue": 0.85}}
             }
         },
-        # Add alternating row color (zebra striping) for even rows
+        # Add alternating row color (zebra striping) for even rows (soft blue)
         {
             "addConditionalFormatRule": {
                 "rule": {
@@ -262,11 +262,35 @@ async def export_to_sheets(user_id: int, request: Request, db: Session = Depends
                             "values": [{"userEnteredValue": "=ISEVEN(ROW(A2))"}]
                         },
                         "format": {
-                            "backgroundColor": {"red": 0.96, "green": 0.98, "blue": 1}
+                            "backgroundColor": {"red": 0.89, "green": 0.94, "blue": 0.99}
                         }
                     }
                 },
                 "index": 0
+            }
+        },
+        # Add alternating row color for odd rows (very light gray)
+        {
+            "addConditionalFormatRule": {
+                "rule": {
+                    "ranges": [{
+                        "sheetId": 0,
+                        "startRowIndex": 1,
+                        "endRowIndex": num_rows,
+                        "startColumnIndex": 0,
+                        "endColumnIndex": num_cols
+                    }],
+                    "booleanRule": {
+                        "condition": {
+                            "type": "CUSTOM_FORMULA",
+                            "values": [{"userEnteredValue": "=ISODD(ROW(A2))"}]
+                        },
+                        "format": {
+                            "backgroundColor": {"red": 0.98, "green": 0.98, "blue": 0.98}
+                        }
+                    }
+                },
+                "index": 1
             }
         }
     ]
