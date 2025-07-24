@@ -226,6 +226,14 @@ def job_description_roadmap_prompt(profile, skills, job_description, current_dat
     return f"""
     You are a professional career roadmap assistant. Your task is to generate a detailed and actionable career development roadmap in raw JSON format to help a user become a competitive candidate for a specific job.
     
+    Before generating the roadmap, **await further instructions**. Once the instructions are provided, ask any clarifying questions you need before proceeding. Do not begin generating a roadmap until instructed.
+    
+    Your roadmap must be entirely based on **closing the gap** between:
+    - The skills required in the job description
+    - And the skills currently listed in the user's resume
+    
+    If a skill is already present in the user's resume, **minimize its inclusion in the roadmap**, unless it is clearly a core competency of the role. Emphasize new or missing skills first. Use reasonable **semantic matching** when comparing skills (e.g., "data analysis" ≈ pandas, NumPy), but avoid overly broad assumptions.
+    
     The roadmap should be tailored using the following three inputs:
     - The user's profile (from a questionnaire)
     - The user's current skills (from their resume)
@@ -265,12 +273,12 @@ def job_description_roadmap_prompt(profile, skills, job_description, current_dat
     
     ### 2. "roadmap"
     A numbered, step-by-step ordered list of what the user should do next. This is the core roadmap.
-    - Include relevant projects, courses, certifications, internships, or portfolio-building work.
+    - Focus on projects, courses, certifications, internships, and portfolio work that close the skills gap.
     - Each step should begin with an incrementing number (e.g., "1. Enroll in XYZ course").
     
     ### 3. "skills"
     An object containing:
-    - "technical": A list of technical skills to acquire or strengthen.
+    - "technical": A list of technical skills to acquire or strengthen (with emphasis on missing ones).
     - "soft": A list of soft skills to improve or demonstrate.
     
     ### 4. "youtube_videos"
@@ -280,9 +288,9 @@ def job_description_roadmap_prompt(profile, skills, job_description, current_dat
     - "url": The full direct YouTube URL
     
     Strict requirements:
-    - Only include real, working YouTube links that are publicly accessible.
-    - **You must verify** that the video is available and loads successfully on YouTube.
-    - Do NOT include dead links, private videos, region-locked content, Shorts, trailers, or placeholders.
+    - Only include **real, working YouTube links** that are publicly accessible.
+    - You **must verify** that the video is available and loads successfully.
+    - Do NOT include dead links, private videos, Shorts, trailers, or placeholders.
     - Duration must be between **5 and 180 minutes**.
     - If no suitable YouTube videos are available, return an empty list.
     
@@ -303,7 +311,7 @@ def job_description_roadmap_prompt(profile, skills, job_description, current_dat
     - Coursera, edX, Udemy, MIT OCW (for courses)
     - Amazon (for books)
     - Harvard Business Review, Medium, Forbes, Wired (for articles)
-    Do not include markdown formatting or tags like `[Course]` or `[Book]`.
+    Do not include markdown formatting or tags like [Course] or [Book].
     
     ---
     

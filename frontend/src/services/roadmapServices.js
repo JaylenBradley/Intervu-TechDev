@@ -36,8 +36,20 @@ export async function fetchJobDescRoadmap(userId, roadmapId) {
   return res.json();
 }
 
+export async function updateJobDescRoadmapTitle(roadmapId, newTitle) {
+  const res = await fetch(`${BASE_URL}/api/roadmap/jobdesc/${roadmapId}/title`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title: newTitle }),
+  });
+  if (!res.ok) throw new Error("Failed to update roadmap title");
+  return res.json();
+}
+
 export async function deleteJobDescRoadmap(roadmapId) {
-  const res = await fetch(`${BASE_URL}/api/roadmap/jobdesc/${roadmapId}`, { method: "DELETE" });
+  const res = await fetch(`${BASE_URL}/api/roadmap/jobdesc/${roadmapId}`, {
+    method: "DELETE"
+  });
   if (!res.ok) throw new Error("Failed to delete roadmap");
   return res.json();
 }

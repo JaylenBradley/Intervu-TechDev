@@ -130,7 +130,7 @@ const Questionnaire = ({ onComplete, user }) => {
     setGenError("");
     try {
       await generateRoadmap(user.id);
-      navigate("/roadmap");
+      navigate("/roadmaps/careergoal-roadmap");
     } catch (err) {
       setGenError(err.message);
     } finally {
@@ -326,13 +326,13 @@ const Questionnaire = ({ onComplete, user }) => {
               <div className="flex justify-center gap-4">
                 <button
                   onClick={handleModalYes}
-                  className="px-6 py-2 rounded-lg btn font-semibold"
+                  className="px-6 py-2 rounded-lg btn font-semibold cursor-pointer"
                 >
                   Yes
                 </button>
                 <button
                   onClick={handleModalNo}
-                  className="px-6 py-2 rounded-lg btn font-semibold border"
+                  className="px-6 py-2 rounded-lg btn font-semibold border cursor-pointer"
                 >
                   No
                 </button>

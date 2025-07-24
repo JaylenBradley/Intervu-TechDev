@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { fetchJobDescRoadmaps, createJobDescRoadmap } from "../services/roadmapServices";
+import {
+  fetchJobDescRoadmaps,
+  createJobDescRoadmap,
+  updateJobDescRoadmapTitle,
+} from "../services/roadmapServices";
 import { parseRoadmapJson } from "../utils/parseRoadmapJson.js";
 
 const SkillGapRoadmap = ({ user }) => {
@@ -9,6 +13,11 @@ const SkillGapRoadmap = ({ user }) => {
   const [genError, setGenError] = useState("");
   const [error, setError] = useState("");
   const [jobDescription, setJobDescription] = useState("");
+  const [expanded, setExpanded] = useState({});
+  const [editingTitleId, setEditingTitleId] = useState(null);
+  const [titleInput, setTitleInput] = useState("");
+  const [titleLoading, setTitleLoading] = useState(false);
+  const [titleError, setTitleError] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -25,7 +34,7 @@ const SkillGapRoadmap = ({ user }) => {
       }
     };
     getRoadmaps();
-  }, [user, generating]);
+  }, [user, generating, titleLoading]);
 
   const handleGenerateRoadmap = async () => {
     setGenerating(true);
@@ -40,34 +49,74 @@ const SkillGapRoadmap = ({ user }) => {
     }
   };
 
-  if (loading || generating) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="loader-lg"/>
-    </div>
-  );
+  const toggleJobDesc = (id) => {
+    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const startEditTitle = (id, currentTitle) => {
+    setEditingTitleId(id);
+    setTitleInput(currentTitle);
+    setTitleError("");
+  };
+
+  const cancelEditTitle = () => {
+    setEditingTitleId(null);
+    setTitleInput("");
+    setTitleError("");
+  };
+
+  const saveTitle = async (id) => {
+    if (!titleInput.trim()) {
+      setTitleError("Title cannot be empty.");
+      return;
+    }
+    setTitleLoading(true);
+    setTitleError("");
+    try {
+      await updateJobDescRoadmapTitle(id, titleInput.trim());
+      setEditingTitleId(null);
+      setTitleInput("");
+    } catch (err) {
+      setTitleError(err.message);
+    } finally {
+      setTitleLoading(false);
+    }
+  };
+
+  if (loading || generating)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="loader-lg" />
+      </div>
+    );
 
   if (error) return <div className="text-red-600">{error}</div>;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
       <div className="bg-app-accent text-app-text border border-app-primary p-8 rounded-xl shadow-lg w-full max-w-4xl mt-16 mb-16">
-        <h2 className="text-2xl font-bold mb-6 text-center text-app-primary">Job Description Roadmaps</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-app-primary">
+          Job Description Roadmaps
+        </h2>
         <form
           className="mb-8 flex flex-col items-center"
-          onSubmit={e => { e.preventDefault(); handleGenerateRoadmap(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleGenerateRoadmap();
+          }}
         >
           <textarea
             className="w-full border border-app-primary rounded-lg p-3 mb-4"
             rows={4}
             placeholder="Paste a job description here to generate a roadmap..."
             value={jobDescription}
-            onChange={e => setJobDescription(e.target.value)}
+            onChange={(e) => setJobDescription(e.target.value)}
             required
             disabled={generating}
           />
           {genError && <div className="text-red-600 mb-2">{genError}</div>}
           <button
-            className="btn-primary w-full py-3 text-lg font-semibold rounded-lg"
+            className="btn-primary w-full py-3 text-lg font-semibold rounded-lg cursor-pointer"
             type="submit"
             disabled={generating || !jobDescription}
           >
@@ -76,27 +125,102 @@ const SkillGapRoadmap = ({ user }) => {
           </button>
         </form>
         {roadmaps.length === 0 && (
-          <div className="text-center text-app-primary">No job description roadmaps found.</div>
+          <div className="text-center text-app-primary">
+            No job description roadmaps found.
+          </div>
         )}
-        {roadmaps.map((roadmapObj, idx) => {
+        {roadmaps.map((roadmapObj) => {
           const roadmap = parseRoadmapJson(roadmapObj.roadmap_json);
           return (
-            <div key={roadmapObj.id} className="mb-8 p-6 border rounded-lg bg-white shadow">
-              <h3 className="font-semibold text-lg mb-2">Job Description</h3>
-              <pre className="bg-gray-100 p-2 rounded mb-4 whitespace-pre-wrap">{roadmapObj.job_description}</pre>
+            <div
+              key={roadmapObj.id}
+              className="mb-8 p-6 border rounded-lg bg-white shadow"
+            >
+            <div className="flex items-center justify-between mb-2">
+              {editingTitleId === roadmapObj.id ? (
+                <>
+                  <input
+                    className="border border-app-primary rounded px-2 py-1 w-100"
+                    value={titleInput}
+                    onChange={(e) => setTitleInput(e.target.value)}
+                    disabled={titleLoading}
+                    maxLength={100}
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      className="btn-danger rounded-md min-w-[87px] px-3 py-1 cursor-pointer"
+                      onClick={cancelEditTitle}
+                      disabled={titleLoading}
+                      type="button"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="btn-primary rounded-md min-w-[87px] px-3 py-1 cursor-pointer"
+                      onClick={() => saveTitle(roadmapObj.id)}
+                      disabled={titleLoading}
+                      type="button"
+                    >
+                      {titleLoading ? "Saving..." : "Save"}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3 className="font-semibold text-lg truncate max-w-s">
+                    {roadmapObj.title || roadmap.title || "Untitled Roadmap"}
+                  </h3>
+                  <button
+                    className="btn-primary rounded-md min-w-[87px] px-3 py-1 cursor-pointer"
+                    onClick={() =>
+                      startEditTitle(
+                        roadmapObj.id,
+                        roadmapObj.title || roadmap.title || "Untitled Roadmap"
+                      )
+                    }
+                    type="button"
+                  >
+                    Edit Title
+                  </button>
+                </>
+              )}
+            </div>
+              {editingTitleId === roadmapObj.id && titleError && (
+                <div className="text-red-600 mb-2">{titleError}</div>
+              )}
+              <div className="flex items-center justify-end mb-2">
+              <button
+                className="btn-primary rounded-md min-w-[87px] px-3 py-1 cursor-pointer"
+                onClick={() => toggleJobDesc(roadmapObj.id)}
+                type="button"
+              >
+                {expanded[roadmapObj.id] ? "Hide Job Description" : "Show Job Description"}
+              </button>
+              </div>
+              {expanded[roadmapObj.id] && (
+                <pre className="bg-gray-100 p-2 rounded mb-4 whitespace-pre-wrap">
+                  {roadmapObj.job_description}
+                </pre>
+              )}
               {roadmap.specific_goals && (
                 <>
-                  <h4 className="font-semibold mt-4 mb-2">Specific Goals</h4>
+                  <h4 className="font-semibold mt-1 mb-2">Specific Goals</h4>
                   <ul className="list-disc ml-6">
-                    {roadmap.specific_goals.map((goal, i) => <li key={i}>{goal}</li>)}
+                    {roadmap.specific_goals.map((goal, i) => (
+                      <li key={i}>{goal}</li>
+                    ))}
                   </ul>
                 </>
               )}
               {roadmap.roadmap && (
                 <>
-                  <h4 className="font-semibold mt-4 mb-2">Step-by-Step Roadmap</h4>
+                  <h4 className="font-semibold mt-4 mb-2">
+                    Step-by-Step Roadmap
+                  </h4>
                   <ul className="list-disc ml-6">
-                    {roadmap.roadmap.map((step, i) => <li key={i}>{step}</li>)}
+                    {roadmap.roadmap.map((step, i) => (
+                      <li key={i}>{step}</li>
+                    ))}
                   </ul>
                 </>
               )}
@@ -107,13 +231,17 @@ const SkillGapRoadmap = ({ user }) => {
                     <div>
                       <strong>Technical:</strong>
                       <ul className="list-disc ml-6">
-                        {(roadmap.skills.technical || []).map((s, i) => <li key={i}>{s}</li>)}
+                        {(roadmap.skills.technical || []).map((s, i) => (
+                          <li key={i}>{s}</li>
+                        ))}
                       </ul>
                     </div>
                     <div>
                       <strong>Soft:</strong>
                       <ul className="list-disc ml-6">
-                        {(roadmap.skills.soft || []).map((s, i) => <li key={i}>{s}</li>)}
+                        {(roadmap.skills.soft || []).map((s, i) => (
+                          <li key={i}>{s}</li>
+                        ))}
                       </ul>
                     </div>
                   </div>
@@ -125,7 +253,12 @@ const SkillGapRoadmap = ({ user }) => {
                   <ul className="list-disc ml-6">
                     {roadmap.youtube_videos.map((item, i) => (
                       <li key={i}>
-                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-app-primary underline">
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-app-primary underline"
+                        >
                           {item.title}
                         </a>
                       </li>
@@ -135,30 +268,41 @@ const SkillGapRoadmap = ({ user }) => {
               )}
               {roadmap.job_titles && (
                 <>
-                  <h4 className="font-semibold mt-4 mb-2">Job Titles You Can Apply For</h4>
+                  <h4 className="font-semibold mt-4 mb-2">
+                    Job Titles You Can Apply For
+                  </h4>
                   <ul className="list-disc ml-6">
-                    {roadmap.job_titles.map((title, i) => <li key={i}>{title}</li>)}
+                    {roadmap.job_titles.map((title, i) => (
+                      <li key={i}>{title}</li>
+                    ))}
                   </ul>
                 </>
               )}
               {roadmap.resource_links && (
                 <>
                   <h4 className="font-semibold mt-4 mb-2">Resource Links</h4>
-                  {Object.entries(roadmap.resource_links).map(([cat, items]) =>
-                    (items && items.length > 0) && (
-                      <div key={cat} className="mb-2">
-                        <strong className="capitalize">{cat}:</strong>
-                        <ul className="list-disc ml-6">
-                          {items.map((item, i) => (
-                            <li key={i}>
-                              <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-app-primary underline">
-                                {item.title}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )
+                  {Object.entries(roadmap.resource_links).map(
+                    ([cat, items]) =>
+                      items &&
+                      items.length > 0 && (
+                        <div key={cat} className="mb-2">
+                          <strong className="capitalize">{cat}:</strong>
+                          <ul className="list-disc ml-6">
+                            {items.map((item, i) => (
+                              <li key={i}>
+                                <a
+                                  href={item.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-app-primary underline"
+                                >
+                                  {item.title}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )
                   )}
                 </>
               )}

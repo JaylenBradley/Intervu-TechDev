@@ -20,7 +20,9 @@ import ProtectedRoute from "./containers/ProtectedRoute.jsx";
 import Questionnaire from "./pages/Questionnaire.jsx";
 import ResumeMain from "./pages/ResumeMain.jsx";
 import ResumeFeedback from "./pages/ResumeFeedback.jsx";
+import RoadmapMain from "./pages/RoadmapMain.jsx";
 import SkillGapRoadmap from "./pages/SkillGapRoadmap.jsx";
+// import SkillGapRoadmapDetail from "./pages/SkillGapRoadmapDetail.jsx";
 import TailorResume from "./pages/TailorResume.jsx";
 import TechnicalPrep from "./pages/TechnicalPrep.jsx";
 import UploadResume from "./pages/UploadResume.jsx";
@@ -109,18 +111,26 @@ const App = () => {
             <Questionnaire onComplete={() => setQuestionnaireComplete(true)} user={user}/>
           </ProtectedRoute>
         }/>
-
-
-        <Route path="/roadmap" element={
+        <Route path="/roadmaps" element={
+        <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+          <RoadmapMain user={user}/>
+        </ProtectedRoute>
+        }/>
+        <Route path="/roadmaps/careergoal-roadmap" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <GeneralRoadmap user={user} onRoadmapGenerated={() => setHasRoadmap(true)}/>
           </ProtectedRoute>
         }/>
-        <Route path="/skillgap-roadmap" element={
+        <Route path="/roadmaps/skillgap-roadmap" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <SkillGapRoadmap user={user}/>
           </ProtectedRoute>
         }/>
+        {/*<Route path="/roadmaps/skillgap-roadmap/:id" element={*/}
+        {/*  <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>*/}
+        {/*    <SkillGapRoadmapDetail user={user}/>*/}
+        {/*  </ProtectedRoute>*/}
+        {/*}/>*/}
         <Route path="/resume" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <ResumeMain user={user}/>

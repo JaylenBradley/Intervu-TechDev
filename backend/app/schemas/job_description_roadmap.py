@@ -5,14 +5,16 @@ from datetime import datetime
 class JobDescriptionRoadmapCreate(BaseModel):
     user_id: int
     job_description: str
+    title: str = "Untitled Roadmap"
 
-class JobDescriptionRoadmapOut(BaseModel):
+class JobDescriptionRoadmapOut(JobDescriptionRoadmapCreate):
     id: str
-    user_id: int
-    job_description: str
     roadmap_json: Any
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
 
     class Config:
         orm_mode = True
+
+class JobDescriptionRoadmapUpdateTitle(BaseModel):
+    title: str = "Untitled Roadmap"

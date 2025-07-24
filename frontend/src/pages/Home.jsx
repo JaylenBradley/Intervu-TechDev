@@ -39,14 +39,14 @@ const team = [
   },
   {
     name: "Justin Song",
-    role: "Co-Founder & Fullstack Engineer",
+    role: "Co-Founder & Fullstack Developer",
     linkedin: "https://www.linkedin.com/in/jujiwoo/",
     github: "https://github.com/jujiwoo",
     img: null
   },
     {
     name: "Samantha Adorno",
-    role: "Co‑Founder & Backend Engineer",
+    role: "Co‑Founder & Backend Developer",
     linkedin: "https://www.linkedin.com/in/samantha-adorno/",
     github: "https://github.com/sadorno1",
     img: null,
@@ -74,9 +74,9 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
         </p>
         <button
           className="btn-primary px-8 py-3 text-xl font-semibold rounded-lg mt-2 shadow cursor-pointer"
-          onClick={() => goTo(user ? "/roadmap" : "/signup")}
+          onClick={() => goTo(user ? "/roadmaps" : "/signup")}
         >
-          {user ? (hasRoadmap ? "View Your Roadmap" : "Create Your Roadmap") : "Get Started"}
+          {user ? (hasRoadmap ? "View Your Roadmaps" : "Create Your Roadmap") : "Get Started"}
         </button>
       </section>
 
@@ -125,9 +125,9 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
         </h2>
         <button
           className="btn-primary px-8 py-3 text-xl font-semibold rounded-lg shadow cursor-pointer"
-          onClick={() => goTo(user ? "/roadmap" : "/signup")}
+          onClick={() => goTo(user ? "/roadmaps" : "/signup")}
         >
-          {user ? "Go to Your Roadmap" : "Sign Up Now"}
+          {user ? "Go to Your Roadmaps" : "Sign Up Now"}
         </button>
       </section>
       {showModal && (

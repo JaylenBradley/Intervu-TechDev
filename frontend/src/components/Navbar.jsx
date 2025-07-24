@@ -79,8 +79,7 @@ const Navbar = ({ user }) => {
       <div className="flex items-center gap-2 relative ml-4" ref={menuRef} style={{flexShrink: 0}}>
         <NavButton icon={<AiFillHome size={24} />} alt="Home" onClick={() => navigate('/')} />
         <NavButton icon={<RiQuestionnaireFill size={24} />} alt="Questionnaire" onClick={() => navigate('/questionnaire')} />
-        <NavButton icon={<FaMapSigns size={24} />} alt="Roadmap" onClick={() => navigate('/roadmap')} />
-        <NavButton icon={<AiFillHome size={24} />} alt="Skillgap" onClick={() => navigate('/skillgap-roadmap')} />
+        <NavButton icon={<FaMapSigns size={24} />} alt="Roadmaps" onClick={() => navigate('/roadmaps')} />
         <NavButton icon={<FaFileAlt size={24} />} alt="Resume" onClick={handleResumeClick} />
         <NavButton icon={<MdWork size={24} />} alt="Job Dashboard" onClick={() => navigate('/dashboard')} />
         <NavButton icon={<FaRobot size={24} />} alt="AI-Interviewer" onClick={() => navigate('/ai-interviewer')} />

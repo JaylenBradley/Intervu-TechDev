@@ -58,7 +58,7 @@ body {
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 .btn-danger:hover {
-  background-color: #dc2626;
+  background-color: #fca5a5;
 }
 .btn-danger:disabled {
   background-color: #e5e7eb;

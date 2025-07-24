@@ -39,10 +39,12 @@ def create_job_description_roadmap(db: Session, data):
 
     job_description_roadmap_json = generate_job_description_roadmap(profile, skills_str, data.job_description)
 
+    title = getattr(data, "title", None) or "Untitled Roadmap"
     job_description_roadmap = JobDescriptionRoadmap(
         user_id=data.user_id,
         job_description=data.job_description,
-        roadmap_json=job_description_roadmap_json
+        roadmap_json=job_description_roadmap_json,
+        title=title
     )
     db.add(job_description_roadmap)
     db.commit()
@@ -55,6 +57,15 @@ def get_job_description_roadmaps_by_user(db: Session, user_id: int):
 
 def get_job_description_roadmap(db: Session, roadmap_id: str):
     return db.query(JobDescriptionRoadmap).filter(JobDescriptionRoadmap.id == roadmap_id).first()
+
+def update_job_description_roadmap_title(db: Session, roadmap_id: str, new_title: str):
+    roadmap = db.query(JobDescriptionRoadmap).filter(JobDescriptionRoadmap.id == roadmap_id).first()
+    if not roadmap:
+        return None
+    roadmap.title = new_title
+    db.commit()
+    db.refresh(roadmap)
+    return roadmap
 
 def delete_job_description_roadmap(db: Session, roadmap_id: str):
     roadmap = db.query(JobDescriptionRoadmap).filter(JobDescriptionRoadmap.id == roadmap_id).first()
