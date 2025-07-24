@@ -120,6 +120,19 @@ const ResumeMain = ({ user }) => {
                 ))}
               </ul>
             </div>
+            {resume.parsed_data.leadership && resume.parsed_data.leadership.length > 0 && (
+              <div className="mb-4">
+                <strong>Leadership:</strong>
+                <ul className="list-disc ml-6">
+                  {resume.parsed_data.leadership.map((lead, i) => (
+                    <li key={i}>
+                      <strong>{lead.title}</strong> at {lead.organization} ({lead.start_date} - {lead.end_date})<br/>
+                      <span>{lead.description}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {resume.parsed_data.skills && resume.parsed_data.skills.length > 0 && (
               <div className="mb-4">
                 <strong>Skills:</strong> {resume.parsed_data.skills.join(", ")}

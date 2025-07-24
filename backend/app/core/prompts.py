@@ -114,7 +114,7 @@ IMPORTANT RULES:
 
 - For EVERY substantive line you analyze, you MUST provide:
   Original: [the line]
-  Feedback:brief evaluation]
+  Feedback: [brief evaluation]
   - Option 1 [improved version]
   - Option 2: [another improved version]
 
@@ -125,12 +125,12 @@ Examples of what to SKIP:
 - Marketing Manager" (job title)
 - "Company Name" (company)
 - "Project Name (project title)
--2023224ate range)
+- 2023 - 2024 (date range)
 - "This is a clear entry" (simple statement)
 
 Examples of what to ANALYZE:
 -•Increased sales by 25% through targeted marketing campaigns..." (achievement bullet)
-- "Bachelor of Science in Business Administration with 30.8(detailed degree)
+- "Bachelor of Science in Business Administration with 30.8 (detailed degree)
 - "Project management, data analysis, customer service" (skills list)
 
 Resume text:
@@ -143,6 +143,7 @@ You are a resume parser. Given the following resume text, output ONLY valid JSON
 {{
   "education": [{{"institution": str, "degree": str, "start_date": str, "end_date": str}}],
   "experience": [{{"company": str, "title": str, "start_date": str, "end_date": str, "description": str}}],
+  "leadership": [{{"organization": str, "title": str, "start_date": str, "end_date": str, "description": str}}],
   "skills": [str],
   "certifications": [str],
   "projects": [{{"name": str, "description": str}}],

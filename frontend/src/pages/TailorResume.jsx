@@ -38,6 +38,13 @@ const TailorResume = ({ user }) => {
             });
             text += "\n";
           }
+          if (data.parsed_data.leadership && data.parsed_data.leadership.length) {
+            text += "LEADERSHIP\n";
+            data.parsed_data.leadership.forEach(lead => {
+              text += `${lead.title} at ${lead.organization} (${lead.start_date} - ${lead.end_date})\n${lead.description}\n`;
+            });
+            text += "\n";
+          }
           if (data.parsed_data.skills && data.parsed_data.skills.length) {
             text += `SKILLS\n${data.parsed_data.skills.join(", ")}\n\n`;
           }
