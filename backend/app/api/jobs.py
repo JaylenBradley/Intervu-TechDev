@@ -159,6 +159,42 @@ async def export_to_sheets(user_id: int, request: Request, db: Session = Depends
                 }
             }
         },
+        # Set manual minimum widths for all columns
+        {
+            "updateDimensionProperties": {
+                "range": {"sheetId": 0, "dimension": "COLUMNS", "startIndex": 0, "endIndex": 1},
+                "properties": {"pixelSize": 140},
+                "fields": "pixelSize"
+            }
+        },
+        {
+            "updateDimensionProperties": {
+                "range": {"sheetId": 0, "dimension": "COLUMNS", "startIndex": 1, "endIndex": 2},
+                "properties": {"pixelSize": 140},
+                "fields": "pixelSize"
+            }
+        },
+        {
+            "updateDimensionProperties": {
+                "range": {"sheetId": 0, "dimension": "COLUMNS", "startIndex": 2, "endIndex": 3},
+                "properties": {"pixelSize": 110},
+                "fields": "pixelSize"
+            }
+        },
+        {
+            "updateDimensionProperties": {
+                "range": {"sheetId": 0, "dimension": "COLUMNS", "startIndex": 3, "endIndex": 4},
+                "properties": {"pixelSize": 120},
+                "fields": "pixelSize"
+            }
+        },
+        {
+            "updateDimensionProperties": {
+                "range": {"sheetId": 0, "dimension": "COLUMNS", "startIndex": 4, "endIndex": 5},
+                "properties": {"pixelSize": 200},
+                "fields": "pixelSize"
+            }
+        },
         # Add filter to header row
         {
             "setBasicFilter": {
