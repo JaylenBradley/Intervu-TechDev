@@ -244,6 +244,30 @@ async def export_to_sheets(user_id: int, request: Request, db: Session = Depends
                 "innerHorizontal": {"style": "SOLID", "width": 1, "color": {"red": 0.85, "green": 0.85, "blue": 0.85}},
                 "innerVertical":   {"style": "SOLID", "width": 1, "color": {"red": 0.85, "green": 0.85, "blue": 0.85}}
             }
+        },
+        # Add alternating row color (zebra striping) for even rows
+        {
+            "addConditionalFormatRule": {
+                "rule": {
+                    "ranges": [{
+                        "sheetId": 0,
+                        "startRowIndex": 1,
+                        "endRowIndex": num_rows,
+                        "startColumnIndex": 0,
+                        "endColumnIndex": num_cols
+                    }],
+                    "booleanRule": {
+                        "condition": {
+                            "type": "CUSTOM_FORMULA",
+                            "values": [{"userEnteredValue": "=ISEVEN(ROW())"}]
+                        },
+                        "format": {
+                            "backgroundColor": {"red": 0.96, "green": 0.98, "blue": 1}
+                        }
+                    }
+                },
+                "index": 0
+            }
         }
     ]
     service.spreadsheets().batchUpdate(
