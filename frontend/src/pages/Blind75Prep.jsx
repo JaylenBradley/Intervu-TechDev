@@ -92,21 +92,28 @@ export default function Blind75Prep({ userId }) {
   };
 
   /* ── navigation helpers ─────────────────────────────── */
+  const scrollToTop = () =>
+  window.scrollTo({ top: 0, behavior: "smooth" }); 
+
   const next = () => {
-    if (!showCode && evaluationMode) { setShowCode(true); return; }
+    if (!showCode && evaluationMode) { setShowCode(true); scrollToTop(); return; }
     if (current < questions.length - 1) {
       setCurrent((c) => c + 1);
       setShowCode(false);
       resetStatus();
+      scrollToTop();
+
     }
   };
 
   const skip = () => {
-    if (!showCode && evaluationMode) { setShowCode(true); return; }
+    if (!showCode && evaluationMode) { setShowCode(true); scrollToTop(); return; }
     if (current < questions.length - 1) {
       setCurrent((c) => c + 1);
       setShowCode(false);
       resetStatus();
+      scrollToTop();
+
     }
   };
 
@@ -382,10 +389,13 @@ const submitCode = async () => {
   }
 };
 
-const totalSteps = evaluationMode ? questions.length * 2 : questions.length;
-const stepIndex  = showCode ? current * 2 + 1 : current * 2;
-const percent    = Math.round(((stepIndex + 1) / totalSteps) * 100);
+const totalSteps = evaluationMode ? questions.length * 2    
+                                  : questions.length;        
+const stepIndex  = evaluationMode
+  ? (showCode ? current * 2 + 1 : current * 2)  
+  :  current;                                   
 
+const percent = Math.round(((stepIndex + 1) / totalSteps) * 100);
 
 const header = (
   <div className="bg-white rounded-xl shadow-lg p-6">
@@ -546,7 +556,7 @@ useEffect(() => {
 
   if (uiStep === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-app-background py-16">
+      <div className="min-h-screen flex items-center justify-center py-16">
         <div className="bg-white rounded-xl shadow-lg p-8 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-app-primary mx-auto mb-4" />
           <p className="text-app-text">Loading problems…</p>
