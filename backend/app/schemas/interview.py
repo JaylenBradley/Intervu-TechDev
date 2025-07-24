@@ -57,7 +57,7 @@ class UserAnswer(BaseModel):
 class AnswerFeedback(BaseModel):
     question_id: str
     feedback: str
-    score: float  # 0-100
+    score: int 
     suggestions: List[str]
     time_complexity: str
     space_complexity: str 

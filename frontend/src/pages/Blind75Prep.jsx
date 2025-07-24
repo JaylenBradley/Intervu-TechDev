@@ -5,12 +5,13 @@ import {
 import {
   SortableContext, arrayMove, verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-
 import PracticePanel from "../components/PracticePanel";
 import CodePanel     from "../components/CodePanel";
 import {
   toLines, MAX_INDENT, INDENT_WIDTH, diffClasses,
 } from "../utils/constants";
+import ConfigBlind75 from "../components/Config_Blind75";
+
 
 function useLocalStorage(key, fallback) {
   const [value, setValue] = useState(() => {
@@ -94,6 +95,8 @@ export default function Blind75Prep({ userId }) {
   /* ── navigation helpers ─────────────────────────────── */
   const scrollToTop = () =>
   window.scrollTo({ top: 0, behavior: "smooth" }); 
+
+  
 
   const next = () => {
     if (!showCode && evaluationMode) { setShowCode(true); scrollToTop(); return; }
@@ -327,22 +330,29 @@ const canAdvance = () => {
 };
 
 const buildEliminatedCode = (type) => {
-  const linesArr = [...questions[current].plainSolution];  
+  const linesArr = [...questions[current].plainSolution];
+  const SAFE_OFFSET = 2;
+  if (linesArr.length <= SAFE_OFFSET) return linesArr.join("\n");
 
-  const n = Math.min(elimCount, linesArr.length);
+  const n = Math.min(elimCount, linesArr.length - SAFE_OFFSET);
 
   if (type === "last") {
     for (let i = 0; i < n; i++) {
-      linesArr[linesArr.length - 1 - i] = "# ???";
+      const idx = linesArr.length - 1 - i;
+      if (idx >= SAFE_OFFSET) linesArr[idx] = "# Type line here";
     }
-  } else {                         
+  } else {
     const idxs = new Set();
-    while (idxs.size < n) idxs.add(Math.floor(Math.random() * linesArr.length));
-    idxs.forEach((i) => (linesArr[i] = "# ???"));
+    while (idxs.size < n) {
+      const randIdx = SAFE_OFFSET + Math.floor(Math.random() * (linesArr.length - SAFE_OFFSET));
+      idxs.add(randIdx);
+    }
+    idxs.forEach((i) => (linesArr[i] = "# Type line here"));
   }
 
   return linesArr.join("\n");
 };
+
 useEffect(() => {
   if (!showCode) return;
 
@@ -413,9 +423,6 @@ const header = (
         style={{ width: `${percent}%` }}
       />
     </div>
-    <div className="flex justify-end text-xs text-gray-500 mt-1">
-      {percent}% Complete
-    </div>
   </div>
 );
 
@@ -438,121 +445,23 @@ useEffect(() => {
 
   /* ====== MAIN RENDER ====== */
   if (uiStep === "config") {
-    return (
-      <div className="min-h-screen flex items-center justify-center py-16">
-        <div className="bg-white shadow-xl rounded-2xl w-full max-w-lg p-10 space-y-6">
-          <h1 className="text-center text-3xl font-extrabold text-app-primary">
-            Technical Prep
-          </h1>
+  return (
+    <ConfigBlind75
+      /* lift state down */
+      showConfig={showConfig}       setShowConfig={setShowConfig}
+      numQuestions={numQuestions}   setNumQuestions={setNumQuestions}
+      evaluationMode={evaluationMode} setEvaluationMode={setEvaluationMode}
+      elimMode={elimMode}           setElimMode={setElimMode}
+      elimCount={elimCount}         setElimCount={setElimCount}
 
-          {/* toggle config panel */}
-          <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={() => setShowConfig((v) => !v)}
-              className="flex items-center gap-1 text-app-primary text-sm
-                         px-3 py-1 border border-app-primary rounded-lg
-                         hover:bg-app-primary hover:text-white transition">
-              Settings
-            </button>
-          </div>
+      /* callbacks */
+      startQuiz={startQuiz}
+      handleSaveCfg={handleSaveCfg}
+      handleCancelCfg={handleCancelCfg}
+    />
+  );
+}
 
-          {/* form */}
-          <form
-            onSubmit={(e) => { e.preventDefault(); startQuiz(); }}
-            className="space-y-6">
-
-            {/* always‑visible field */}
-            <div>
-              <label className="block mb-1 font-medium text-app-text">
-                Number of Questions
-              </label>
-              <select
-                value={numQuestions}
-                onChange={(e) => setNumQuestions(+e.target.value)}
-                className="w-full px-3 py-2 border border-app-primary rounded-lg
-                           bg-app-background focus:outline-none">
-                {[3, 5, 10].map((n) => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* advanced settings */}
-            {showConfig && (
-              <>
-                {/* evaluation mode */}
-                <div className="flex items-center justify-between bg-gray-50
-                                border border-gray-200 rounded-lg p-3">
-                  <label className="font-medium text-app-text">
-                    Evaluation mode
-                    <br />
-                    <span className="text-xs text-gray-500">
-                      (write code after each reorder)
-                    </span>
-                  </label>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={evaluationMode}
-                      onChange={(e) => setEvaluationMode(e.target.checked)}
-                      className="sr-only peer" />
-                    <div className="w-11 h-6 bg-gray-300 rounded-full
-                                    peer-checked:bg-app-primary
-                                    after:absolute after:start-1 after:top-1
-                                    after:bg-white after:h-4 after:w-4 after:rounded-full
-                                    after:transition-all peer-checked:after:translate-x-full" />
-                  </label>
-                </div>
-
-                {/* auto‑blank */}
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <label className="block font-medium text-app-text mb-2">
-                    Auto‑blank lines in solution
-                  </label>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <select
-                      value={elimMode}
-                      onChange={(e) => setElimMode(e.target.value)}
-                      className="px-3 py-2 border rounded-lg bg-white focus:outline-none">
-                      <option value="none">Off</option>
-                      <option value="random">Random N</option>
-                      <option value="last">Last N</option>
-                    </select>
-                    <input
-                      type="number"
-                      min={1} max={99}
-                      disabled={elimMode === "none"}
-                      value={elimCount}
-                      onChange={(e) => setElimCount(+e.target.value)}
-                      className="w-20 px-3 py-2 border rounded-lg bg-white
-                                 focus:outline-none disabled:opacity-50" />
-                    <span className="text-sm text-gray-500">lines</span>
-                  </div>
-                </div>
-
-                {/* save / cancel */}
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={handleCancelCfg}
-                    className="px-4 py-1 rounded-lg text-sm border">Cancel</button>
-                  <button
-                    type="button"
-                    onClick={handleSaveCfg}
-                    className="btn-primary px-4 py-1 rounded-lg text-sm">Save</button>
-                </div>
-              </>
-            )}
-
-            <button className="btn-primary w-full py-2 rounded-lg font-semibold">
-              Start Practice
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
 
   if (uiStep === "loading") {
     return (

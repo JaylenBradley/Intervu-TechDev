@@ -112,15 +112,16 @@ Evaluate the answer and provide detailed feedback. Return ONLY a valid JSON obje
 }}
 
 Scoring rules:
-- Score is out of 100.
+- Score is out of 100
+-DO NOT GIVE DECIMAL SCORES, THE SCORES MUST BE INTS, FOR EXAMPLE DONT GIVE 40.0 GIVE 40 
 - Only give a score of 100 if the solution is fully correct, optimal, well-explained, and handles all edge cases.
 - Deduct up to 40 points for correctness issues (wrong or incomplete solution).
 - Deduct up to 30 points for efficiency issues (suboptimal time/space complexity).
 - Deduct up to 20 points for code quality issues (poor readability, bad structure).
 - Deduct up to 10 points for missing edge cases.
-- If the solution is perfect, give 100. If there are minor issues, deduct points as specified above. Be specific and consistent.
- - If you see a line that says # ??? that means there is a missing line, deduct points accordingly.
-- Do not give arbitrary scores like 85.5 for a perfect solution.
+- If the solution is perfect, give 100 If there are minor issues, deduct points as specified above. Be specific and consistent.
+ - If you see a line that says "# Type line here" that means there is a missing line, deduct points accordingly.
+- Do not give arbitrary scores like 85 for a perfect solution.
 
 Evaluation criteria:
 - Correctness (40%): Does the solution solve the problem correctly?
@@ -128,7 +129,7 @@ Evaluation criteria:
 - Code Quality (20%): Is the code readable and well-structured?
 - Edge Cases (10%): Does it handle edge cases properly?
 
-Score should be 0-100. Be constructive and specific.
+Score should be 0-100  Be constructive and specific.
 """
     
     try:
