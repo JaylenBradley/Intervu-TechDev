@@ -1,20 +1,25 @@
-import { auth } from "../services/firebase.js";
-import { fetchUserResume } from "../services/resumeServices";
-import { signOut } from "firebase/auth";
-import { useEffect, useState, useRef,  } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import NavButton from "./NavButton.jsx";
 import { AiFillHome } from "react-icons/ai";
+import { auth } from "../services/firebase.js";
 import { FaFileAlt, FaMapSigns, FaRobot, FaUser } from "react-icons/fa";
 import { MdWork } from "react-icons/md";
+import NavButton from "./NavButton.jsx";
+import { RiQuestionnaireFill } from "react-icons/ri";
+import { fetchUserResume } from "../services/resumeServices";
 import logo from "../assets/images/intervu-logo-transparent.png";
+import { signOut } from "firebase/auth";
+import Modal from "./Modal";
+import { useNotification } from "./NotificationProvider";
 
 const Navbar = ({ user }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [resumeCheckLoading, setResumeCheckLoading] = useState(false);
   const [showResumeModal, setShowResumeModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const menuRef = useRef();
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     const handler = (e) => {
@@ -32,16 +37,18 @@ const Navbar = ({ user }) => {
 
   const handleAuthClick = async () => {
     if (user) {
-      const confirmed = window.confirm("Are you sure you want to log out?");
-      if (confirmed) {
-        await signOut(auth);
-        alert("Goodbye! You have been logged out");
-        navigate("/signin");
-      }
+      setShowLogoutModal(true);
     } else {
       navigate("/signin");
     }
     setMenuOpen(false);
+  };
+
+  const handleLogout = async () => {
+    setShowLogoutModal(false);
+    await signOut(auth);
+    showNotification("Goodbye! You have been logged out", "success");
+    navigate("/signin");
   };
 
   const handleResumeClick = async () => {
@@ -70,7 +77,7 @@ const Navbar = ({ user }) => {
       <div className="flex items-center min-w-0">
         <button
           className="flex items-center focus:outline-none cursor-pointer"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/')} 
           style={{ background: "none", border: "none", padding: 0, margin: 0 }}
           type="button"
         >
@@ -146,6 +153,14 @@ const Navbar = ({ user }) => {
           )}
         </div>
       </div>
+      <Modal
+        open={showLogoutModal}
+        message="Are you sure you want to log out?"
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutModal(false)}
+        confirmText="Log out"
+        cancelText="Cancel"
+      />
     </nav>
   );
 };

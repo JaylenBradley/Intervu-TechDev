@@ -119,11 +119,40 @@ const ResumeMain = ({ user }) => {
                 {resume.parsed_data.experience.map((exp, i) => (
                   <li key={i}>
                     <strong>{exp.title}</strong> at {exp.company} ({exp.start_date} - {exp.end_date})<br/>
-                    <span>{exp.description}</span>
+                    {exp.description
+                      ? exp.description
+                          .split(/[•▪]/)
+                          .map(line => line.replace(/\s+/g, ' ').trim())
+                          .filter(line => line.length > 0)
+                          .map((line, j) => (
+                            <div key={j}>{j > 0 && '• '}{line}</div>
+                          ))
+                      : null}
                   </li>
                 ))}
               </ul>
             </div>
+            {resume.parsed_data.leadership && resume.parsed_data.leadership.length > 0 && (
+              <div className="mb-4">
+                <strong>Leadership:</strong>
+                <ul className="list-disc ml-6">
+                  {resume.parsed_data.leadership.map((lead, i) => (
+                    <li key={i}>
+                      <strong>{lead.title}</strong> at {lead.organization} ({lead.start_date} - {lead.end_date})<br/>
+                      {lead.description
+                        ? lead.description
+                            .split(/[•▪]/)
+                            .map(line => line.replace(/\s+/g, ' ').trim())
+                            .filter(line => line.length > 0)
+                            .map((line, j) => (
+                              <div key={j}>{j > 0 && '• '}{line}</div>
+                            ))
+                        : null}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {resume.parsed_data.skills && resume.parsed_data.skills.length > 0 && (
               <div className="mb-4">
                 <strong>Skills:</strong> {resume.parsed_data.skills.join(", ")}
@@ -140,7 +169,15 @@ const ResumeMain = ({ user }) => {
                 <ul className="list-disc ml-6">
                   {resume.parsed_data.projects.map((proj, i) => (
                     <li key={i}>
-                      <strong>{proj.name}</strong>: {proj.description}
+                      <strong>{proj.name}</strong>: {proj.description
+                        ? proj.description
+                            .split(/[•▪]/)
+                            .map(line => line.replace(/\s+/g, ' ').trim())
+                            .filter(line => line.length > 0)
+                            .map((line, j) => (
+                              <div key={j}>{j > 0 && '• '}{line}</div>
+                            ))
+                        : null}
                     </li>
                   ))}
                 </ul>

@@ -28,6 +28,7 @@ import TailorResume from "./pages/TailorResume.jsx";
 import TechnicalPrep from "./pages/TechnicalPrep.jsx";
 import UploadResume from "./pages/UploadResume.jsx";
 import UserProfile from "./pages/UserProfile.jsx";
+import NotificationProvider from "./components/NotificationProvider";
 
 const App = () => {
   const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
@@ -96,7 +97,7 @@ const App = () => {
     );
 
   return (
-    <>
+    <NotificationProvider>
       <Navbar user={user}/>
       <Routes>
         <Route path="/signup" element={<AuthForm isSignUp={true}/>}/>
@@ -202,7 +203,7 @@ const App = () => {
       </Routes>
       <ScrollToTopButton />
       <Footer/>
-    </>
+    </NotificationProvider>
   );
 }
 

@@ -1,9 +1,10 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useNotification } from "../components/NotificationProvider";
 import { BsLinkedin, BsGraphUpArrow } from "react-icons/bs";
 import { FaGithubSquare } from "react-icons/fa";
-import { RiRoadMapFill } from "react-icons/ri";
 import { GiBrain } from "react-icons/gi";
+import { RiRoadMapFill } from "react-icons/ri";
 import { SiProbot } from "react-icons/si";
 import intervuLogo from "../assets/images/intervu-logo-transparent.png";
 
@@ -57,6 +58,22 @@ const team = [
 const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
   const showModal = user && !questionnaireComplete;
   const navigate = useNavigate();
+  const location = useLocation();
+  const { showNotification } = useNotification();
+  const shownRef = useRef(false);
+
+  useEffect(() => {
+    if (shownRef.current) return;
+    if (location.state?.showSignInToast) {
+      showNotification("Sign in successful! Welcome back", "success");
+      shownRef.current = true;
+      navigate(location.pathname, { replace: true, state: {} });
+    } else if (location.state?.showSignUpToast) {
+      showNotification("Sign up successful! Welcome", "success");
+      shownRef.current = true;
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, showNotification, navigate]);
 
   useEffect(() => {
     window.scrollTo(0, 0);

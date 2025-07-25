@@ -85,10 +85,11 @@ def parse_resume_prompt(resume_text: str) -> str:
     {{
       "education": [{{"institution": str, "degree": str, "start_date": str, "end_date": str}}],
       "experience": [{{"company": str, "title": str, "start_date": str, "end_date": str, "description": str}}],
-      "skills": [str],
+      "leadership": [{{"organization": str, "title": str, "start_date": str, "end_date": str, "description": str}}],
       "certifications": [str],
       "projects": [{{"name": str, "description": str}}],
-      "contact_info": {{"name": str, "email": str, "phone": str}}
+      "contact_info": {{"name": str, "email": str, "phone": str}},
+      "skills": [str]
     }}
     
     If a field is missing, return an empty list or empty string for that field. Do not invent information. Return only the JSON object.

@@ -38,7 +38,26 @@ const TailorResume = ({ user }) => {
           if (data.parsed_data.experience && data.parsed_data.experience.length) {
             text += "EXPERIENCE\n";
             data.parsed_data.experience.forEach(exp => {
-              text += `${exp.title} at ${exp.company} (${exp.start_date} - ${exp.end_date})\n${exp.description}\n`;
+              text += `${exp.title} at ${exp.company} (${exp.start_date} - ${exp.end_date})\n`;
+              // Split description by bullet points and format properly
+              const bullets = exp.description.split(/[•\-]/).filter(bullet => bullet.trim());
+              bullets.forEach(bullet => {
+                text += `• ${bullet.trim()}\n`;
+              });
+              text += "\n";
+            });
+            text += "\n";
+          }
+          if (data.parsed_data.leadership && data.parsed_data.leadership.length) {
+            text += "LEADERSHIP\n";
+            data.parsed_data.leadership.forEach(lead => {
+              text += `${lead.title} at ${lead.organization} (${lead.start_date} - ${lead.end_date})\n`;
+              // Split description by bullet points and format properly
+              const bullets = lead.description.split(/[•\-]/).filter(bullet => bullet.trim());
+              bullets.forEach(bullet => {
+                text += `• ${bullet.trim()}\n`;
+              });
+              text += "\n";
             });
             text += "\n";
           }

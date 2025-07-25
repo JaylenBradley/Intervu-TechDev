@@ -14,6 +14,9 @@ import { GiArcheryTarget, GiMoneyStack } from "react-icons/gi";
 import { PiConfetti, PiNotePencil } from "react-icons/pi";
 import { RxCross1 } from "react-icons/rx";
 import { TiPlusOutline } from "react-icons/ti";
+import { FaBuilding, FaBriefcase, FaFlag, FaCalendarAlt, FaMapMarkerAlt, FaDollarSign } from "react-icons/fa";
+import { useNotification } from "../components/NotificationProvider";
+import Modal from "../components/Modal";
 
 const JobDashboard = ({ user }) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
@@ -35,9 +38,29 @@ const JobDashboard = ({ user }) => {
     status: "applied"
   });
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  const [filters, setFilters] = useState({
+    company_name: "",
+    company_sort: "asc", // or "desc"
+    job_title: "",
+    status: "",
+    applied_date: "",
+    location: "",
+    salary_range: ""
+  });
+
+  const [filterOptions, setFilterOptions] = useState({
+    company_names: [],
+    job_titles: [],
+    statuses: ["applied", "interviewing", "offer", "rejected", "withdrawn"],
+    applied_dates: [],
+    locations: [],
+    salary_ranges: []
+  });
+
+  const { showNotification } = useNotification();
+
+  const [deleteJobId, setDeleteJobId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const loadJobs = async () => {
     try {
@@ -60,6 +83,45 @@ const JobDashboard = ({ user }) => {
     if (!user) return;
     loadJobs();
   }, [user]);
+
+  // Populate filter options based on jobs
+  useEffect(() => {
+    setFilterOptions({
+      company_names: Array.from(new Set(jobs.map(j => j.company_name).filter(Boolean))).sort(),
+      job_titles: Array.from(new Set(jobs.map(j => j.job_title).filter(Boolean))).sort(),
+      statuses: ["applied", "interviewing", "offer", "rejected", "withdrawn"],
+      applied_dates: Array.from(new Set(jobs.map(j => {
+        if (!j.applied_date) return null;
+        const d = new Date(j.applied_date);
+        return d instanceof Date && !isNaN(d) ? d.toLocaleDateString('en-CA') : null;
+      }).filter(Boolean))).sort(),
+      locations: Array.from(new Set(jobs.map(j => j.location).filter(Boolean))).sort(),
+      salary_ranges: Array.from(new Set(jobs.map(j => j.salary_range).filter(Boolean))).sort(),
+    });
+  }, [jobs]);
+
+  // Filtering logic
+  const filteredJobs = jobs.filter(job => {
+    if (filters.company_name && job.company_name !== filters.company_name) return false;
+    if (filters.job_title && job.job_title !== filters.job_title) return false;
+    if (filters.status && job.status !== filters.status) return false;
+    if (filters.applied_date && job.applied_date) {
+      const localDate = new Date(job.applied_date).toLocaleDateString('en-CA');
+      if (localDate !== filters.applied_date) return false;
+    }
+    if (filters.location && job.location !== filters.location) return false;
+    if (filters.salary_range && job.salary_range !== filters.salary_range) return false;
+    return true;
+  });
+
+  // Sorting logic for company name
+  const sortedJobs = [...filteredJobs].sort((a, b) => {
+    if (filters.company_sort === "asc") {
+      return (a.company_name || "").localeCompare(b.company_name || "");
+    } else {
+      return (b.company_name || "").localeCompare(a.company_name || "");
+    }
+  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -120,16 +182,28 @@ const JobDashboard = ({ user }) => {
     }
   };
 
-  const handleDelete = async (jobId) => {
-    if (window.confirm("Are you sure you want to delete this application?")) {
-      try {
-        await deleteJobApplication(jobId);
-        await loadJobs();
-        setError(null);
-      } catch (err) {
-        setError("Failed to delete job application. Please try again.");
-      }
+  const handleDelete = (jobId) => {
+    setDeleteJobId(jobId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteJobId) return;
+    try {
+      await deleteJobApplication(deleteJobId);
+      await loadJobs();
+      setError(null);
+    } catch (err) {
+      setError("Failed to delete job application. Please try again.");
+    } finally {
+      setShowDeleteModal(false);
+      setDeleteJobId(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setDeleteJobId(null);
   };
 
   const handleEdit = (job) => {
@@ -171,7 +245,7 @@ const JobDashboard = ({ user }) => {
 
   const handleExportCSV = async () => {
     if (!user || !user.id) {
-      alert("Please sign in to export your job applications.");
+      showNotification("Please sign in to export your job applications.", "error");
       return;
     }
     try {
@@ -185,13 +259,13 @@ const JobDashboard = ({ user }) => {
       link.click();
       link.remove();
     } catch (err) {
-      alert("Failed to export job applications. Please try again.");
+      showNotification("Failed to export job applications. Please try again.", "error");
     }
   };
 
   const handleExportGoogleSheets = async () => {
     if (!user || !user.id) {
-      alert("Please sign in to export to Google Sheets.");
+      showNotification("Please sign in to export to Google Sheets.", "error");
       return;
     }
     try {
@@ -204,10 +278,10 @@ const JobDashboard = ({ user }) => {
       if (data.sheet_url) {
         window.open(data.sheet_url, "_blank");
       } else {
-        alert("Failed to export to Google Sheets.");
+        showNotification("Failed to export to Google Sheets.", "error");
       }
     } catch (err) {
-      alert("Failed to export to Google Sheets. Please try again.");
+      showNotification("Failed to export to Google Sheets. Please try again.", "error");
     }
   };
 
@@ -241,7 +315,7 @@ const JobDashboard = ({ user }) => {
               className="btn-primary text-white px-6 py-3 rounded-lg transition-colors flex items-center gap-2 cursor-pointer"
               onClick={() => {
                 if (!user || !user.id) {
-                  alert("Please sign in to export to Google Sheets.");
+                  showNotification("Please sign in to export to Google Sheets.", "error");
                   return;
                 }
                 window.open(`${backendUrl}/api/jobs/export-to-sheets/${user.id}`, '_blank');
@@ -288,12 +362,148 @@ const JobDashboard = ({ user }) => {
           ))}
         </div>
 
+        {/* Enhanced Filter UI */}
+        <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl shadow border border-blue-200 mb-8 p-6 sticky top-4 z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 items-end w-full">
+            {/* Company Name Filter */}
+            <div className="flex flex-col">
+              <label className="flex items-center gap-1 text-xs font-semibold text-app-primary mb-1">
+                <FaBuilding className="text-blue-400 text-base"/>
+                Company Name
+              </label>
+              <div className="flex items-center gap-1">
+                <select
+                  value={filters.company_name}
+                  onChange={e => setFilters(f => ({ ...f, company_name: e.target.value }))}
+                  className="rounded-full border border-blue-200 px-3 py-1 text-sm bg-white focus:ring-2 focus:ring-blue-300 shadow-sm w-full"
+                >
+                  <option value="">All</option>
+                  {filterOptions.company_names.map(name => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="ml-1 px-2 py-1 border border-blue-200 rounded-full text-xs bg-blue-100 hover:bg-blue-200 transition-colors"
+                  onClick={() => setFilters(f => ({ ...f, company_sort: f.company_sort === "asc" ? "desc" : "asc" }))}
+                  title="Toggle sort order"
+                >
+                  {filters.company_sort === "asc" ? "A→Z" : "Z→A"}
+                </button>
+              </div>
+            </div>
+            {/* Job Title Filter */}
+            <div className="flex flex-col">
+              <label className="flex items-center gap-1 text-xs font-semibold text-app-primary mb-1">
+                <FaBriefcase className="text-green-400 text-base"/>
+                Job Title
+              </label>
+              <select
+                value={filters.job_title}
+                onChange={e => setFilters(f => ({ ...f, job_title: e.target.value }))}
+                className="rounded-full border border-green-200 px-3 py-1 text-sm bg-white focus:ring-2 focus:ring-green-300 shadow-sm w-full"
+              >
+                <option value="">All</option>
+                {filterOptions.job_titles.map(title => (
+                  <option key={title} value={title}>{title}</option>
+                ))}
+              </select>
+            </div>
+            {/* Status Filter */}
+            <div className="flex flex-col">
+              <label className="flex items-center gap-1 text-xs font-semibold text-app-primary mb-1">
+                <FaFlag className="text-yellow-400 text-base"/>
+                Status
+              </label>
+              <select
+                value={filters.status}
+                onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
+                className="rounded-full border border-yellow-200 px-3 py-1 text-sm bg-white focus:ring-2 focus:ring-yellow-300 shadow-sm w-full"
+              >
+                <option value="">All</option>
+                {filterOptions.statuses.map(status => (
+                  <option key={status} value={status}>{status}</option>
+                ))}
+              </select>
+            </div>
+            {/* Applied Date Filter */}
+            <div className="flex flex-col">
+              <label className="flex items-center gap-1 text-xs font-semibold text-app-primary mb-1">
+                <FaCalendarAlt className="text-purple-400 text-base"/>
+                Applied Date
+              </label>
+              <select
+                value={filters.applied_date}
+                onChange={e => setFilters(f => ({ ...f, applied_date: e.target.value }))}
+                className="rounded-full border border-purple-200 px-3 py-1 text-sm bg-white focus:ring-2 focus:ring-purple-300 shadow-sm w-full"
+              >
+                <option value="">All</option>
+                {filterOptions.applied_dates.map(date => (
+                  <option key={date} value={date}>{date}</option>
+                ))}
+              </select>
+            </div>
+            {/* Location Filter */}
+            <div className="flex flex-col">
+              <label className="flex items-center gap-1 text-xs font-semibold text-app-primary mb-1">
+                <FaMapMarkerAlt className="text-pink-400 text-base"/>
+                Location
+              </label>
+              <select
+                value={filters.location}
+                onChange={e => setFilters(f => ({ ...f, location: e.target.value }))}
+                className="rounded-full border border-pink-200 px-3 py-1 text-sm bg-white focus:ring-2 focus:ring-pink-300 shadow-sm w-full"
+              >
+                <option value="">All</option>
+                {filterOptions.locations.map(loc => (
+                  <option key={loc} value={loc}>{loc}</option>
+                ))}
+              </select>
+            </div>
+            {/* Salary Range Filter */}
+            <div className="flex flex-col">
+              <label className="flex items-center gap-1 text-xs font-semibold text-app-primary mb-1">
+                <FaDollarSign className="text-indigo-400 text-base"/>
+                Salary Range
+              </label>
+              <select
+                value={filters.salary_range}
+                onChange={e => setFilters(f => ({ ...f, salary_range: e.target.value }))}
+                className="rounded-full border border-indigo-200 px-3 py-1 text-sm bg-white focus:ring-2 focus:ring-indigo-300 shadow-sm w-full"
+              >
+                <option value="">All</option>
+                {filterOptions.salary_ranges.map(sal => (
+                  <option key={sal} value={sal}>{sal}</option>
+                ))}
+              </select>
+            </div>
+            {/* Reset Filters Button - right aligned in last grid cell */}
+            <div className="flex flex-col items-end justify-end h-full">
+              <button
+                type="button"
+                className="px-4 py-2 rounded-full text-xs font-semibold bg-gray-200 hover:bg-gray-300 text-gray-700 border border-gray-300 shadow-sm mt-4 sm:mt-0"
+                onClick={() => setFilters({
+                  company_name: "",
+                  company_sort: "asc",
+                  job_title: "",
+                  status: "",
+                  applied_date: "",
+                  location: "",
+                  salary_range: ""
+                })}
+              >
+                Reset Filters
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-app-primary">Your Applications</h2>
           </div>
 
-          {jobs.length === 0 ? (
+          {sortedJobs.length === 0 ? (
             <div className="p-8 text-center">
               <div className="flex items-center justify-center text-4xl mb-4">
                 <PiNotePencil/>
@@ -303,7 +513,7 @@ const JobDashboard = ({ user }) => {
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {jobs.map((job) => (
+              {sortedJobs.map((job) => (
                 <div key={job.id} className="p-6 hover:bg-gray-50 transition-colors">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -335,7 +545,6 @@ const JobDashboard = ({ user }) => {
                         </p>
                       )}
                     </div>
-
                     <div className="flex items-center gap-2 ml-4">
                       <select
                         value={job.status}
@@ -350,18 +559,14 @@ const JobDashboard = ({ user }) => {
                       </select>
                       <button
                         onClick={() => handleEdit(job)}
-                        className=
-                          "flex items-center justify-center gap-0.5 cursor-pointer
-                          job-edit-button text-sm"
+                        className="flex items-center justify-center gap-0.5 cursor-pointer job-edit-button text-sm"
                       >
                         <FaPencilAlt/>
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(job.id)}
-                        className=
-                          "flex items-center justify-center gap-0.5 cursor-pointer
-                          text-red-500 hover:text-red-700 text-sm"
+                        className="flex items-center justify-center gap-0.5 cursor-pointer text-red-500 hover:text-red-700 text-sm"
                       >
                         <IoTrashBinOutline/>
                         Delete
@@ -505,6 +710,14 @@ const JobDashboard = ({ user }) => {
           </div>
         </>
       )}
+      <Modal
+        open={showDeleteModal}
+        message="Are you sure you want to delete this application?"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 };

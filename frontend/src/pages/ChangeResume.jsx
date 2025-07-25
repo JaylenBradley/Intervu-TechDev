@@ -1,5 +1,6 @@
 import  {useState, useRef, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "../components/NotificationProvider";
 
 const ChangeResume = ({ user }) => {
   const [file, setFile] = useState(null);
@@ -8,6 +9,7 @@ const ChangeResume = ({ user }) => {
   const [error, setError] = useState("");
   const fileInputRef = useRef();
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -41,7 +43,7 @@ const ChangeResume = ({ user }) => {
         body: formData,
       });
       if (!res.ok) throw new Error("Failed to upload resume");
-      alert("Resume uploaded and parsed successfully!");
+      showNotification("Resume uploaded and parsed successfully!", "success");
       navigate("/resume");
     } catch (err) {
       setError("Error uploading resume. Please try again.");

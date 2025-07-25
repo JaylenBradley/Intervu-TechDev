@@ -119,5 +119,186 @@ async def export_to_sheets(user_id: int, request: Request, db: Session = Depends
         valueInputOption='RAW',
         body={'values': data}
     ).execute()
+
+    # Formatting improvements
+    num_rows = len(data)
+    num_cols = len(data[0])
+    requests = [
+        # Bold and color header row (deeper blue, white text)
+        {
+            "repeatCell": {
+                "range": {
+                    "sheetId": 0,
+                    "startRowIndex": 0,
+                    "endRowIndex": 1,
+                    "startColumnIndex": 0,
+                    "endColumnIndex": num_cols
+                },
+                "cell": {
+                    "userEnteredFormat": {
+                        "backgroundColor": {"red": 0.22, "green": 0.45, "blue": 0.75},
+                        "textFormat": {"bold": True, "foregroundColor": {"red": 1, "green": 1, "blue": 1}}
+                    }
+                },
+                "fields": "userEnteredFormat(backgroundColor,textFormat)"
+            }
+        },
+        # Freeze header row
+        {
+            "updateSheetProperties": {
+                "properties": {"sheetId": 0, "gridProperties": {"frozenRowCount": 1}},
+                "fields": "gridProperties.frozenRowCount"
+            }
+        },
+        # Auto-resize columns
+        {
+            "autoResizeDimensions": {
+                "dimensions": {
+                    "sheetId": 0,
+                    "dimension": "COLUMNS",
+                    "startIndex": 0,
+                    "endIndex": num_cols
+                }
+            }
+        },
+        # Set manual minimum widths for all columns
+        {
+            "updateDimensionProperties": {
+                "range": {"sheetId": 0, "dimension": "COLUMNS", "startIndex": 0, "endIndex": 1},
+                "properties": {"pixelSize": 140},
+                "fields": "pixelSize"
+            }
+        },
+        {
+            "updateDimensionProperties": {
+                "range": {"sheetId": 0, "dimension": "COLUMNS", "startIndex": 1, "endIndex": 2},
+                "properties": {"pixelSize": 140},
+                "fields": "pixelSize"
+            }
+        },
+        {
+            "updateDimensionProperties": {
+                "range": {"sheetId": 0, "dimension": "COLUMNS", "startIndex": 2, "endIndex": 3},
+                "properties": {"pixelSize": 110},
+                "fields": "pixelSize"
+            }
+        },
+        {
+            "updateDimensionProperties": {
+                "range": {"sheetId": 0, "dimension": "COLUMNS", "startIndex": 3, "endIndex": 4},
+                "properties": {"pixelSize": 120},
+                "fields": "pixelSize"
+            }
+        },
+        {
+            "updateDimensionProperties": {
+                "range": {"sheetId": 0, "dimension": "COLUMNS", "startIndex": 4, "endIndex": 5},
+                "properties": {"pixelSize": 200},
+                "fields": "pixelSize"
+            }
+        },
+        # Add filter to header row
+        {
+            "setBasicFilter": {
+                "filter": {
+                    "range": {
+                        "sheetId": 0,
+                        "startRowIndex": 0,
+                        "endRowIndex": num_rows,
+                        "startColumnIndex": 0,
+                        "endColumnIndex": num_cols
+                    }
+                }
+            }
+        },
+        # Format Applied Date column (index 3) as YYYY-MM-DD
+        {
+            "repeatCell": {
+                "range": {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "endRowIndex": num_rows,
+                    "startColumnIndex": 3,
+                    "endColumnIndex": 4
+                },
+                "cell": {
+                    "userEnteredFormat": {
+                        "numberFormat": {"type": "DATE", "pattern": "yyyy-mm-dd"}
+                    }
+                },
+                "fields": "userEnteredFormat.numberFormat"
+            }
+        },
+        # Add borders to the table
+        {
+            "updateBorders": {
+                "range": {
+                    "sheetId": 0,
+                    "startRowIndex": 0,
+                    "endRowIndex": num_rows,
+                    "startColumnIndex": 0,
+                    "endColumnIndex": num_cols
+                },
+                "top":    {"style": "SOLID", "width": 1, "color": {"red": 0.6, "green": 0.6, "blue": 0.6}},
+                "bottom": {"style": "SOLID", "width": 1, "color": {"red": 0.6, "green": 0.6, "blue": 0.6}},
+                "left":   {"style": "SOLID", "width": 1, "color": {"red": 0.6, "green": 0.6, "blue": 0.6}},
+                "right":  {"style": "SOLID", "width": 1, "color": {"red": 0.6, "green": 0.6, "blue": 0.6}},
+                "innerHorizontal": {"style": "SOLID", "width": 1, "color": {"red": 0.85, "green": 0.85, "blue": 0.85}},
+                "innerVertical":   {"style": "SOLID", "width": 1, "color": {"red": 0.85, "green": 0.85, "blue": 0.85}}
+            }
+        },
+        # Add alternating row color (zebra striping) for even rows (soft blue)
+        {
+            "addConditionalFormatRule": {
+                "rule": {
+                    "ranges": [{
+                        "sheetId": 0,
+                        "startRowIndex": 1,
+                        "endRowIndex": num_rows,
+                        "startColumnIndex": 0,
+                        "endColumnIndex": num_cols
+                    }],
+                    "booleanRule": {
+                        "condition": {
+                            "type": "CUSTOM_FORMULA",
+                            "values": [{"userEnteredValue": "=ISEVEN(ROW(A2))"}]
+                        },
+                        "format": {
+                            "backgroundColor": {"red": 0.89, "green": 0.94, "blue": 0.99}
+                        }
+                    }
+                },
+                "index": 0
+            }
+        },
+        # Add alternating row color for odd rows (very light gray)
+        {
+            "addConditionalFormatRule": {
+                "rule": {
+                    "ranges": [{
+                        "sheetId": 0,
+                        "startRowIndex": 1,
+                        "endRowIndex": num_rows,
+                        "startColumnIndex": 0,
+                        "endColumnIndex": num_cols
+                    }],
+                    "booleanRule": {
+                        "condition": {
+                            "type": "CUSTOM_FORMULA",
+                            "values": [{"userEnteredValue": "=ISODD(ROW(A2))"}]
+                        },
+                        "format": {
+                            "backgroundColor": {"red": 0.98, "green": 0.98, "blue": 0.98}
+                        }
+                    }
+                },
+                "index": 1
+            }
+        }
+    ]
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=sheet_id,
+        body={"requests": requests}
+    ).execute()
     sheet_url = f'https://docs.google.com/spreadsheets/d/{sheet_id}'
     return RedirectResponse(sheet_url)

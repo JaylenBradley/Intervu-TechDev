@@ -11,6 +11,8 @@ import {
   toLines, MAX_INDENT, INDENT_WIDTH, diffClasses,
 } from "../utils/constants";
 import ConfigBlind75 from "../components/Config_Blind75";
+import { CSS } from "@dnd-kit/utilities";
+import { useNotification } from "../components/NotificationProvider";
 
 
 function useLocalStorage(key, fallback) {
@@ -144,7 +146,7 @@ export default function Blind75Prep({ userId }) {
       setUiStep("quiz");
     } catch (err) {
       console.error(err);
-      alert("Failed to load problems");
+      showNotification("Failed to load problems", "error");
       setUiStep("config");
     }
   };
@@ -395,7 +397,7 @@ const submitCode = async () => {
       return cp;
     });
   } catch (err) {
-    alert("Evaluation failed. Try again.");
+    showNotification("Evaluation failed. Try again.", "error");
   } finally {
     setCodeLoading(false);
   }
