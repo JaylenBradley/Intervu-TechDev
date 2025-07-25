@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaInstagram, FaTwitter, FaGlobe, FaUserFriends } from "react-icons/fa";
+import { FaGithub, FaGlobe, FaInstagram, FaLinkedin, FaTwitter, FaUserFriends } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 
 const dummyFriends = [
@@ -44,7 +44,7 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-300 via-gray-200 to-cyan-300 flex justify-center items-start py-16">
+    <div className="min-h-screen flex justify-center items-start py-16">
       <div className="flex gap-12 w-full max-w-5xl">
         {/* Profile Section */}
         <div className="flex-1 flex flex-col gap-8">
@@ -105,7 +105,7 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
               </a>
             )}
             {profile.linkedin && (
-              <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-700">
+              <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-500">
                 <FaLinkedin size={22} /> LinkedIn
               </a>
             )}
