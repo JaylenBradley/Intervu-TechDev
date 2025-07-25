@@ -20,9 +20,10 @@ export default function ConfigBlind75({
           <button
             type="button"
             onClick={() => setShowConfig((v) => !v)}
-            className="flex items-center gap-1 text-app-primary text-sm
-                       px-3 py-1 border border-app-primary rounded-lg
-                       hover:bg-app-primary hover:text-white transition"
+            className="
+            flex items-center gap-1 text-app-primary text-sm
+            px-3 py-1 border border-app-primary rounded-lg
+            btn-primary hover:text-white transition cursor-pointer"
           >
             Settings
           </button>

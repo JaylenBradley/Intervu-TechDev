@@ -86,7 +86,7 @@ const Navbar = ({ user }) => {
         <NavButton icon={<FaMapSigns size={24} />} alt="Roadmaps" onClick={() => navigate('/roadmaps')} />
         <NavButton icon={<FaFileAlt size={24} />} alt="Resume" onClick={handleResumeClick} />
         <NavButton icon={<MdWork size={24} />} alt="Job Dashboard" onClick={() => navigate('/dashboard')} />
-        <NavButton icon={<FaRobot size={24} />} alt="AI Interviewer" onClick={() => navigate('/ai-interviewer')} />
+        <NavButton icon={<FaRobot size={24} />} alt="Ai Interviewer" onClick={() => navigate('/ai-interviewer')} />
         {/* Dropdown Menu */}
         <div ref={menuRef} className="relative">
           <button

@@ -34,7 +34,7 @@ const AiInterviewerMain = () => {
           <h2 className="text-2xl font-bold text-app-primary mb-2">Technical Interview</h2>
           <p className="text-app-text text-center mb-4">
             Practice Leetcode by figuring out the approach, arranging code blocks
-        and identifying time and space complexities.
+            and identifying time and space complexities
           </p>
           <button
             className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"

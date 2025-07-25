@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { fetchQuestionnaire } from "../services/questionnaireServices";
 import { getBehavioralQuestions, getBehavioralFeedback } from "../services/behavioralPrepServices";
 import { renderFeedback } from "../utils/renderFeedback.jsx";
@@ -41,6 +42,7 @@ const BehavioralPrep = ({ user }) => {
   const audioElementRef = useRef(null);
   const localChunksRef = useRef([]);
   const mediaRecorderRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -441,7 +443,7 @@ const BehavioralPrep = ({ user }) => {
                 </div>
               </div>
             )}
-            <button className="btn w-full h-12 text-lg font-semibold py-2 rounded-lg mt-2 cursor-pointer" onClick={() => window.location.href = "/"}>Done</button>
+            <button className="btn w-full h-12 text-lg font-semibold py-2 rounded-lg mt-2 cursor-pointer" onClick={() => navigate("/ai-interviewer")}>Done</button>
           </div>
         )}
       </div>
