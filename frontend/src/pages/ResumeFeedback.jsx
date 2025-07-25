@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
 
 // Helper to parse raw feedback string into structured data
@@ -40,6 +40,10 @@ const ResumeFeedback = ({ user }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleGetFeedback = async () => {
     if (!user || !user.id) {

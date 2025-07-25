@@ -1,7 +1,12 @@
+import {useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 
 const ErrorPage = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-app-background">

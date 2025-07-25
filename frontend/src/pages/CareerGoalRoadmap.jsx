@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { fetchRoadmap, generateRoadmap } from "../services/roadmapServices";
 import { parseRoadmapJson } from "../utils/parseRoadmapJson.js";
+import { FaMapSigns } from "react-icons/fa";
 
-const Roadmap = ({ user, onRoadmapGenerated }) => {
-  const [roadmap, setRoadmap] = useState(null);
-  const [loading, setLoading] = useState(true);
+const CareerGoalRoadmap = ({ user, onRoadmapGenerated }) => {
+  const [error, setError] = useState("");
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState("");
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [roadmap, setRoadmap] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -38,9 +45,9 @@ const Roadmap = ({ user, onRoadmapGenerated }) => {
       setGenError(err.message);
       setGenerating(false);
     }
-  };
+  }
 
-  if (loading || generating) return (
+  if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="loader-lg"/>
     </div>
@@ -49,18 +56,32 @@ const Roadmap = ({ user, onRoadmapGenerated }) => {
   if (!roadmap && user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-app-accent text-app-text border border-app-primary p-8 rounded-xl shadow-lg w-full max-w-md mt-16 mb-16 flex flex-col items-center">
-          <h2 className="text-2xl font-bold mb-4 text-center text-app-primary">No Roadmap Found</h2>
-          <p className="mb-6 text-center">You haven't generated a roadmap yet. Would you like to generate one now?</p>
+        <div className="bg-white text-app-text border-2 border-app-primary p-10 rounded-2xl shadow-2xl w-full max-w-lg mt-20 mb-20 flex flex-col items-center">
+          <FaMapSigns className="text-app-primary text-5xl mb-4" />
+          <h2 className="text-3xl font-extrabold mb-3 text-center text-app-primary">No Roadmap Found</h2>
+          <p className="mb-6 text-lg text-center text-gray-600">
+            You haven't generated a roadmap yet.<br />Would you like to generate one now?
+          </p>
           {genError && <div className="text-red-600 mb-2">{genError}</div>}
           <button
-            className="btn-primary w-full py-3 text-lg font-semibold rounded-lg"
+            className="btn-primary w-full py-3 text-lg font-semibold rounded-lg cursor-pointer mt-2"
             onClick={handleGenerateRoadmap}
             disabled={generating}
           >
-            {generating ? <div className="loader-md mr-2"></div> : null}
-            {generating ? "Generating..." : "Generate Roadmap"}
+            Generate Roadmap
           </button>
+          {generating && (
+            <>
+              <div className="fixed inset-0 z-40 backdrop-blur-sm pointer-events-auto"></div>
+              <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="bg-white text-black rounded-xl p-8 shadow-2xl max-w-md w-full border border-app-primary flex flex-col items-center">
+                  <div className="loader-md mb-4"></div>
+                  <span className="font-semibold text-lg">Generating your roadmap...</span>
+                  {genError && <div className="text-red-600 mt-4">{genError}</div>}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
@@ -71,6 +92,12 @@ const Roadmap = ({ user, onRoadmapGenerated }) => {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="bg-app-accent text-app-text border border-app-primary p-8 rounded-xl shadow-lg w-full max-w-4xl mt-16 mb-16">
+        <button
+          className="mb-4 btn-primary px-4 py-2 rounded-md cursor-pointer"
+          onClick={() => navigate("/roadmaps")}
+        >
+          &larr; Back to Roadmap Hub
+        </button>
         <h2 className="text-2xl font-bold mb-6 text-center text-app-primary">Your Personalized Roadmap</h2>
         {roadmap.specific_goals && (
           <>
@@ -107,16 +134,31 @@ const Roadmap = ({ user, onRoadmapGenerated }) => {
             </div>
           </>
         )}
-        {roadmap.youtube_search_terms && roadmap.youtube_search_terms.length > 0 &&(
+        {roadmap.youtube_videos && roadmap.youtube_videos.length > 0 && (
           <>
-            <h3 className="font-semibold text-lg mt-4 mb-2">YouTube Videos</h3>
+            <h4 className="font-semibold mt-4 mb-2">YouTube Videos</h4>
             <ul className="list-disc ml-6">
-              {roadmap.youtube_search_terms.map((item, i) => (
+              {roadmap.youtube_videos.map((item, i) => (
                 <li key={i}>
-                  <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-app-primary underline">
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-app-primary underline"
+                  >
                     {item.title}
                   </a>
                 </li>
+              ))}
+            </ul>
+          </>
+        )}
+        {roadmap.youtube_search_terms && roadmap.youtube_search_terms.length > 0 && (
+          <>
+            <h4 className="font-semibold mt-4 mb-2">YouTube Search Terms</h4>
+            <ul className="list-disc ml-6">
+              {roadmap.youtube_search_terms.map((term, i) => (
+                <li key={i}>{term}</li>
               ))}
             </ul>
           </>
@@ -155,4 +197,4 @@ const Roadmap = ({ user, onRoadmapGenerated }) => {
   );
 };
 
-export default Roadmap;
+export default CareerGoalRoadmap;

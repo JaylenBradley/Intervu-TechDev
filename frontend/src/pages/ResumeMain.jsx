@@ -21,6 +21,10 @@ const ResumeMain = ({ user }) => {
   const jobDescRef = useRef();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const loadResume = async () => {
       if (!user || !user.id) return;
       setLoading(true);

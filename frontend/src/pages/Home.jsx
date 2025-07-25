@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BsLinkedin, BsGraphUpArrow } from "react-icons/bs";
 import { FaGithubSquare } from "react-icons/fa";
@@ -39,14 +40,14 @@ const team = [
   },
   {
     name: "Justin Song",
-    role: "Co-Founder & Fullstack Engineer",
+    role: "Co-Founder & Fullstack Developer",
     linkedin: "https://www.linkedin.com/in/jujiwoo/",
     github: "https://github.com/jujiwoo",
     img: null
   },
     {
     name: "Samantha Adorno",
-    role: "Co‑Founder & Backend Engineer",
+    role: "Co‑Founder & Backend Developer",
     linkedin: "https://www.linkedin.com/in/samantha-adorno/",
     github: "https://github.com/sadorno1",
     img: null,
@@ -57,10 +58,9 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
   const showModal = user && !questionnaireComplete;
   const navigate = useNavigate();
 
-  const goTo = (path) => {
-    navigate(path);
+  useEffect(() => {
     window.scrollTo(0, 0);
-  };
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col items-center">
@@ -74,9 +74,9 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
         </p>
         <button
           className="btn-primary px-8 py-3 text-xl font-semibold rounded-lg mt-2 shadow cursor-pointer"
-          onClick={() => goTo(user ? "/roadmap" : "/signup")}
+          onClick={() => navigate(user ? "/roadmaps" : "/signup")}
         >
-          {user ? (hasRoadmap ? "View Your Roadmap" : "Create Your Roadmap") : "Get Started"}
+          {user ? (hasRoadmap ? "View Your Roadmaps" : "Create Your Roadmap") : "Get Started"}
         </button>
       </section>
 
@@ -109,7 +109,7 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
                   </a>
                 )}
                 {member.github && (
-                  <a href={member.github} target="_blank" rel="noopener noreferrer" className="underline icon-pop">
+                  <a href={member.github} target="_blank" rel="noopener noreferrer" className="text-black underline icon-pop">
                     <FaGithubSquare size={28} />
                   </a>
                 )}
@@ -125,9 +125,9 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
         </h2>
         <button
           className="btn-primary px-8 py-3 text-xl font-semibold rounded-lg shadow cursor-pointer"
-          onClick={() => goTo(user ? "/roadmap" : "/signup")}
+          onClick={() => navigate(user ? "/roadmaps" : "/signup")}
         >
-          {user ? "Go to Your Roadmap" : "Sign Up Now"}
+          {user ? "Go to Your Roadmaps" : "Sign Up Now"}
         </button>
       </section>
       {showModal && (
@@ -143,7 +143,7 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
               </p>
               <button
                 className="btn-primary w-full py-3 text-lg font-semibold rounded-lg cursor-pointer"
-                onClick={() => goTo("/questionnaire")}
+                onClick={() => navigate("/questionnaire")}
               >
                 Go to Questionnaire
               </button>

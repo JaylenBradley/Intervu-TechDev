@@ -1,28 +1,33 @@
-import {Routes, Route, useNavigate} from 'react-router-dom';
-import { useEffect, useState } from "react";
 import { auth } from "./services/firebase";
-import { onAuthStateChanged } from "firebase/auth";
 import { fetchQuestionnaireStatus, getUserByFirebaseId } from "./services/userServices";
 import { fetchRoadmap } from "./services/roadmapServices";
+import { Routes, Route } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import AiInterviewerMain from "./pages/AiInterviewerMain.jsx";
 import AuthForm from "./containers/AuthForm.jsx";
+import CareerGoalRoadmap from "./pages/CareerGoalRoadmap.jsx";
 import BehavioralPrep from "./pages/BehavioralPrep.jsx";
-import JobDashboard from "./pages/JobDashboard.jsx";
+import Blind75Prep from "./pages/Blind75Prep.jsx";
+import ChangeResume from "./pages/ChangeResume";
+import CreateResume from "./pages/CreateResume.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
 import Footer from "./components/Footer.jsx";
 import Home from "./pages/Home.jsx";
-import Blind75Prep from "./pages/Blind75Prep.jsx";
+import JobDashboard from "./pages/JobDashboard.jsx";
 import Navbar from "./components/Navbar.jsx";
 import ProtectedRoute from "./containers/ProtectedRoute.jsx";
 import Questionnaire from "./pages/Questionnaire.jsx";
-import Roadmap from "./pages/Roadmap.jsx";
 import ResumeMain from "./pages/ResumeMain.jsx";
-import CreateResume from "./pages/CreateResume.jsx";
 import ResumeFeedback from "./pages/ResumeFeedback.jsx";
-import AiInterviewerMain from "./pages/AiInterviewerMain.jsx";
-import TechnicalPrep from "./pages/TechnicalPrep.jsx";
-import ChangeResume from "./pages/ChangeResume";
-import UploadResume from "./pages/UploadResume.jsx";
+import RoadmapMain from "./pages/RoadmapMain.jsx";
+import ScrollToTopButton from "./components/ScrollToTopButton.jsx";
+import SkillGapRoadmap from "./pages/SkillGapRoadmap.jsx";
+import SkillGapRoadmapDetail from "./pages/SkillGapRoadmapDetail.jsx";
 import TailorResume from "./pages/TailorResume.jsx";
+import TechnicalPrep from "./pages/TechnicalPrep.jsx";
+import UploadResume from "./pages/UploadResume.jsx";
+import UserProfile from "./pages/UserProfile.jsx";
 
 const App = () => {
   const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
@@ -103,22 +108,71 @@ const App = () => {
               hasRoadmap={hasRoadmap}
           />
         }/>
+        <Route path="/profile" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <UserProfile user={user}/>
+          </ProtectedRoute>
+        }/>
+        {/*<Route path="/user/:id" element={*/}
+        {/*  <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>*/}
+
+        {/*  </ProtectedRoute>*/}
+        {/*}/>*/}
         <Route path="/questionnaire" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <Questionnaire onComplete={() => setQuestionnaireComplete(true)} user={user}/>
           </ProtectedRoute>
         }/>
-        <Route path="/roadmap" element={
+        <Route path="/roadmaps" element={
+        <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+          <RoadmapMain user={user}/>
+        </ProtectedRoute>
+        }/>
+        <Route path="/roadmaps/career-goal-roadmap" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <Roadmap user={user} onRoadmapGenerated={() => setHasRoadmap(true)}/>
+            <CareerGoalRoadmap user={user} onRoadmapGenerated={() => setHasRoadmap(true)}/>
           </ProtectedRoute>
         }/>
-        <Route path="/resume" element={<ResumeMain user={user}/>} />
-        <Route path="/resume/improve" element={<CreateResume user={user}/>} />
-        <Route path="/resume/feedback" element={<ResumeFeedback user={user}/>} />
-        <Route path="/resume/change" element={<ChangeResume user={user}/>} />
-        <Route path="/resume/upload" element={<UploadResume user={user}/>} />
-        <Route path="/resume/tailor" element={<TailorResume user={user}/>} />
+        <Route path="/roadmaps/skill-gap-roadmap" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <SkillGapRoadmap user={user}/>
+          </ProtectedRoute>
+        }/>
+        <Route path="/roadmaps/skill-gap-roadmap/:id" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <SkillGapRoadmapDetail user={user}/>
+          </ProtectedRoute>
+        }/>
+        <Route path="/resume" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <ResumeMain user={user}/>
+          </ProtectedRoute>
+        }/>
+        <Route path="/resume/upload" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <UploadResume user={user}/>
+          </ProtectedRoute>
+        }/>
+        <Route path="/resume/change" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <ChangeResume user={user}/>
+          </ProtectedRoute>
+        }/>
+        <Route path="/resume/improve" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <CreateResume user={user}/>
+          </ProtectedRoute>
+        }/>
+        <Route path="/resume/feedback" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <ResumeFeedback user={user}/>
+          </ProtectedRoute>
+        }/>
+        <Route path="/resume/tailor" element={
+          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+            <TailorResume user={user}/>
+          </ProtectedRoute>
+        }/>
         <Route path="/dashboard" element={
           <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
             <JobDashboard user={user}/>
@@ -146,6 +200,7 @@ const App = () => {
         }/>
         <Route path="*" element={<ErrorPage/>}/>
       </Routes>
+      <ScrollToTopButton />
       <Footer/>
     </>
   );

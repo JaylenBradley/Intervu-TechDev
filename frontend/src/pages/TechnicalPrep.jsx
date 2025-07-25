@@ -22,6 +22,10 @@ const TechnicalPrep = ({ user }) => {
     numQuestions: 3
   });
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Load user's questionnaire data
   useEffect(() => {
     const loadUserProfile = async () => {
