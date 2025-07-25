@@ -11,23 +11,25 @@ const ProtectedRoute = ({ user, questionnaireComplete, children }) => {
     alerted.current = false;
   }, [location.pathname]);
 
-  if (!user) {
-    if (!alerted.current) {
+  useEffect(() => {
+    if (!user && !alerted.current) {
       if (localStorage.getItem("justLoggedOut") === "true") {
         localStorage.removeItem("justLoggedOut");
       } else {
         showNotification("You must be logged in to access this page", "error");
       }
       alerted.current = true;
+    } else if (user && !questionnaireComplete && location.pathname !== "/questionnaire" && !alerted.current) {
+      showNotification("Please complete the questionnaire before accessing this page", "error");
+      alerted.current = true;
     }
+  }, [user, questionnaireComplete, location.pathname, showNotification]);
+
+  if (!user) {
     return <Navigate to="/signin" />;
   }
 
   if (!questionnaireComplete && location.pathname !== "/questionnaire") {
-    if (!alerted.current) {
-      showNotification("Please complete the questionnaire before accessing this page", "error");
-      alerted.current = true;
-    }
     return <Navigate to="/questionnaire" />;
   }
 

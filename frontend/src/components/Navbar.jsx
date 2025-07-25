@@ -52,7 +52,7 @@ const Navbar = ({ user }) => {
     navigate("/signin");
   };
 
-  const handleResumeClick = async () => {
+  const handleResumeClick = () => {
     navigate("/resume");
   };
 

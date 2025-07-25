@@ -42,7 +42,10 @@ const AuthForm = ({ isSignUp }) => {
 
             await createUser(data);
             showNotification("Sign up successful! Welcome", "success");
-            setTimeout(() => { navigate("/", { state: { showSignUpToast: true } }); }, 1200);
+            setTimeout(() => {
+              navigate("/", { state: { showSignUpToast: true } });
+              window.location.reload();
+            }, 1200);
 
         } catch (error) {
             if (error.code === "auth/email-already-in-use") {

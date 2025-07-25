@@ -1,6 +1,6 @@
 import React from "react";
 
-const Modal = ({ open, message, onConfirm, onCancel, confirmText = "Confirm", cancelText = "Cancel" }) => {
+const Modal = ({ open, message, onConfirm, onCancel, confirmText = "Confirm", cancelText = "Cancel", backgroundClass }) => {
   if (!open) return null;
   return (
     <div style={{
@@ -15,14 +15,17 @@ const Modal = ({ open, message, onConfirm, onCancel, confirmText = "Confirm", ca
       alignItems: "center",
       justifyContent: "center"
     }}>
-      <div style={{
-        background: "#fff",
-        borderRadius: 10,
-        padding: 32,
-        minWidth: 320,
-        boxShadow: "0 4px 24px rgba(0,0,0,0.18)",
-        textAlign: "center"
-      }}>
+      <div
+        className={backgroundClass}
+        style={{
+          background: backgroundClass ? undefined : "#fff",
+          borderRadius: 10,
+          padding: 32,
+          minWidth: 320,
+          boxShadow: "0 4px 24px rgba(0,0,0,0.18)",
+          textAlign: "center"
+        }}
+      >
         <div style={{ marginBottom: 24, fontSize: 18 }}>{message}</div>
         <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
           <button onClick={onCancel} style={{ padding: "8px 20px", borderRadius: 6, border: "1px solid #ccc", background: "#f5f5f5", cursor: "pointer" }}>{cancelText}</button>
