@@ -51,24 +51,8 @@ const Navbar = ({ user }) => {
     navigate("/signin");
   };
 
-  const handleResumeClick = async () => {
-    if (!user || !user.id) {
-      navigate("/signin");
-      return;
-    }
-    setResumeCheckLoading(true);
-    try {
-      const resume = await fetchUserResume(user.id);
-      if (!resume) {
-        setShowResumeModal(true);
-      } else {
-        navigate("/resume");
-      }
-    } catch {
-      setShowResumeModal(true);
-    } finally {
-      setResumeCheckLoading(false);
-    }
+  const handleResumeClick = () => {
+    navigate("/resume");
   };
 
   return (

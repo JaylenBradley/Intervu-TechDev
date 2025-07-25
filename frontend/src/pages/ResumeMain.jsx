@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { fetchUserResume } from "../services/resumeServices";
 import { tailorResumeToJobDescription } from "../services/resumeServices";
 import { useRef } from "react";
+import Modal from "../components/Modal";
 
 const ResumeMain = ({ user }) => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const ResumeMain = ({ user }) => {
   const [tailorLoading, setTailorLoading] = useState(false);
   const [tailorError, setTailorError] = useState("");
   const [showTailor, setShowTailor] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const jobDescRef = useRef();
 
   useEffect(() => {
@@ -31,8 +33,10 @@ const ResumeMain = ({ user }) => {
       try {
         const data = await fetchUserResume(user.id);
         setResume(data);
+        if (!data) setShowUploadModal(true);
       } catch {
         setResume(null);
+        setShowUploadModal(true);
       } finally {
         setLoading(false);
       }
@@ -191,6 +195,18 @@ const ResumeMain = ({ user }) => {
             Change Resume
           </button>
         </div>
+      )}
+
+      {!resume && (
+        <Modal
+          open={showUploadModal}
+          message={"You have not uploaded a resume yet. Would you like to upload one now?"}
+          onConfirm={() => { setShowUploadModal(false); navigate("/resume/upload"); }}
+          onCancel={() => { setShowUploadModal(false); navigate("/"); }}
+          confirmText="Upload Resume"
+          cancelText="Cancel"
+          backgroundClass="bg-app-accent"
+        />
       )}
 
       <div className="w-full max-w-2xl border-t-2 border-app-primary mb-12"></div>
