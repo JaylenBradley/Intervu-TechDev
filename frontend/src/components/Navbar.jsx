@@ -1,14 +1,16 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import NavButton from "./NavButton.jsx";
-import { auth } from "../services/firebase.js";
-import { signOut } from "firebase/auth";
-import { RiQuestionnaireFill } from "react-icons/ri";
 import { AiFillHome } from "react-icons/ai";
-import { FaMapSigns, FaFileAlt, FaRobot } from "react-icons/fa";
+import { auth } from "../services/firebase.js";
+import { FaFileAlt, FaMapSigns, FaRobot } from "react-icons/fa";
 import { MdWork } from "react-icons/md";
-import logo from "../assets/images/intervu-logo-transparent.png";
+import NavButton from "./NavButton.jsx";
+import { RiQuestionnaireFill } from "react-icons/ri";
 import { fetchUserResume } from "../services/resumeServices";
+import logo from "../assets/images/intervu-logo-transparent.png";
+import { signOut } from "firebase/auth";
+import Modal from "./Modal";
+import { useNotification } from "./NotificationProvider";
 
 const Navbar = ({ user }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -16,6 +18,8 @@ const Navbar = ({ user }) => {
   const navigate = useNavigate();
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [resumeCheckLoading, setResumeCheckLoading] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     const handler = (e) => {
@@ -29,16 +33,18 @@ const Navbar = ({ user }) => {
 
   const handleAuthClick = async () => {
     if (user) {
-      const confirmed = window.confirm("Are you sure you want to log out?");
-      if (confirmed) {
-        await signOut(auth);
-        alert("Goodbye! You have been logged out");
-        navigate("/signin");
-      }
+      setShowLogoutModal(true);
     } else {
       navigate("/signin");
     }
     setMenuOpen(false);
+  };
+
+  const handleLogout = async () => {
+    setShowLogoutModal(false);
+    await signOut(auth);
+    showNotification("Goodbye! You have been logged out", "success");
+    navigate("/signin");
   };
 
   const handleResumeClick = async () => {
@@ -139,6 +145,14 @@ const Navbar = ({ user }) => {
           </div>
         </>
       )}
+      <Modal
+        open={showLogoutModal}
+        message="Are you sure you want to log out?"
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutModal(false)}
+        confirmText="Log out"
+        cancelText="Cancel"
+      />
     </nav>
   );
 };

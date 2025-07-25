@@ -13,6 +13,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useNotification } from "../components/NotificationProvider";
 
 /*Constants and helpers*/
 const INDENT_WIDTH = 48;
@@ -99,6 +100,7 @@ function SortableLine({ line, isWrong, highlightCorrect }) {
 
 /* Main component */
 export default function Blind75Prep({ userId }) {
+  const { showNotification } = useNotification();
   /* state */
   const [step, setStep] = useState("config");
   const [numQuestions, setNumQuestions] = useState(3);
@@ -111,7 +113,7 @@ export default function Blind75Prep({ userId }) {
   const [timeSel, setTimeSel] = useState("");
   const [spaceSel, setSpaceSel] = useState("");
   const [approachSel, setApproachSel] = useState("");
-  const [wrongLineIds, setWrongLineIds] = useState(new Set());
+  const [wrongLineIds, setWrongLineIds] = new Set();
   const [evaluationMode, setEvaluationMode] = useState(false);   
   const [codeMode,      setCodeMode]      = useState(false);     
   const [codeAnswer,    setCodeAnswer]    = useState("");
@@ -154,7 +156,7 @@ export default function Blind75Prep({ userId }) {
       setStep("quiz");
     } catch (e) {
       console.error(e);
-      alert("Failed to load problems");
+      showNotification("Failed to load problems", "error");
       setStep("config");
     }
   };
@@ -315,7 +317,7 @@ const submitCode = async () => {
       return cp;
     });
   } catch (err) {
-    alert("Evaluation failed. Try again.");
+    showNotification("Evaluation failed. Try again.", "error");
   } finally {
     setCodeLoading(false);
   }

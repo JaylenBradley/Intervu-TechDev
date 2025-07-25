@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "../components/NotificationProvider";
 
 const CreateResume = ({ user }) => {
   const [improvedResume, setImprovedResume] = useState("");
@@ -7,6 +8,7 @@ const CreateResume = ({ user }) => {
   const [improveError, setImproveError] = useState("");
   const [exporting, setExporting] = useState(false);
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
 
   const handleImproveResume = async () => {
     setImproving(true);
@@ -47,7 +49,7 @@ const CreateResume = ({ user }) => {
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      alert("Error exporting resume. Please try again.");
+      showNotification("Error exporting resume. Please try again.", "error");
     } finally {
       setExporting(false);
     }

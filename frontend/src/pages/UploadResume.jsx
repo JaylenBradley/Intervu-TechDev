@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "../components/NotificationProvider";
 
 const UploadResume = ({ user }) => {
   const [file, setFile] = useState(null);
@@ -8,6 +9,7 @@ const UploadResume = ({ user }) => {
   const [error, setError] = useState("");
   const fileInputRef = useRef();
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -37,7 +39,7 @@ const UploadResume = ({ user }) => {
         body: formData,
       });
       if (!res.ok) throw new Error("Failed to upload resume");
-      alert("Resume uploaded and parsed successfully!");
+      showNotification("Resume uploaded and parsed successfully!", "success");
       navigate("/resume");
     } catch (err) {
       setError("Error uploading resume. Please try again.");

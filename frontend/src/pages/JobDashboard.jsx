@@ -15,6 +15,8 @@ import { PiConfetti, PiNotePencil } from "react-icons/pi";
 import { RxCross1 } from "react-icons/rx";
 import { TiPlusOutline } from "react-icons/ti";
 import { FaBuilding, FaBriefcase, FaFlag, FaCalendarAlt, FaMapMarkerAlt, FaDollarSign } from "react-icons/fa";
+import { useNotification } from "../components/NotificationProvider";
+import Modal from "../components/Modal";
 
 const JobDashboard = ({ user }) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
@@ -54,6 +56,11 @@ const JobDashboard = ({ user }) => {
     locations: [],
     salary_ranges: []
   });
+
+  const { showNotification } = useNotification();
+
+  const [deleteJobId, setDeleteJobId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const loadJobs = async () => {
     try {
@@ -175,16 +182,28 @@ const JobDashboard = ({ user }) => {
     }
   };
 
-  const handleDelete = async (jobId) => {
-    if (window.confirm("Are you sure you want to delete this application?")) {
-      try {
-        await deleteJobApplication(jobId);
-        await loadJobs();
-        setError(null);
-      } catch (err) {
-        setError("Failed to delete job application. Please try again.");
-      }
+  const handleDelete = (jobId) => {
+    setDeleteJobId(jobId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteJobId) return;
+    try {
+      await deleteJobApplication(deleteJobId);
+      await loadJobs();
+      setError(null);
+    } catch (err) {
+      setError("Failed to delete job application. Please try again.");
+    } finally {
+      setShowDeleteModal(false);
+      setDeleteJobId(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setDeleteJobId(null);
   };
 
   const handleEdit = (job) => {
@@ -226,7 +245,7 @@ const JobDashboard = ({ user }) => {
 
   const handleExportCSV = async () => {
     if (!user || !user.id) {
-      alert("Please sign in to export your job applications.");
+      showNotification("Please sign in to export your job applications.", "error");
       return;
     }
     try {
@@ -240,13 +259,13 @@ const JobDashboard = ({ user }) => {
       link.click();
       link.remove();
     } catch (err) {
-      alert("Failed to export job applications. Please try again.");
+      showNotification("Failed to export job applications. Please try again.", "error");
     }
   };
 
   const handleExportGoogleSheets = async () => {
     if (!user || !user.id) {
-      alert("Please sign in to export to Google Sheets.");
+      showNotification("Please sign in to export to Google Sheets.", "error");
       return;
     }
     try {
@@ -259,10 +278,10 @@ const JobDashboard = ({ user }) => {
       if (data.sheet_url) {
         window.open(data.sheet_url, "_blank");
       } else {
-        alert("Failed to export to Google Sheets.");
+        showNotification("Failed to export to Google Sheets.", "error");
       }
     } catch (err) {
-      alert("Failed to export to Google Sheets. Please try again.");
+      showNotification("Failed to export to Google Sheets. Please try again.", "error");
     }
   };
 
@@ -296,7 +315,7 @@ const JobDashboard = ({ user }) => {
               className="btn-primary text-white px-6 py-3 rounded-lg transition-colors flex items-center gap-2 cursor-pointer"
               onClick={() => {
                 if (!user || !user.id) {
-                  alert("Please sign in to export to Google Sheets.");
+                  showNotification("Please sign in to export to Google Sheets.", "error");
                   return;
                 }
                 window.open(`${backendUrl}/api/jobs/export-to-sheets/${user.id}`, '_blank');
@@ -691,6 +710,14 @@ const JobDashboard = ({ user }) => {
           </div>
         </>
       )}
+      <Modal
+        open={showDeleteModal}
+        message="Are you sure you want to delete this application?"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 };

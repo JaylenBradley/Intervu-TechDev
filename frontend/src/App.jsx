@@ -23,6 +23,7 @@ import TechnicalPrep from "./pages/TechnicalPrep.jsx";
 import ChangeResume from "./pages/ChangeResume";
 import UploadResume from "./pages/UploadResume.jsx";
 import TailorResume from "./pages/TailorResume.jsx";
+import NotificationProvider from "./components/NotificationProvider";
 
 const App = () => {
   const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
@@ -91,7 +92,7 @@ const App = () => {
     );
 
   return (
-    <>
+    <NotificationProvider>
       <Navbar user={user}/>
       <Routes>
         <Route path="/signup" element={<AuthForm isSignUp={true}/>}/>
@@ -147,7 +148,7 @@ const App = () => {
         <Route path="*" element={<ErrorPage/>}/>
       </Routes>
       <Footer/>
-    </>
+    </NotificationProvider>
   );
 }
 
