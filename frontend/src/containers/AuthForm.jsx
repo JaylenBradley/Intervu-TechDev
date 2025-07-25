@@ -77,7 +77,10 @@ const AuthForm = ({ isSignUp }) => {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const firebaseId = userCredential.user.uid;
             await getUserByFirebaseId(firebaseId);
-            setTimeout(() => { navigate("/", { state: { showSignInToast: true } }); }, 1200);
+            setTimeout(() => {
+              navigate("/", { state: { showSignInToast: true } });
+              window.location.reload();
+            }, 1200);
         } catch (error) {
             if (error.code === "auth/user-not-found") {
                 setFormError("No user found with this email");
