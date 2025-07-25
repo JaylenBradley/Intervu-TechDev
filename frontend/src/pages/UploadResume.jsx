@@ -53,7 +53,7 @@ const UploadResume = ({ user }) => {
   };
 
   return (
-    <div className="min-h-screen bg-app-background flex flex-col items-center justify-center py-20">
+    <div className="min-h-screen bg-gradient-to-br from-white to-app-accent flex flex-col items-center justify-center py-20">
       <div className={`w-full max-w-2xl flex flex-col items-center`}>
         <button
           onClick={() => navigate("/")}
@@ -61,7 +61,7 @@ const UploadResume = ({ user }) => {
         >
           ← Back
         </button>
-        <div className="bg-white rounded-2xl shadow-2xl p-10 w-full flex flex-col items-center border-2 border-app-primary">
+        <div className="bg-app-accent rounded-2xl shadow-2xl p-10 w-full flex flex-col items-center border-2 border-app-primary">
           <h1 className="text-3xl font-extrabold text-app-primary mb-8">Upload Your Resume</h1>
           <input
             type="file"
