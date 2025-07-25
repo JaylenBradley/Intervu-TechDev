@@ -13,7 +13,11 @@ const ProtectedRoute = ({ user, questionnaireComplete, children }) => {
 
   if (!user) {
     if (!alerted.current) {
-      showNotification("You must be logged in to access this page", "error");
+      if (localStorage.getItem("justLoggedOut") === "true") {
+        localStorage.removeItem("justLoggedOut");
+      } else {
+        showNotification("You must be logged in to access this page", "error");
+      }
       alerted.current = true;
     }
     return <Navigate to="/signin" />;

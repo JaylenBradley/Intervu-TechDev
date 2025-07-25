@@ -47,28 +47,13 @@ const Navbar = ({ user }) => {
   const handleLogout = async () => {
     setShowLogoutModal(false);
     await signOut(auth);
+    localStorage.setItem("justLoggedOut", "true");
     showNotification("Goodbye! You have been logged out", "success");
     navigate("/signin");
   };
 
   const handleResumeClick = async () => {
-    if (!user || !user.id) {
-      navigate("/signin");
-      return;
-    }
-    setResumeCheckLoading(true);
-    try {
-      const resume = await fetchUserResume(user.id);
-      if (!resume) {
-        setShowResumeModal(true);
-      } else {
-        navigate("/resume");
-      }
-    } catch {
-      setShowResumeModal(true);
-    } finally {
-      setResumeCheckLoading(false);
-    }
+    navigate("/resume");
   };
 
   return (

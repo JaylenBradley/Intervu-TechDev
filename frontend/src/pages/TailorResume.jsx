@@ -157,31 +157,31 @@ const TailorResume = ({ user }) => {
       {/* Comparison Card */}
       {tailoredResume && (
         <div className="w-full max-w-6xl bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center border-2 border-app-primary">
-          <div className="w-full flex flex-row justify-center gap-8">
-            <div className="flex-1 min-w-[320px] max-w-[520px] flex flex-col">
-              <span className="font-bold text-app-primary mb-2">Current Resume</span>
-              <pre className="w-full h-96 text-base font-mono bg-gray-50 rounded-xl border border-app-accent p-4 whitespace-pre-wrap overflow-auto">{currentResume}</pre>
+          <div className="w-full flex flex-row justify-center gap-8 mb-6">
+            <div className="flex-1 min-w-[320px] max-w-[750px] flex flex-col">
+              <span className="font-bold text-app-primary mb-2 text-center">Current Resume</span>
+              <pre className="w-full text-sm font-mono bg-gray-50 rounded-xl border border-app-accent p-4 whitespace-pre-wrap">{currentResume}</pre>
             </div>
-            <div className="flex-1 min-w-[320px] max-w-[520px] flex flex-col">
-              <span className="font-bold text-app-primary mb-2">Tailored Resume</span>
-              <pre className="w-full h-96 text-base font-mono bg-gray-50 rounded-xl border border-app-accent p-4 whitespace-pre-wrap overflow-auto">{tailoredResume}</pre>
-              <div className="flex gap-4 mt-4 justify-center w-full">
-                <button
-                  onClick={() => handleExport("pdf")}
-                  disabled={exporting}
-                  className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-app-primary/90 transition-colors flex items-center justify-center min-w-[160px] min-h-[44px]"
-                >
-                  {exporting && exportFormat === "pdf" ? <div className="loader-md" /> : "Export as PDF"}
-                </button>
-                <button
-                  onClick={() => handleExport("docx")}
-                  disabled={exporting}
-                  className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-app-primary/90 transition-colors flex items-center justify-center min-w-[160px] min-h-[44px]"
-                >
-                  {exporting && exportFormat === "docx" ? <div className="loader-md" /> : "Export as Word"}
-                </button>
-              </div>
+            <div className="flex-1 min-w-[320px] max-w-[750px] flex flex-col">
+              <span className="font-bold text-app-primary mb-2 text-center">Tailored Resume</span>
+              <pre className="w-full text-sm font-mono bg-gray-50 rounded-xl border border-app-accent p-4 whitespace-pre-wrap">{tailoredResume}</pre>
             </div>
+          </div>
+          <div className="flex gap-4 mt-4 justify-center w-full">
+            <button
+              onClick={() => handleExport("pdf")}
+              disabled={exporting}
+              className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-app-primary/90 transition-colors flex items-center justify-center min-w-[160px] min-h-[44px]"
+            >
+              {exporting && exportFormat === "pdf" ? <div className="loader-md" /> : "Export as PDF"}
+            </button>
+            <button
+              onClick={() => handleExport("docx")}
+              disabled={exporting}
+              className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-app-primary/90 transition-colors flex items-center justify-center min-w-[160px] min-h-[44px]"
+            >
+              {exporting && exportFormat === "docx" ? <div className="loader-md" /> : "Export as Word"}
+            </button>
           </div>
         </div>
       )}

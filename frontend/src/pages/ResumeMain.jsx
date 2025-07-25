@@ -6,6 +6,23 @@ import { fetchUserResume } from "../services/resumeServices";
 import { tailorResumeToJobDescription } from "../services/resumeServices";
 import { useRef } from "react";
 
+const getBullets = (desc) => {
+  if (!desc) return [];
+  let bullets = desc
+    .split(/\r?\n/)
+    .map(line => line.replace(/^[-•▪\s]+/, '').trim())
+    .filter(Boolean);
+
+  if (bullets.length <= 1) {
+    // Try splitting on period+space, period+capital, or space+common action verb
+    bullets = desc
+      .split(/\. (?=[A-Z])|\.(?=[A-Z])| (?=Led |Implemented |Designed |Built |Created |Developed |Managed |Coordinated |Organized |Produced |Launched |Founded |Started |Initiated |Oversaw |Directed |Supervised |Enhanced |Improved |Increased |Reduced |Streamlined |Automated |Analyzed |Researched |Presented |Taught |Mentored |Tutored |Assisted |Supported |Collaborated )/g)
+      .map(line => line.replace(/^[-•▪\s]+/, '').trim())
+      .filter(Boolean);
+  }
+  return bullets;
+};
+
 const ResumeMain = ({ user }) => {
   const navigate = useNavigate();
   const [resume, setResume] = useState(null);
@@ -119,15 +136,13 @@ const ResumeMain = ({ user }) => {
                 {resume.parsed_data.experience.map((exp, i) => (
                   <li key={i}>
                     <strong>{exp.title}</strong> at {exp.company} ({exp.start_date} - {exp.end_date})<br/>
-                    {exp.description
-                      ? exp.description
-                          .split(/[•▪]/)
-                          .map(line => line.replace(/\s+/g, ' ').trim())
-                          .filter(line => line.length > 0)
-                          .map((line, j) => (
-                            <div key={j}>{j > 0 && '• '}{line}</div>
-                          ))
-                      : null}
+                    {exp.description && (
+                      <ul className="list-disc ml-6">
+                        {getBullets(exp.description).map((line, j) => (
+                          <li key={j}>{line}</li>
+                        ))}
+                      </ul>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -139,15 +154,13 @@ const ResumeMain = ({ user }) => {
                   {resume.parsed_data.leadership.map((lead, i) => (
                     <li key={i}>
                       <strong>{lead.title}</strong> at {lead.organization} ({lead.start_date} - {lead.end_date})<br/>
-                      {lead.description
-                        ? lead.description
-                            .split(/[•▪]/)
-                            .map(line => line.replace(/\s+/g, ' ').trim())
-                            .filter(line => line.length > 0)
-                            .map((line, j) => (
-                              <div key={j}>{j > 0 && '• '}{line}</div>
-                            ))
-                        : null}
+                      {lead.description && (
+                        <ul className="list-disc ml-6">
+                          {getBullets(lead.description).map((line, j) => (
+                            <li key={j}>{line}</li>
+                          ))}
+                        </ul>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -169,15 +182,13 @@ const ResumeMain = ({ user }) => {
                 <ul className="list-disc ml-6">
                   {resume.parsed_data.projects.map((proj, i) => (
                     <li key={i}>
-                      <strong>{proj.name}</strong>: {proj.description
-                        ? proj.description
-                            .split(/[•▪]/)
-                            .map(line => line.replace(/\s+/g, ' ').trim())
-                            .filter(line => line.length > 0)
-                            .map((line, j) => (
-                              <div key={j}>{j > 0 && '• '}{line}</div>
-                            ))
-                        : null}
+                      <strong>{proj.name}</strong>: {proj.description && (
+                        <ul className="list-disc ml-6">
+                          {getBullets(proj.description).map((line, j) => (
+                            <li key={j}>{line}</li>
+                          ))}
+                        </ul>
+                      )}
                     </li>
                   ))}
                 </ul>

@@ -38,6 +38,9 @@ const JobDashboard = ({ user }) => {
     status: "applied"
   });
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const [filters, setFilters] = useState({
     company_name: "",
     company_sort: "asc", // or "desc"
@@ -518,12 +521,12 @@ const JobDashboard = ({ user }) => {
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-app-primary">{job.job_title}</h3>
+                        <h3 className="text-lg font-semibold text-app-primary">{job.company_name}</h3>
                         <span className={`flex items-center justify center gap-0.5 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(job.status)}`}>
                           {getStatusIcon(job.status)} {job.status}
                         </span>
                       </div>
-                      <p className="text-app-text font-medium mb-1">{job.company_name}</p>
+                      <p className="text-app-text font-medium mb-1">{job.job_title}</p>
                       <div className="flex items-center gap-4 text-sm text-app-text/70 mb-3">
                         <span className="flex items-center gap-0.5">
                           <CiMapPin/>
