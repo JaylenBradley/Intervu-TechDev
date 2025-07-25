@@ -3,35 +3,46 @@ import React from "react";
 const Modal = ({ open, message, onConfirm, onCancel, confirmText = "Confirm", cancelText = "Cancel", backgroundClass }) => {
   if (!open) return null;
   return (
-    <div style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100vw",
-      height: "100vh",
-      background: "rgba(0,0,0,0.3)",
-      zIndex: 10000,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
-    }}>
-      <div
-        className={backgroundClass}
-        style={{
-          background: backgroundClass ? undefined : "#fff",
-          borderRadius: 10,
-          padding: 32,
-          minWidth: 320,
-          boxShadow: "0 4px 24px rgba(0,0,0,0.18)",
-          textAlign: "center"
-        }}
-      >
-        <div style={{ marginBottom: 24, fontSize: 18 }}>{message}</div>
-        <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
-          <button onClick={onCancel} style={{ padding: "8px 20px", borderRadius: 6, border: "1px solid #ccc", background: "#f5f5f5", cursor: "pointer" }}>{cancelText}</button>
-          <button onClick={onConfirm} style={{ padding: "8px 20px", borderRadius: 6, border: "none", background: "#2196f3", color: "#fff", cursor: "pointer" }}>{confirmText}</button>
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center backdrop-blur-sm transition-opacity duration-200">
+      <div className="min-w-[340px] rounded-3xl p-0 bg-white shadow-2xl border-2 border-app-primary text-center animate-modal-in">
+        {/* Top accent bar */}
+        <div className="h-2 w-full rounded-t-3xl bg-gradient-to-r from-app-primary to-app-secondary mb-0" />
+        <div className="p-8">
+          {/* Custom icon */}
+          <div className="flex justify-center mb-4">
+            <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-app-primary/10 text-app-primary text-3xl shadow">
+              &#9888;
+            </span>
+          </div>
+          <div className="mb-6 text-lg text-app-primary font-semibold">{message}</div>
+          <div className="flex justify-center gap-4">
+            <button
+              className="px-6 py-2 rounded-lg btn-primary font-semibold transition-colors cursor-pointer"
+              onClick={onCancel}
+            >
+              {cancelText}
+            </button>
+            <button
+              className="px-6 py-2 rounded-lg btn-primary font-semibold transition-colors cursor-pointer"
+              onClick={onConfirm}
+            >
+              {confirmText}
+            </button>
+          </div>
         </div>
       </div>
+      {/* Animation styles */}
+      <style>
+        {`
+          .animate-modal-in {
+            animation: modalIn 0.25s cubic-bezier(0.4,0,0.2,1);
+          }
+          @keyframes modalIn {
+            0% { opacity: 0; transform: scale(0.95);}
+            100% { opacity: 1; transform: scale(1);}
+          }
+        `}
+      </style>
     </div>
   );
 };
