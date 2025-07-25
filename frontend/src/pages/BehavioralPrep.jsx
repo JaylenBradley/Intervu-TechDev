@@ -26,16 +26,17 @@ const BehavioralPrep = ({ user }) => {
     difficulty: "Medium",
   });
 
-  const [questions, setQuestions] = useState([]);
-  const [selectedIdx, setSelectedIdx] = useState(0);
   const [answer, setAnswer] = useState("");
-  const [recording, setRecording] = useState(false);
-  const [feedback, setFeedback] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [generating, setGenerating] = useState(false);
-  const [error, setError] = useState("");
   const [audioChunks, setAudioChunks] = useState([]);
+  const [audioRecorded, setAudioRecorded] = useState(false);
+  const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const [generating, setGenerating] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [questions, setQuestions] = useState([]);
+  const [recording, setRecording] = useState(false);
+  const [selectedIdx, setSelectedIdx] = useState(0);
   const audioUrlRef = useRef(null);
   const audioElementRef = useRef(null);
   const localChunksRef = useRef([]);
@@ -96,6 +97,7 @@ const BehavioralPrep = ({ user }) => {
 
   const handleRecord = async () => {
     if (!recording) {
+      setAudioRecorded(false);
       setError("");
       localChunksRef.current = [];
       try {
@@ -160,12 +162,36 @@ const BehavioralPrep = ({ user }) => {
         seniority: form.seniority,
         difficulty: form.difficulty,
       });
+      setAudioRecorded(true);
       setFeedback(fb);
     } catch {
       setError("Failed to process audio or get feedback");
     } finally {
       setLoading(false);
     }
+  };
+
+   //Function for playing back the user's recorded audio
+  const handlePlayAudio = () => {
+    if (!audioUrlRef.current) return;
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+      audioElementRef.current.currentTime = 0;
+    }
+    const audio = new Audio(audioUrlRef.current);
+    audio.onended = () => setIsPlaying(false);
+    audioElementRef.current = audio;
+    audio.play();
+    setIsPlaying(true);
+  };
+
+  //Function for stopping the user's recorded audio
+  const handleStopAudio = () => {
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+      audioElementRef.current.currentTime = 0;
+    }
+    setIsPlaying(false);
   };
 
   function formatFeedbackForSpeech(feedbackObj) {
@@ -207,29 +233,6 @@ const BehavioralPrep = ({ user }) => {
     }
   }
 
-  //Function for playing back the user's recorded audio
-  const handlePlayAudio = () => {
-    if (!audioUrlRef.current) return;
-    if (audioElementRef.current) {
-      audioElementRef.current.pause();
-      audioElementRef.current.currentTime = 0;
-    }
-    const audio = new Audio(audioUrlRef.current);
-    audio.onended = () => setIsPlaying(false);
-    audioElementRef.current = audio;
-    audio.play();
-    setIsPlaying(true);
-  };
-
-  //Function for stopping the user's recorded audio
-  const handleStopAudio = () => {
-    if (audioElementRef.current) {
-      audioElementRef.current.pause();
-      audioElementRef.current.currentTime = 0;
-    }
-    setIsPlaying(false);
-  };
-
   const handleSubmitAnswer = async () => {
     setLoading(true);
     setFeedback("");
@@ -254,6 +257,14 @@ const BehavioralPrep = ({ user }) => {
 
   return (
     <div className="min-h-screen flex flex-col items-center py-10">
+      <div className="mb-2">
+        <button
+          className="mb-2 btn-primary px-4 py-2 rounded-md cursor-pointer"
+          onClick={() => window.history.back()}
+        >
+          &larr; Back
+        </button>
+      </div>
       <div className="bg-app-accent border border-app-primary rounded-xl p-8 w-full max-w-2xl shadow-lg">
         <h2 className="text-2xl font-bold text-app-primary mb-4 text-center">Behavioral Interview Prep</h2>
         <ul className="bg-app-background p-4 rounded mb-6 text-sm">
@@ -336,15 +347,20 @@ const BehavioralPrep = ({ user }) => {
             <label className="font-medium min-w-[120px]">Select Question:</label>
             <select
               value={selectedIdx}
-              onChange={e => { setSelectedIdx(Number(e.target.value)); setAnswer(""); setFeedback(""); }}
+              onChange={e => {
+                setSelectedIdx(Number(e.target.value));
+                setAnswer("");
+                setFeedback("");
+                setAudioRecorded(false);
+              }}
               className="flex-1 px-1 py-1 ml-1 mb-2 border border-app-primary rounded-lg bg-app-background cursor-pointer"
             >
               {questions.map((q, i) => (
                 <option key={i} value={i}>{`Q${i + 1}`}</option>
               ))}
             </select>
-            <div className="mb-2 p-3 bg-app-background rounded border">{questions[selectedIdx]}</div>
-            <div className="flex items-center gap-2 mt-4 mb-2">
+            <div className="mb-4 p-3 bg-app-background rounded border">{questions[selectedIdx]}</div>
+            <div className="flex items-center gap-2 mb-4">
               <button type="button" onClick={handleRecord}
                 className={`rounded-full p-3 border border-app-primary flex items-center justify-center cursor-pointer
                   ${recording ? "bg-app-background text-app-primary" : "bg-app-background text-app-primary"}`}>
@@ -358,12 +374,12 @@ const BehavioralPrep = ({ user }) => {
                   e.target.style.height = `${e.target.scrollHeight}px`;
                 }}
                 className="flex-1 px-3 py-2 border border-app-primary rounded-lg bg-app-background"
-                placeholder="Your answer (or use the mic)"
+                placeholder="Type your answer or use the mic"
                 rows={3}
               />
             </div>
-            {loading && <div className="loader mb-4"></div>}
-            <button className={`btn w-full h-12 text-lg font-semibold py-2 rounded-lg mt-3 mb-4 flex items-center justify-center cursor-pointer
+            {loading && <div className="loader mb-2"></div>}
+            <button className={`btn w-full h-12 text-lg font-semibold py-2 rounded-lg mb-4 flex items-center justify-center cursor-pointer
               ${loading ? "bg-app-secondary opacity-60 cursor-not-allowed" : ""}`}
               onClick={handleSubmitAnswer}
               disabled={loading || !answer}
@@ -371,8 +387,34 @@ const BehavioralPrep = ({ user }) => {
               {loading && <div className="loader-md mr-2"></div>}
               {loading ? "Getting Feedback..." : "Submit Answer"}
             </button>
+            {audioRecorded && (
+              <div className="flex gap-2 mb-4">
+                <button
+                  type="button"
+                  className="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 btn-primary cursor-pointer"
+                  onClick={handlePlayAudio}
+                  disabled={isPlaying}
+                >
+                  <span role="img" aria-label="Play">
+                    <GoPlay/>
+                  </span>
+                  Play Your Recording
+                </button>
+                <button
+                  type="button"
+                  className="px-4 py-2 rounded-lg font-semibold flex items-center gap-2 btn-danger cursor-pointer"
+                  onClick={handleStopAudio}
+                  disabled={!isPlaying}
+                >
+                  <span role="img" aria-label="Stop">
+                    <ImStop/>
+                  </span>
+                  Stop Your Recording
+                </button>
+              </div>
+            )}
             {feedback && (
-              <div className="p-4 bg-app-background border border-app-primary rounded">
+              <div className="p-4 mb-2 bg-app-background border border-app-primary rounded">
                 <strong>Feedback:</strong>
                 {renderFeedback(feedback)}
                 <div className="flex gap-2 mt-2">
@@ -399,7 +441,7 @@ const BehavioralPrep = ({ user }) => {
                 </div>
               </div>
             )}
-            <button className="btn w-full h-12 text-lg font-semibold py-2 rounded-lg mt-3 cursor-pointer" onClick={() => window.location.href = "/"}>Done</button>
+            <button className="btn w-full h-12 text-lg font-semibold py-2 rounded-lg mt-2 cursor-pointer" onClick={() => window.location.href = "/"}>Done</button>
           </div>
         )}
       </div>
