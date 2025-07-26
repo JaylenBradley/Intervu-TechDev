@@ -3,13 +3,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from app.core.database import SessionLocal
-from app.schemas.blind_75 import (
+from app.schemas.blind_75_problem import (
     Problem,
     Line,
     WrongSubmission,
 )
 from app.models.blind75_problem import Blind75Problem         
-from app.models.blind75 import Blind75 as Blind75Model        
 from app.models.user import User
 
 def get_db():
@@ -48,23 +47,3 @@ def get_random_problem(db: Session = Depends(get_db)):
         solution=[Line(**line) for line in row.solution],
     )
 
-
-@router.post("/wrong", status_code=201)
-def submit_wrong_problem(
-    submission: WrongSubmission,
-    db: Session = Depends(get_db),
-):
-    user = db.query(User).filter(User.id == submission.user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    db.add(
-        Blind75Model(
-            user_id=submission.user_id,
-            title=submission.title,
-            problem_type=submission.problem_type,
-            difficulty=submission.difficulty,
-        )
-    )
-    db.commit()
-    return {"detail": "Wrong problem recorded"}
