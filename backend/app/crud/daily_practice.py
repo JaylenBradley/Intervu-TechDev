@@ -34,11 +34,24 @@ def update_daily_stat(db: Session, user_id: int, stat_date: date, updates: Daily
 def get_or_create_daily_stat(db: Session, user_id: int, stat_date: date):
     db_stat = get_daily_stat(db, user_id, stat_date)
     if not db_stat:
+        # Check if user has any previous goal set
+        previous_goal = get_user_latest_goal(db, user_id)
+        
         daily_stat_data = DailyStatCreate(
             user_id=user_id,
             date=stat_date,
             answered=0,
-            score=0
+            score=0,
+            goal=previous_goal if previous_goal > 0 else 0
         )
         db_stat = create_daily_stat(db, daily_stat_data)
     return db_stat
+
+def get_user_latest_goal(db: Session, user_id: int):
+    """Get the most recent goal set by the user"""
+    latest_stat = db.query(DailyStat).filter(
+        DailyStat.user_id == user_id,
+        DailyStat.goal > 0
+    ).order_by(DailyStat.date.desc()).first()
+    
+    return latest_stat.goal if latest_stat else 0

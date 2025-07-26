@@ -11,8 +11,6 @@ import {
   toLines, MAX_INDENT, INDENT_WIDTH, diffClasses,
 } from "../utils/constants";
 import ConfigBlind75 from "../components/Config_Blind75";
-import { CSS } from "@dnd-kit/utilities";
-import { useNotification } from "../components/NotificationProvider";
 
 
 function useLocalStorage(key, fallback) {
@@ -33,7 +31,7 @@ function useLocalStorage(key, fallback) {
   return [value, persist];
 }
 
-export default function Blind75Prep({ userId }) {
+export default function Blind75Prep({ user }) {
   const [savedCfg, saveCfg] = useLocalStorage("blind75-settings", {
     evaluationMode : false,
     elimMode       : "none",
@@ -52,6 +50,12 @@ export default function Blind75Prep({ userId }) {
   const [questions    , setQuestions    ] = useState([]);
   const [current      , setCurrent      ] = useState(0);
   const [showCode     , setShowCode     ] = useState(false);
+
+  /* ── goal modal state ────────────────────────────────── */
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [dailyGoal, setDailyGoal] = useState('');
+  const [currentGoal, setCurrentGoal] = useState(0);
+  const [hasCheckedGoal, setHasCheckedGoal] = useState(false);
 
   /* ── per‑question state ─────────────────── */
   const [statusLines , setStatusLines ] = useState(null);
@@ -119,6 +123,54 @@ export default function Blind75Prep({ userId }) {
       resetStatus();
       scrollToTop();
 
+    }
+  };
+
+  /* ── goal functions ─────────────────────────────────── */
+  const checkUserGoal = async () => {
+    if (!user?.id || hasCheckedGoal) return;
+    
+    try {
+      const BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+      const response = await fetch(`${BASE}/api/daily-practice/${user.id}/today`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentGoal(data.goal);
+        if (data.goal === 0) {
+          setShowGoalModal(true);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to check goal:', error);
+    } finally {
+      setHasCheckedGoal(true);
+    }
+  };
+
+  const handleEditGoal = () => {
+    setDailyGoal(currentGoal > 0 ? currentGoal : '');
+    setShowGoalModal(true);
+  };
+
+  const handleSaveGoal = async () => {
+    if (!dailyGoal || dailyGoal < 1) return;
+    
+    try {
+      const BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+      const response = await fetch(`${BASE}/api/daily-practice/${user.id}/goal`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ goal: dailyGoal })
+      });
+      
+      if (response.ok) {
+        setCurrentGoal(dailyGoal);
+        setShowGoalModal(false);
+        setDailyGoal('');
+      }
+    } catch (error) {
+      console.error('Failed to save goal:', error);
     }
   };
 
@@ -361,6 +413,11 @@ const canAdvance = () => {
   return arr.join("\n");
 };
 
+/* ── check goal on mount ────────────────────────────── */
+useEffect(() => {
+  checkUserGoal();
+}, [user?.id]);
+
 useEffect(() => {
   if (!showCode) return;
 
@@ -457,6 +514,13 @@ useEffect(() => {
       evaluationMode={evaluationMode} setEvaluationMode={setEvaluationMode}
       elimMode={elimMode}           setElimMode={setElimMode}
       elimCount={elimCount}         setElimCount={setElimCount}
+
+      /* goal modal props */
+      showGoalModal={showGoalModal} setShowGoalModal={setShowGoalModal}
+      dailyGoal={dailyGoal}         setDailyGoal={setDailyGoal}
+      currentGoal={currentGoal}
+      handleSaveGoal={handleSaveGoal}
+      handleEditGoal={handleEditGoal}
 
       /* callbacks */
       startQuiz={startQuiz}

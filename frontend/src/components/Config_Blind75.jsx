@@ -7,9 +7,60 @@ export default function ConfigBlind75({
   startQuiz,
   handleSaveCfg,
   handleCancelCfg,
+  showGoalModal,
+  setShowGoalModal,
+  dailyGoal,
+  setDailyGoal,
+  handleSaveGoal,
+  currentGoal,
+  handleEditGoal,
 }) {
   return (
     <div className="min-h-screen flex items-center justify-center py-16">
+      {/* Goal Modal */}
+      {showGoalModal && (
+        <>
+          <div className="fixed inset-0 z-40 backdrop-blur-md pointer-events-auto"></div>
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-xl p-8 shadow-2xl max-w-md w-full border border-app-primary text-center relative">
+              <h2 className="text-2xl font-bold mb-4 text-app-primary">
+                {currentGoal > 0 ? 'Edit Your Daily Goal' : 'Set Your Daily Goal'}
+              </h2>
+              <p className="mb-6 text-app-text">
+                How many questions do you want to solve today?
+              </p>
+              <div className="mb-6">
+                <input
+                  type="number"
+                  min="1"
+                  max="50"
+                  value={dailyGoal}
+                  onChange={(e) => setDailyGoal(+e.target.value)}
+                  className="w-full px-4 py-3 border border-app-primary rounded-lg
+                             bg-app-background focus:outline-none text-center text-lg font-semibold"
+                  placeholder="Enter your daily goal"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  className="flex-1 py-3 text-lg font-semibold rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition cursor-pointer"
+                  onClick={() => setShowGoalModal(false)}
+                >
+                  Skip
+                </button>
+                <button
+                  className="flex-1 btn-primary py-3 text-lg font-semibold rounded-lg cursor-pointer"
+                  onClick={handleSaveGoal}
+                  disabled={!dailyGoal || dailyGoal < 1}
+                >
+                  {currentGoal > 0 ? 'Update Goal' : 'Set Goal'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
       <div className="bg-white shadow-xl rounded-2xl w-full max-w-lg p-10 space-y-6">
         <h1 className="text-center text-3xl font-extrabold text-app-primary">
           Technical Prep
@@ -54,6 +105,25 @@ export default function ConfigBlind75({
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* daily goal section */}
+          <div className="flex items-center justify-between bg-app-background border border-app-primary rounded-lg p-3">
+            <div>
+              <label className="font-medium text-app-text">
+                Daily Goal
+              </label>
+              <p className="text-sm text-gray-500">
+                {currentGoal > 0 ? `Current: ${currentGoal} questions` : 'No goal set'}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleEditGoal}
+              className="px-4 py-2 text-sm btn-primary rounded-lg font-medium transition cursor-pointer"
+            >
+              {currentGoal > 0 ? 'Edit Goal' : 'Set Goal'}
+            </button>
           </div>
 
           {/* advanced settings */}

@@ -10,6 +10,7 @@ class DailyStatBase(BaseModel):
 class DailyStatCreate(DailyStatBase):
     user_id: int
     date: date
+    goal: int = 0
 
 class DailyStatUpdate(BaseModel):
     goal: Optional[int] = None
