@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaGithub, FaGlobe, FaInstagram, FaLinkedin, FaTwitter, FaUserFriends } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaUserFriends } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 
 const dummyFriends = [
@@ -16,11 +16,8 @@ const defaultUser = {
   bio: "",
   education: "",
   avatar: "",
-  website: "",
   linkedin: "",
   github: "",
-  instagram: "",
-  twitter: "",
 };
 
 const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
@@ -41,6 +38,11 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
   const handleEditSave = () => {
     setProfile(editData);
     setEditModalOpen(false);
+  };
+
+  const formatUrl = url => {
+    if (!url) return "";
+    return url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
   };
 
   return (
@@ -95,38 +97,33 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
             <div>
               <span className="font-semibold text-app-primary">Education:</span>
               <span className="ml-2 text-gray-700">{profile.education || "Education info (placeholder)"}</span>
+
+              {profile.linkedin && (
+                <div className="mt-4">
+                  <a
+                    href={formatUrl(profile.linkedin)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-blue-500"
+                  >
+                    <FaLinkedin size={22} /> LinkedIn
+                  </a>
+                </div>
+              )}
+
+              {profile.github && (
+                <div className="mt-2">
+                  <a
+                    href={formatUrl(profile.github)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-gray-800"
+                  >
+                    <FaGithub size={22} /> GitHub
+                  </a>
+                </div>
+              )}
             </div>
-          </div>
-          {/* Social Links */}
-          <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary flex gap-6 items-center">
-            {profile.website && (
-              <a href={profile.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-app-primary">
-                <FaGlobe size={22} /> Website
-              </a>
-            )}
-            {profile.linkedin && (
-              <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-500">
-                <FaLinkedin size={22} /> LinkedIn
-              </a>
-            )}
-            {profile.github && (
-              <a href={profile.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-800">
-                <FaGithub size={22} /> GitHub
-              </a>
-            )}
-            {profile.instagram && (
-              <a href={profile.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-pink-500">
-                <FaInstagram size={22} /> Instagram
-              </a>
-            )}
-            {profile.twitter && (
-              <a href={profile.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-400">
-                <FaTwitter size={22} /> Twitter
-              </a>
-            )}
-            {!profile.website && !profile.linkedin && !profile.github && !profile.instagram && !profile.twitter && (
-              <span className="text-gray-400">No social links added.</span>
-            )}
           </div>
         </div>
         {/* Friends List Section */}
@@ -180,13 +177,6 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
                     className="bg-app-background border border-app-primary rounded px-3 py-2"
                 />
                 <input
-                    name="website"
-                    value={editData.website}
-                    onChange={handleEditChange}
-                    placeholder="Website URL"
-                    className="bg-app-background border border-app-primary rounded px-3 py-2"
-                />
-                <input
                     name="linkedin"
                     value={editData.linkedin}
                     onChange={handleEditChange}
@@ -198,20 +188,6 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
                     value={editData.github}
                     onChange={handleEditChange}
                     placeholder="GitHub URL"
-                    className="bg-app-background border border-app-primary rounded px-3 py-2"
-                />
-                <input
-                    name="instagram"
-                    value={editData.instagram}
-                    onChange={handleEditChange}
-                    placeholder="Instagram URL"
-                    className="bg-app-background border-app-primary border rounded px-3 py-2"
-                />
-                <input
-                    name="twitter"
-                    value={editData.twitter}
-                    onChange={handleEditChange}
-                    placeholder="Twitter URL"
                     className="bg-app-background border border-app-primary rounded px-3 py-2"
                 />
                 <div className="flex justify-end gap-2 mt-2">

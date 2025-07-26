@@ -1,6 +1,5 @@
 const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
-// Create a new user
 export async function createUser(userData) {
   const response = await fetch(`${BASE_URL}/api/user`, {
     method: "POST",
@@ -11,21 +10,12 @@ export async function createUser(userData) {
   return response.json();
 }
 
-// Mark questionnaire as complete
-export async function completeQuestionnaire(id) {
-  const res = await fetch(`${BASE_URL}/api/user/${id}/questionnaire-complete`, { method: "POST" });
-  if (!res.ok) throw new Error("Failed to complete questionnaire");
-  return res.json();
-}
-
-// Get all users
 export async function getAllUsers() {
   const response = await fetch(`${BASE_URL}/api/users`);
   if (!response.ok) throw new Error("Failed to fetch users");
   return response.json();
 }
 
-// Get a user by ID
 export async function getUser(id) {
   const response = await fetch(`${BASE_URL}/api/user/${id}`);
   if (!response.ok) throw new Error("User not found");
@@ -38,14 +28,19 @@ export async function getUserByFirebaseId(firebaseId) {
   return response.json();
 }
 
-// Fetch questionnaire status
+// Mark questionnaire as complete
+export async function completeQuestionnaire(id) {
+  const res = await fetch(`${BASE_URL}/api/user/${id}/questionnaire-complete`, { method: "POST" });
+  if (!res.ok) throw new Error("Failed to complete questionnaire");
+  return res.json();
+}
+
 export async function fetchQuestionnaireStatus(id) {
   const res = await fetch(`${BASE_URL}/api/user/${id}/questionnaire-status`);
   if (!res.ok) throw new Error("Failed to fetch status");
   return res.json();
 }
 
-// Update a user by ID
 export async function updateUser(id, userData) {
   const response = await fetch(`${BASE_URL}/api/user/${id}`, {
     method: "PATCH",
@@ -56,7 +51,6 @@ export async function updateUser(id, userData) {
   return response.json();
 }
 
-// Delete a user by ID
 export async function deleteUser(id) {
   const response = await fetch(`${BASE_URL}/api/user/${id}`, {
     method: "DELETE",

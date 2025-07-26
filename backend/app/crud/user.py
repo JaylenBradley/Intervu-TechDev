@@ -1,6 +1,10 @@
 from sqlalchemy.orm import Session
+from app.models.job_application import JobApplication
+from app.models.questionnaire import Questionnaire
+from app.models.resume import Resume
+from app.models.roadmap import Roadmap
 from app.models.user import User
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
 
 def create_user(db: Session, user: UserCreate):
     db_user = User(**user.dict())
@@ -27,12 +31,13 @@ def get_questionnaire_status(db: Session, id: int) -> bool:
     user = db.query(User).filter(User.id == id).first()
     return user.questionnaire_completed if user else False
 
-def update_user(db: Session, id: int, user: UserCreate):
+def update_user(db: Session, id: int, user_data: dict):
     db_user = db.query(User).filter(User.id == id).first()
     if not db_user:
         return None
-    for field, value in user.dict().items():
-        setattr(db_user, field, value)
+    for field, value in user_data.items():
+        if hasattr(db_user, field):
+            setattr(db_user, field, value)
     db.commit()
     db.refresh(db_user)
     return db_user
@@ -41,6 +46,11 @@ def delete_user(db: Session, id: int):
     db_user = db.query(User).filter(User.id == id).first()
     if not db_user:
         return False
+
+    db.query(Resume).filter(Resume.user_id == id).delete()
+    db.query(Questionnaire).filter(Questionnaire.user_id == id).delete()
+    db.query(Roadmap).filter(Roadmap.user_id == id).delete()
+
     db.delete(db_user)
     db.commit()
     return True

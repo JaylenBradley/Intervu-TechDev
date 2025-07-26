@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.core.database import SessionLocal
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.crud.user import create_user, get_user, update_user, delete_user, get_user_by_firebase_id
 
 router = APIRouter()
@@ -64,8 +64,8 @@ def get_questionnaire_status(id: int, db: Session = Depends(get_db)):
     return {"completed": user.questionnaire_completed}
 
 @router.patch("/user/{id}", response_model=UserResponse)
-def patch_user_endpoint(id: int, user: UserCreate, db: Session = Depends(get_db)):
-    db_user = update_user(db, id, user)
+def patch_user_endpoint(id: int, user: UserUpdate, db: Session = Depends(get_db)):
+    db_user = update_user(db, id, user.dict(exclude_unset=True))
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user

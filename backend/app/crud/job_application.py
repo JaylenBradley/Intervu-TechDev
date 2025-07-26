@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from app.models.job import JobApplication, ApplicationStatus
-from app.schemas.job import JobApplicationCreate, JobApplicationUpdate
+from app.models.job_application import JobApplication, ApplicationStatus
+from app.schemas.job_application import JobApplicationCreate, JobApplicationUpdate
 from typing import List, Optional
 import uuid
 
