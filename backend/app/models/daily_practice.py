@@ -11,6 +11,7 @@ class DailyStat(Base):
     goal      = Column(Integer, default=0, nullable=False)
     answered  = Column(Integer, default=0, nullable=False)
     score     = Column(Integer, default=0, nullable=False)
+    streak    = Column(Integer, default=0, nullable=False) 
     
     user = relationship("User", backref="daily_stats")
     __table_args__ = (UniqueConstraint('user_id', 'date', name='_user_date_uc'),)

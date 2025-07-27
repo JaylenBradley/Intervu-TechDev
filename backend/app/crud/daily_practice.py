@@ -34,7 +34,6 @@ def update_daily_stat(db: Session, user_id: int, stat_date: date, updates: Daily
 def get_or_create_daily_stat(db: Session, user_id: int, stat_date: date):
     db_stat = get_daily_stat(db, user_id, stat_date)
     if not db_stat:
-        # Check if user has any previous goal set
         previous_goal = get_user_latest_goal(db, user_id)
         
         daily_stat_data = DailyStatCreate(
@@ -55,3 +54,41 @@ def get_user_latest_goal(db: Session, user_id: int):
     ).order_by(DailyStat.date.desc()).first()
     
     return latest_stat.goal if latest_stat else 0
+
+def calculate_current_streak(db: Session, user_id: int, target_date: date = None):
+    """Calculate the current streak for a user up to the target date"""
+    if target_date is None:
+        target_date = date.today()
+    
+    stats = db.query(DailyStat).filter(
+        DailyStat.user_id == user_id,
+        DailyStat.date <= target_date
+    ).order_by(DailyStat.date.desc()).all()
+    
+    if not stats:
+        return 0
+    
+    streak = 0
+    for stat in stats:
+        if stat.answered >= stat.goal and stat.goal > 0:
+            streak += 1
+        else:
+            break  
+    
+    return streak
+
+def update_streak_for_user(db: Session, user_id: int, stat_date: date = None):
+    """Update the streak field for a specific date"""
+    if stat_date is None:
+        stat_date = date.today()
+    
+    current_streak = calculate_current_streak(db, user_id, stat_date)
+    
+    # Update the streak in the database
+    db_stat = get_daily_stat(db, user_id, stat_date)
+    if db_stat:
+        db_stat.streak = current_streak
+        db.commit()
+        db.refresh(db_stat)
+    
+    return current_streak

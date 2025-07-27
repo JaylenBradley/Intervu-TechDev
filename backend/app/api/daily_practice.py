@@ -3,11 +3,12 @@ from sqlalchemy.orm import Session
 from app.core.database import SessionLocal
 from app.schemas.daily_practice import DailyStatCreate, DailyStatUpdate, DailyStatResponse, GoalUpdateRequest
 from app.crud.daily_practice import (
-    create_daily_stat, 
     get_daily_stat, 
     get_daily_stats_by_user,
     update_daily_stat,
-    get_or_create_daily_stat
+    get_or_create_daily_stat,
+    calculate_current_streak,
+    update_streak_for_user
 )
 from app.crud.user import get_user
 from datetime import date
@@ -61,12 +62,13 @@ def update_answers(user_id: int, increment: int = 1, stat_date: date = None, db:
     if not updated_stat:
         raise HTTPException(status_code=404, detail="Could not update daily stat")
     
+    update_streak_for_user(db, user_id, stat_date)
+    db.refresh(updated_stat)
     return updated_stat
 
 @router.post("/daily-practice/{user_id}/score", response_model=DailyStatResponse)
 def update_score(user_id: int, score_increment: int, stat_date: date = None, db: Session = Depends(get_db)):
     """Add to the daily score for a user"""
-    # Check if user exists
     user = get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -101,7 +103,6 @@ def get_goal(user_id: int, stat_date: date = None, db: Session = Depends(get_db)
 @router.get("/daily-practice/{user_id}/today", response_model=DailyStatResponse)
 def get_today_stats(user_id: int, db: Session = Depends(get_db)):
     """Get today's practice statistics for a user"""
-    # Check if user exists
     user = get_user(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -109,6 +110,16 @@ def get_today_stats(user_id: int, db: Session = Depends(get_db)):
     today = date.today()
     db_stat = get_or_create_daily_stat(db, user_id, today)
     return db_stat
+
+@router.get("/daily-practice/{user_id}/streak")
+def get_current_streak(user_id: int, db: Session = Depends(get_db)):
+    """Get the current streak for a user"""
+    user = get_user(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    current_streak = calculate_current_streak(db, user_id)
+    return {"user_id": user_id, "current_streak": current_streak}
 
 @router.get("/daily-practice/{user_id}/history", response_model=List[DailyStatResponse])
 def get_practice_history(user_id: int, limit: int = 30, db: Session = Depends(get_db)):

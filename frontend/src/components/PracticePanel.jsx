@@ -13,6 +13,7 @@ import {
 
 export default function PracticePanel({
   question,          
+  currentScore,
   approachSel,
   setApproachSel,
   statusA,
@@ -59,6 +60,26 @@ const borderSpace =
 
   return (
     <>
+      {/* ─────────────── Score Display ─────────────── */}
+      <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-app-primary">
+            Current Question Score
+          </h3>
+          <div className="flex items-center gap-2">
+            <span className={`text-2xl font-bold ${currentScore >= 80 ? 'text-green-600' : currentScore >= 60 ? 'text-yellow-600' : 'text-red-600'}`}>
+              {currentScore}
+            </span>
+            <span className="text-gray-500">/100</span>
+          </div>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+          <div
+            className={`h-2 rounded-full transition-all duration-300 ${currentScore >= 80 ? 'bg-green-500' : currentScore >= 60 ? 'bg-yellow-500' : 'bg-red-500'}`}
+            style={{ width: `${currentScore}%` }}
+          />
+        </div>
+      </div>
 
       {/* ─────────────── Approach Card ─────────────── */}
       <div className="bg-white rounded-xl shadow-lg p-6">
@@ -124,7 +145,6 @@ const borderSpace =
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            /* MUST be array of IDs */
             items={currentLines.map((l) => l.id)}
             strategy={verticalListSortingStrategy}
           >

@@ -11,6 +11,7 @@ import {
   toLines, MAX_INDENT, INDENT_WIDTH, diffClasses,
 } from "../utils/constants";
 import ConfigBlind75 from "../components/Config_Blind75";
+import { useNotification } from "../components/NotificationProvider";
 
 
 function useLocalStorage(key, fallback) {
@@ -32,6 +33,8 @@ function useLocalStorage(key, fallback) {
 }
 
 export default function Blind75Prep({ user }) {
+  const { showNotification } = useNotification();
+  
   const [savedCfg, saveCfg] = useLocalStorage("blind75-settings", {
     evaluationMode : false,
     elimMode       : "none",
@@ -54,6 +57,8 @@ export default function Blind75Prep({ user }) {
   /* ── goal modal state ────────────────────────────────── */
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [dailyGoal, setDailyGoal] = useState('');
+  const [currentAnswered, setCurrentAnswered] = useState(0);
+  const [currentStreak, setCurrentStreak] = useState(0);
   const [currentGoal, setCurrentGoal] = useState(0);
   const [hasCheckedGoal, setHasCheckedGoal] = useState(false);
 
@@ -71,6 +76,7 @@ export default function Blind75Prep({ user }) {
   const [codeFeedback, setCodeFeedback] = useState(null);
   const [hintText    , setHintText    ] = useState("");
   const [hintLoading , setHintLoading ] = useState(false);
+  const [currentQuestionScore, setCurrentQuestionScore] = useState(100);
   const [explain, setExplain] = useState({
   approach   : { text: "", loading: false },
   complexity : { text: "", loading: false },
@@ -91,6 +97,7 @@ export default function Blind75Prep({ user }) {
     setCodeAnswer("");
     setCodeFeedback(null);
     setHintText("");
+    setCurrentQuestionScore(100); 
     setExplain({
     approach   : { text: "", loading: false },
     complexity : { text: "", loading: false },
@@ -104,25 +111,56 @@ export default function Blind75Prep({ user }) {
 
   
 
-  const next = () => {
-    if (!showCode && evaluationMode) { setShowCode(true); scrollToTop(); return; }
+  const next = async () => {
+    
+    if (!showCode && evaluationMode) { 
+      
+      if (user?.id) {
+        await updateAnsweredCount();
+        await updateScore(currentQuestionScore);
+      }
+      
+      setShowCode(true); 
+      scrollToTop(); 
+      return; 
+    }
+    
+    if (user?.id) {
+      await updateAnsweredCount();
+      
+      if (showCode) {
+        const apiScore = codeFeedback?.score || 0;
+        await updateScore(apiScore);
+      } else {
+        await updateScore(currentQuestionScore);
+      }
+    } else {
+    }
+    
     if (current < questions.length - 1) {
       setCurrent((c) => c + 1);
       setShowCode(false);
       resetStatus();
       scrollToTop();
-
+    } else {
     }
   };
 
-  const skip = () => {
-    if (!showCode && evaluationMode) { setShowCode(true); scrollToTop(); return; }
+  const skip = async () => {
+    
+    if (!showCode && evaluationMode) { 
+      setShowCode(true); 
+      scrollToTop(); 
+      return; 
+    }
+    
+
+    
     if (current < questions.length - 1) {
       setCurrent((c) => c + 1);
       setShowCode(false);
       resetStatus();
       scrollToTop();
-
     }
   };
 
@@ -171,6 +209,66 @@ export default function Blind75Prep({ user }) {
       }
     } catch (error) {
       console.error('Failed to save goal:', error);
+    }
+  };
+
+  /* ── scoring and tracking functions ─────────────────── */
+  const updateAnsweredCount = async () => {
+    try {
+      const BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+      const response = await fetch(`${BASE}/api/daily-practice/${user.id}/answers?increment=1`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentAnswered(data.answered);
+        setCurrentStreak(data.streak || 0);
+      } else {
+        console.error('Answered count update failed:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Failed to update answered count:', error);
+    }
+  };
+
+  const updateScore = async (score) => {
+    try {
+      const BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+      const response = await fetch(`${BASE}/api/daily-practice/${user.id}/score?score_increment=${score}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+      } else {
+        console.error('Score update failed:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Failed to update score:', error);
+    }
+  };
+
+  const deductScore = (points) => {
+    setCurrentQuestionScore(prev => Math.max(0, prev - points));
+  };
+
+  const fetchCurrentDailyStats = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+      const response = await fetch(`${BASE}/api/daily-practice/${user.id}/today`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentAnswered(data.answered || 0);
+        setCurrentStreak(data.streak || 0); 
+      }
+    } catch (error) {
+      console.error('Failed to fetch daily stats:', error);
     }
   };
 
@@ -329,6 +427,10 @@ const fetchExplanation = async (answerType) => {
     return;
   }
 
+  // Deduct points for incorrect lines/indent
+  if (indentWrong) deductScore(8);
+  if (orderWrong) deductScore(8);
+
   setStatusLines("incorrect");
   setWrongDetail(
     indentWrong && orderWrong ? "both" : indentWrong ? "indent" : "order"
@@ -347,16 +449,27 @@ const fetchExplanation = async (answerType) => {
   const timeOK  = timeSel  === q.time;
   const spaceOK = spaceSel === q.space;
 
-  if (timeOK && spaceOK)          setStatusCx("correct");
-  else if (!timeOK &&  spaceOK)   setStatusCx("time");
-  else if ( timeOK && !spaceOK)   setStatusCx("space");
-  else                            setStatusCx("both");
-};
+  if (timeOK && spaceOK) {
+    setStatusCx("correct");
+  } else {
+    // Deduct points for complexity mistakes
+    if (!timeOK) deductScore(12);
+    if (!spaceOK) deductScore(12);
 
+    if (!timeOK &&  spaceOK)   setStatusCx("time");
+    else if ( timeOK && !spaceOK)   setStatusCx("space");
+    else                            setStatusCx("both");
+  }
+};
 
   const checkApproach = () => {
     const q = questions[current];
     const good = approachSel === q.type;
+    
+    if (!good) {
+      deductScore(15); 
+    }
+    
     setStatusA(good ? "correct" : "incorrect");
   };
 
@@ -384,15 +497,13 @@ const canAdvance = () => {
 };
 
  const buildEliminatedCode = (type) => {
-  const SAFE_LINES = 2;                               // keep first 2 lines
+  const SAFE_LINES = 2;                               
   const arr = [...questions[current].plainSolution];
 
-// Off → return ONLY the first two lines
   if (type === "none") {
       return arr.slice(0, SAFE_LINES).join("\n");
   }
 
-  /* Random N / Last N logic (unchanged) */
   const n = Math.min(elimCount, arr.length - SAFE_LINES);
 
   if (type === "last") {
@@ -400,7 +511,7 @@ const canAdvance = () => {
       const idx = arr.length - 1 - i;
       if (idx >= SAFE_LINES) arr[idx] = "# Type answer here";
     }
-  } else { // "random"
+  } else { 
     const idxs = new Set();
     while (idxs.size < n) {
       idxs.add(
@@ -416,6 +527,7 @@ const canAdvance = () => {
 /* ── check goal on mount ────────────────────────────── */
 useEffect(() => {
   checkUserGoal();
+  fetchCurrentDailyStats();
 }, [user?.id]);
 
 useEffect(() => {
@@ -448,6 +560,12 @@ const submitCode = async () => {
     if (!res.ok) throw new Error("bad response");
     const data = await res.json();           
     setCodeFeedback(data);
+    
+    // Update current question score with API evaluation score
+    if (data.score !== undefined) {
+      setCurrentQuestionScore(data.score);
+    }
+    
     setQuestions((qs) => {
       const cp = [...qs];
       cp[current] = { ...cp[current], codeDone: true };
@@ -578,6 +696,41 @@ return (
       {header}
       {problem}
       
+      {/* ─────────────── Streak & Progress Display ─────────────── */}
+      <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Daily Progress */}
+          <div className="text-center">
+            <div className="text-sm text-gray-500">Today's Progress</div>
+            <div className="text-2xl font-bold text-app-primary">
+              {currentAnswered} / {currentGoal || '?'}
+            </div>
+            <div className="text-xs text-gray-400">Questions Answered</div>
+          </div>
+          
+          {/* Goal Status */}
+          <div className="text-center">
+            <div className="text-sm text-gray-500">Goal Status</div>
+            <div className={`text-2xl font-bold ${currentAnswered >= currentGoal && currentGoal > 0 ? 'text-green-600' : 'text-yellow-600'}`}>
+              {currentAnswered >= currentGoal && currentGoal > 0 ? '✓ Met!' : '• In Progress'}
+            </div>
+            <div className="text-xs text-gray-400">
+              {currentGoal > 0 ? `${Math.max(0, currentGoal - currentAnswered)} more to go` : 'No goal set'}
+            </div>
+          </div>
+          
+          {/* Streak */}
+          <div className="text-center">
+            <div className="text-sm text-gray-500">Current Streak</div>
+            <div className="text-2xl font-bold text-orange-600">
+              ▲ {currentStreak}
+            </div>
+            <div className="text-xs text-gray-400">
+              {currentStreak > 0 ? 'Days in a row!' : 'Start your streak!'}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {showCode ? (
         <CodePanel
@@ -604,6 +757,9 @@ return (
       ) : (
         <PracticePanel
           question={{ ...questions[current], index: current }}
+
+          /* scoring */
+          currentScore={currentQuestionScore}
 
           /* approach */
           approachSel={approachSel}
@@ -650,7 +806,9 @@ return (
           Skip →
         </button>
         <button
-          onClick={next}
+          onClick={() => {
+            next();
+          }}
           disabled={!canAdvance()}
           className="btn-primary w-full py-2 rounded-lg font-semibold"
         >
