@@ -120,11 +120,80 @@ async def feedback_resume(user_id: int, db: Session = Depends(get_db)):
         model="gemini-2.5-flash",
         config=types.GenerateContentConfig(
             temperature=0.3,
-            max_output_tokens=6000
+            max_output_tokens=8000
         ),
         contents=prompt
     )
-    return {"feedback": response.text or ""}
+    
+    # Parse the feedback to extract structured data
+    structured_feedback = parse_feedback_response(response.text)
+    
+    # Add debugging info
+    print(f"Raw feedback length: {len(response.text)}")
+    print(f"Structured feedback items: {len(structured_feedback)}")
+    print(f"First few lines of raw feedback: {response.text[:500]}")
+    
+    # Debug: Print the structured feedback items
+    for i, item in enumerate(structured_feedback):
+        print(f"Item {i}: {item}")
+    
+    return {
+        "feedback": response.text or "",
+        "structured_feedback": structured_feedback
+    }
+
+def parse_feedback_response(feedback_text: str) -> list:
+    """Parse the AI feedback response to extract structured feedback items."""
+    import re
+    
+    if not feedback_text:
+        return []
+    
+    # Use a more robust approach to find all Original: sections
+    pattern = r'Original:\s*([^\n]+)\s*Grade:\s*([^\n]+)\s*Feedback:\s*([^\n]+(?:\n(?!- Option)[^\n]+)*)\s*(- Option 1:[^\n]+(?:\n(?!- Option)[^\n]+)*)\s*(- Option 2:[^\n]+(?:\n(?!Original:)[^\n]+)*)'
+    
+    matches = re.findall(pattern, feedback_text, re.DOTALL)
+    items = []
+    
+    for match in matches:
+        original_text = match[0].strip()
+        grade = match[1].strip()
+        feedback = match[2].strip()
+        option1 = match[3].replace('- Option 1:', '').strip()
+        option2 = match[4].replace('- Option 2:', '').strip()
+        
+        # Remove bullet points from original text
+        original_text = re.sub(r'^[•\-]\s*', '', original_text)
+        original_text = re.sub(r'^\s*[•\-]\s*', '', original_text)
+        original_text = original_text.strip()
+        
+        # Skip items that are just intro text
+        original_lower = original_text.lower()
+        if ('detailed analysis' in original_lower or 
+            'here\'s' in original_lower or
+            'analysis of' in original_lower):
+            continue
+        
+        # Clean up options
+        complete_options = []
+        for option in [option1, option2]:
+            option_text = option.strip()
+            if (len(option_text) > 15 and 
+                not option_text.endswith('...') and 
+                not option_text.endswith('..') and
+                not option_text.endswith('etc') and
+                not option_text.endswith('etc.')):
+                complete_options.append(option_text)
+        
+        if len(complete_options) >= 2:
+            items.append({
+                "original": original_text,
+                "grade": grade,
+                "feedback": feedback,
+                "options": complete_options
+            })
+    
+    return items
 
 @router.post("/resume/tailor", response_model=ResumeTailorResponse)
 async def tailor_resume(request: ResumeTailorRequest, db: Session = Depends(get_db)):
