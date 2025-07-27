@@ -203,7 +203,11 @@ export default function Blind75Prep({ user }) {
       });
       
       if (response.ok) {
-        setCurrentGoal(dailyGoal);
+        const data = await response.json();
+        // Update all stats from backend response to ensure consistency
+        setCurrentGoal(data.goal);
+        setCurrentAnswered(data.answered);
+        setCurrentStreak(data.streak || 0);
         setShowGoalModal(false);
         setDailyGoal('');
       }
@@ -266,10 +270,15 @@ export default function Blind75Prep({ user }) {
         const data = await response.json();
         setCurrentAnswered(data.answered || 0);
         setCurrentStreak(data.streak || 0); 
+        setCurrentGoal(data.goal || 0);
       }
     } catch (error) {
       console.error('Failed to fetch daily stats:', error);
     }
+  };
+
+  const refreshStats = () => {
+    fetchCurrentDailyStats();
   };
 
   /* ── load questions ─────────────────────────────────── */

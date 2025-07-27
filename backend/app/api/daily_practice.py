@@ -8,7 +8,7 @@ from app.crud.daily_practice import (
     update_daily_stat,
     get_or_create_daily_stat,
     calculate_current_streak,
-    update_streak_for_user
+    _refresh_streak
 )
 from app.crud.user import get_user
 from datetime import date
@@ -41,7 +41,7 @@ def update_goal(user_id: int, request: GoalUpdateRequest, stat_date: date = None
     if not updated_stat:
         raise HTTPException(status_code=404, detail="Could not update daily stat")
     
-    return updated_stat
+    return _refresh_streak(db, user_id, stat_date)
 
 @router.post("/daily-practice/{user_id}/answers", response_model=DailyStatResponse)
 def update_answers(user_id: int, increment: int = 1, stat_date: date = None, db: Session = Depends(get_db)):
@@ -62,9 +62,7 @@ def update_answers(user_id: int, increment: int = 1, stat_date: date = None, db:
     if not updated_stat:
         raise HTTPException(status_code=404, detail="Could not update daily stat")
     
-    update_streak_for_user(db, user_id, stat_date)
-    db.refresh(updated_stat)
-    return updated_stat
+    return _refresh_streak(db, user_id, stat_date)
 
 @router.post("/daily-practice/{user_id}/score", response_model=DailyStatResponse)
 def update_score(user_id: int, score_increment: int, stat_date: date = None, db: Session = Depends(get_db)):
@@ -84,7 +82,7 @@ def update_score(user_id: int, score_increment: int, stat_date: date = None, db:
     if not updated_stat:
         raise HTTPException(status_code=404, detail="Could not update daily stat")
     
-    return updated_stat
+    return _refresh_streak(db, user_id, stat_date)
 
 @router.get("/daily-practice/{user_id}/goal", response_model=DailyStatResponse)
 def get_goal(user_id: int, stat_date: date = None, db: Session = Depends(get_db)):
@@ -109,7 +107,7 @@ def get_today_stats(user_id: int, db: Session = Depends(get_db)):
     
     today = date.today()
     db_stat = get_or_create_daily_stat(db, user_id, today)
-    return db_stat
+    return _refresh_streak(db, user_id, today)
 
 @router.get("/daily-practice/{user_id}/streak")
 def get_current_streak(user_id: int, db: Session = Depends(get_db)):
@@ -125,7 +123,17 @@ def get_current_streak(user_id: int, db: Session = Depends(get_db)):
 def get_practice_history(user_id: int, limit: int = 30, db: Session = Depends(get_db)):
     """Get practice history for a user (last 30 days by default)"""
     stats = get_daily_stats_by_user(db, user_id, limit)
-    return stats
+    
+    updated_stats = []
+    for stat in stats:
+        current_streak = calculate_current_streak(db, user_id, stat.date)
+        if stat.streak != current_streak:
+            stat.streak = current_streak
+            db.commit()
+            db.refresh(stat)
+        updated_stats.append(stat)
+    
+    return updated_stats
 
 @router.get("/daily-practice/{user_id}/{stat_date}", response_model=DailyStatResponse)
 def get_stats_by_date(user_id: int, stat_date: date, db: Session = Depends(get_db)):

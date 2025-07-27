@@ -56,21 +56,46 @@ def get_user_latest_goal(db: Session, user_id: int):
     return latest_stat.goal if latest_stat else 0
 
 def calculate_current_streak(db: Session, user_id: int, target_date: date = None):
-    """Calculate the current streak for a user up to the target date"""
     if target_date is None:
         target_date = date.today()
     
     stats = db.query(DailyStat).filter(
         DailyStat.user_id == user_id,
-        DailyStat.date <= target_date
+        DailyStat.date <= target_date,
+        DailyStat.goal > 0  
     ).order_by(DailyStat.date.desc()).all()
     
     if not stats:
         return 0
     
-    streak = 0
+    stats_by_date = {}
     for stat in stats:
-        if stat.answered >= stat.goal and stat.goal > 0:
+        if stat.date not in stats_by_date:
+            stats_by_date[stat.date] = stat
+    
+    sorted_dates = sorted(stats_by_date.keys(), reverse=True)
+    
+    if not sorted_dates:
+        return 0
+    
+    target_stat = stats_by_date.get(target_date)
+    target_goal_completed = (target_stat and 
+                           target_stat.answered >= target_stat.goal and 
+                           target_stat.goal > 0)
+    
+    if not target_goal_completed:
+        previous_dates = [d for d in sorted_dates if d < target_date]
+        if not previous_dates:
+            return 0
+        
+        most_recent_previous = max(previous_dates)
+        return calculate_current_streak(db, user_id, most_recent_previous)
+    
+    streak = 0
+    for stat_date in sorted_dates:
+        stat = stats_by_date[stat_date]
+        goal_met = stat.answered >= stat.goal and stat.goal > 0
+        if goal_met:
             streak += 1
         else:
             break  
@@ -83,8 +108,6 @@ def update_streak_for_user(db: Session, user_id: int, stat_date: date = None):
         stat_date = date.today()
     
     current_streak = calculate_current_streak(db, user_id, stat_date)
-    
-    # Update the streak in the database
     db_stat = get_daily_stat(db, user_id, stat_date)
     if db_stat:
         db_stat.streak = current_streak
@@ -92,3 +115,13 @@ def update_streak_for_user(db: Session, user_id: int, stat_date: date = None):
         db.refresh(db_stat)
     
     return current_streak
+
+def _refresh_streak(db: Session, user_id: int, stat_date: date):
+    """Re‑calculate the current streak and persist it on the *same* DailyStat row."""
+    streak = calculate_current_streak(db, user_id, stat_date)
+    db_stat = get_daily_stat(db, user_id, stat_date)
+    if db_stat and db_stat.streak != streak:
+        db_stat.streak = streak
+        db.commit()
+        db.refresh(db_stat)
+    return db_stat
