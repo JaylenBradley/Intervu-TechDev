@@ -150,7 +150,25 @@ async def tailor_resume(request: ResumeTailorRequest, db: Session = Depends(get_
         config=types.GenerateContentConfig(temperature=0.2),
         contents=prompt
     )
-    return {"tailored_resume": response.text}
+    
+    try:
+        parsed_data = json.loads(response.text)
+    except Exception as e:
+        # Fallback: Try to clean the response and parse again
+        cleaned_response = response.text.strip()
+        # Remove any markdown formatting
+        if cleaned_response.startswith('```json'):
+            cleaned_response = cleaned_response[7:]
+        if cleaned_response.endswith('```'):
+            cleaned_response = cleaned_response[:-3]
+        cleaned_response = cleaned_response.strip()
+        
+        try:
+            parsed_data = json.loads(cleaned_response)
+        except Exception as e2:
+            raise HTTPException(status_code=500, detail=f"Failed to parse tailored resume: {str(e)}")
+    
+    return {"tailored_resume": json.dumps(parsed_data)}
 
 @router.get("/resume/export")
 async def export_resume(user_id: int, format: str = "pdf", db: Session = Depends(get_db)):

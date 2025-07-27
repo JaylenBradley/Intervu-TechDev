@@ -173,13 +173,29 @@ STRICT RULES:
 - Use clear, concise bullet points and section headings.
 - The tailored resume should be ATS-friendly and factual.
 
+CRITICAL: You MUST return ONLY valid JSON. No markdown, no commentary, no text before or after the JSON. Start with {{ and end with }}.
+
 Job Description:
 {job_description}
 
 Original Resume:
 {resume_text}
 
-Return only the fully rewritten, tailored resume in plain text (no markdown, no commentary, no JSON, no code blocks).
+Return ONLY valid JSON using this exact schema:
+
+{{
+  "education": [{{"institution": str, "degree": str, "start_date": str, "end_date": str}}],
+  "experience": [{{"company": str, "title": str, "start_date": str, "end_date": str, "description": str}}],
+  "leadership": [{{"organization": str, "title": str, "start_date": str, "end_date": str, "description": str}}],
+  "certifications": [str],
+  "projects": [{{"name": str, "description": str}}],
+  "contact_info": {{"name": str, "email": str, "phone": str}},
+  "skills": [str]
+}}
+
+If a field is missing, return an empty list or empty string for that field. Do not invent information. Return only the JSON object.
+
+IMPORTANT: Your response must be valid JSON that can be parsed by json.loads(). Do not include any text before or after the JSON object.
 """
 
 def roadmap_prompt(profile, current_date):

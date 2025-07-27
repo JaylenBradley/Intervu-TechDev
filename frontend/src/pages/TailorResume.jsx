@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 const TailorResume = ({ user }) => {
   const [jobDescription, setJobDescription] = useState("");
   const [tailoredResume, setTailoredResume] = useState("");
-  const [currentResume, setCurrentResume] = useState("");
+  const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [exporting, setExporting] = useState(false);
@@ -21,65 +21,10 @@ const TailorResume = ({ user }) => {
     const loadResume = async () => {
       if (!user || !user.id) return;
       try {
-        const data = await fetchUserResume(user.id); // uses service
-        // Try to reconstruct the resume as plain text from parsed_data
-        if (data && data.parsed_data) {
-          let text = "";
-          if (data.parsed_data.contact_info) {
-            text += `${data.parsed_data.contact_info.name || ""}\n${data.parsed_data.contact_info.email || ""}\n${data.parsed_data.contact_info.phone || ""}\n\n`;
-          }
-          if (data.parsed_data.education && data.parsed_data.education.length) {
-            text += "EDUCATION\n";
-            data.parsed_data.education.forEach(edu => {
-              text += `${edu.degree} at ${edu.institution} (${edu.start_date} - ${edu.end_date})\n`;
-            });
-            text += "\n";
-          }
-          if (data.parsed_data.experience && data.parsed_data.experience.length) {
-            text += "EXPERIENCE\n";
-            data.parsed_data.experience.forEach(exp => {
-              text += `${exp.title} at ${exp.company} (${exp.start_date} - ${exp.end_date})\n`;
-              // Split description by bullet points and format properly
-              const bullets = exp.description.split(/[•\-]/).filter(bullet => bullet.trim());
-              bullets.forEach(bullet => {
-                text += `• ${bullet.trim()}\n`;
-              });
-              text += "\n";
-            });
-            text += "\n";
-          }
-          if (data.parsed_data.leadership && data.parsed_data.leadership.length) {
-            text += "LEADERSHIP\n";
-            data.parsed_data.leadership.forEach(lead => {
-              text += `${lead.title} at ${lead.organization} (${lead.start_date} - ${lead.end_date})\n`;
-              // Split description by bullet points and format properly
-              const bullets = lead.description.split(/[•\-]/).filter(bullet => bullet.trim());
-              bullets.forEach(bullet => {
-                text += `• ${bullet.trim()}\n`;
-              });
-              text += "\n";
-            });
-            text += "\n";
-          }
-          if (data.parsed_data.skills && data.parsed_data.skills.length) {
-            text += `SKILLS\n${data.parsed_data.skills.join(", ")}\n\n`;
-          }
-          if (data.parsed_data.certifications && data.parsed_data.certifications.length) {
-            text += `CERTIFICATIONS\n${data.parsed_data.certifications.join(", ")}\n\n`;
-          }
-          if (data.parsed_data.projects && data.parsed_data.projects.length) {
-            text += "PROJECTS\n";
-            data.parsed_data.projects.forEach(proj => {
-              text += `${proj.name}: ${proj.description}\n`;
-            });
-            text += "\n";
-          }
-          setCurrentResume(text.trim());
-        } else {
-          setCurrentResume("");
-        }
+        const data = await fetchUserResume(user.id);
+        setResume(data);
       } catch {
-        setCurrentResume("");
+        setResume(null);
       }
     };
     loadResume();
@@ -120,6 +65,36 @@ const TailorResume = ({ user }) => {
     }
   };
 
+  // Add getBullets function from ResumeMain
+  const getBullets = (desc) => {
+    if (!desc) return [];
+    let bullets = desc
+      .split(/\r?\n/)
+      .map(line => line.replace(/^[-\u2022\u25aa\s]+/, '').trim())
+      .filter(Boolean);
+
+    if (bullets.length <= 1) {
+      // Try splitting on period+space, period+capital, or space+common action verb
+      bullets = desc
+        .split(/\. (?=[A-Z])|\.(?=[A-Z])| (?=Led |Implemented |Designed |Built |Created |Developed |Managed |Coordinated |Organized |Produced |Launched |Founded |Started |Initiated |Oversaw |Directed |Supervised |Enhanced |Improved |Increased |Reduced |Streamlined |Automated |Analyzed |Researched |Presented |Taught |Mentored |Tutored |Assisted |Supported |Collaborated )/g)
+        .map(line => line.replace(/^[-\u2022\u25aa\s]+/, '').trim())
+        .filter(Boolean);
+    }
+    return bullets;
+  };
+
+
+
+  // Helper to parse tailoredResume as JSON
+  let tailoredParsed = null;
+  try {
+    tailoredParsed = tailoredResume ? JSON.parse(tailoredResume) : null;
+  } catch (e) {
+    tailoredParsed = null;
+  }
+
+
+
   return (
     <div className="min-h-screen flex flex-col items-center py-16">
       <div className="w-full max-w-2xl flex flex-col items-center">
@@ -158,15 +133,165 @@ const TailorResume = ({ user }) => {
       {tailoredResume && (
         <div className="w-full max-w-6xl bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center border-2 border-app-primary">
           <div className="w-full flex flex-row justify-center gap-8 mb-6">
+            {/* Current Resume - structured display like ResumeMain */}
             <div className="flex-1 min-w-[320px] max-w-[750px] flex flex-col">
               <span className="font-bold text-app-primary mb-2 text-center">Current Resume</span>
-              <pre className="w-full text-sm font-mono bg-gray-50 rounded-xl border border-app-accent p-4 whitespace-pre-wrap">{currentResume}</pre>
+              {resume ? (
+                <div className="w-full bg-white border-2 border-app-primary rounded-xl shadow p-6 mb-4">
+                  <div className="mb-4">
+                    <strong>Experience:</strong>
+                    <ul className="list-disc ml-6">
+                      {resume.parsed_data.experience.map((exp, i) => (
+                        <li key={i}>
+                          <strong>{exp.title}</strong> at {exp.company} ({exp.start_date} - {exp.end_date})<br/>
+                          {exp.description && (
+                            <ul className="list-disc ml-6">
+                              {getBullets(exp.description).map((line, j) => (
+                                <li key={j}>{line}</li>
+                              ))}
+                            </ul>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  {resume.parsed_data.leadership && resume.parsed_data.leadership.length > 0 && (
+                    <div className="mb-4">
+                      <strong>Leadership:</strong>
+                      <ul className="list-disc ml-6">
+                        {resume.parsed_data.leadership.map((lead, i) => (
+                          <li key={i}>
+                            <strong>{lead.title}</strong> at {lead.organization} ({lead.start_date} - {lead.end_date})<br/>
+                            {lead.description && (
+                              <ul className="list-disc ml-6">
+                                {getBullets(lead.description).map((line, j) => (
+                                  <li key={j}>{line}</li>
+                                ))}
+                              </ul>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {resume.parsed_data.skills && resume.parsed_data.skills.length > 0 && (
+                    <div className="mb-4">
+                      <strong>Skills:</strong> {resume.parsed_data.skills.join(", ")}
+                    </div>
+                  )}
+                  {resume.parsed_data.certifications && resume.parsed_data.certifications.length > 0 && (
+                    <div className="mb-4">
+                      <strong>Certifications:</strong> {resume.parsed_data.certifications.join(", ")}
+                    </div>
+                  )}
+                  {resume.parsed_data.projects && resume.parsed_data.projects.length > 0 && (
+                    <div className="mb-4">
+                      <strong>Projects:</strong>
+                      <ul className="list-disc ml-6">
+                        {resume.parsed_data.projects.map((proj, i) => (
+                          <li key={i}>
+                            <strong>{proj.name}</strong>: {proj.description && (
+                              <ul className="list-disc ml-6">
+                                {getBullets(proj.description).map((line, j) => (
+                                  <li key={j}>{line}</li>
+                                ))}
+                              </ul>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-gray-500">No resume found.</div>
+              )}
             </div>
+            {/* Tailored Resume - structured display */}
             <div className="flex-1 min-w-[320px] max-w-[750px] flex flex-col">
               <span className="font-bold text-app-primary mb-2 text-center">Tailored Resume</span>
-              <pre className="w-full text-sm font-mono bg-gray-50 rounded-xl border border-app-accent p-4 whitespace-pre-wrap">{tailoredResume}</pre>
+              {tailoredParsed ? (
+                <div className="w-full bg-white border-2 border-app-primary rounded-xl shadow p-6 mb-4">
+                  <div className="mb-4">
+                    <strong>Experience:</strong>
+                    <ul className="list-disc ml-6">
+                      {tailoredParsed.experience && tailoredParsed.experience.map((exp, i) => (
+                        <li key={i}>
+                          <strong>{exp.title}</strong> at {exp.company} ({exp.start_date} - {exp.end_date})<br/>
+                          {exp.description && (
+                            <ul className="list-disc ml-6">
+                              {getBullets(exp.description).map((line, j) => (
+                                <li key={j}>{line}</li>
+                              ))}
+                            </ul>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  {tailoredParsed.projects && tailoredParsed.projects.length > 0 && (
+                    <div className="mb-4">
+                      <strong>Projects:</strong>
+                      <ul className="list-disc ml-6">
+                        {tailoredParsed.projects.map((proj, i) => (
+                          <li key={i}>
+                            <strong>{proj.name}</strong>: {proj.description && (
+                              <ul className="list-disc ml-6">
+                                {getBullets(proj.description).map((line, j) => (
+                                  <li key={j}>{line}</li>
+                                ))}
+                              </ul>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {tailoredParsed.leadership && tailoredParsed.leadership.length > 0 && (
+                    <div className="mb-4">
+                      <strong>Leadership & Involvement:</strong>
+                      <ul className="list-disc ml-6">
+                        {tailoredParsed.leadership.map((lead, i) => (
+                          <li key={i}>
+                            <strong>{lead.title}</strong> at {lead.organization} ({lead.start_date} - {lead.end_date})<br/>
+                            {lead.description && (
+                              <ul className="list-disc ml-6">
+                                {getBullets(lead.description).map((line, j) => (
+                                  <li key={j}>{line}</li>
+                                ))}
+                              </ul>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {tailoredParsed.skills && tailoredParsed.skills.length > 0 && (
+                    <div className="mb-4">
+                      <strong>Technical Skills:</strong> {tailoredParsed.skills.join(", ")}
+                    </div>
+                  )}
+                  {tailoredParsed.certifications && tailoredParsed.certifications.length > 0 && (
+                    <div className="mb-4">
+                      <strong>Certifications:</strong> {tailoredParsed.certifications.join(", ")}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-gray-500">
+                  {tailoredResume ? (
+                    <div className="w-full bg-white border-2 border-app-primary rounded-xl shadow p-6 mb-4">
+                      <h2 className="text-xl font-bold text-app-primary mb-2">Tailored Resume (Raw Format)</h2>
+                      <pre className="whitespace-pre-wrap text-sm">{tailoredResume}</pre>
+                    </div>
+                  ) : (
+                    "No tailored resume generated yet."
+                  )}
+                </div>
+              )}
             </div>
           </div>
+          {/* Export buttons (existing) */}
           <div className="flex gap-4 mt-4 justify-center w-full">
             <button
               onClick={() => handleExport("pdf")}
