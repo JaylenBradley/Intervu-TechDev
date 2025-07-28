@@ -1,11 +1,15 @@
 const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
-export async function searchUsers(currentUserId, searchTerm = "", limit = 20) {
+export async function searchUsers(currentUserId, searchTerm = "", careerGoal = "", limit = 20) {
   const params = new URLSearchParams({
     current_user_id: currentUserId,
     search_term: searchTerm,
     limit: limit
   });
+  
+  if (careerGoal) {
+    params.append('career_goal', careerGoal);
+  }
   
   const res = await fetch(`${BASE_URL}/api/users/search?${params}`);
   if (!res.ok) throw new Error("Failed to search users");
@@ -48,5 +52,11 @@ export async function getFollowing(userId) {
 export async function checkFollowingStatus(followerId, followingId) {
   const res = await fetch(`${BASE_URL}/api/friendship/${followerId}/following/${followingId}`);
   if (!res.ok) throw new Error("Failed to check following status");
+  return res.json();
+}
+
+export async function getAllCareerGoals() {
+  const res = await fetch(`${BASE_URL}/api/career-goals`);
+  if (!res.ok) throw new Error("Failed to fetch career goals");
   return res.json();
 } 

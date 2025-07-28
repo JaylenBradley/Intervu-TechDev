@@ -11,6 +11,8 @@ from app.crud.friendship import (
     is_following
 )
 from app.schemas.user import UserResponse
+from app.models.user import User
+from sqlalchemy import distinct
 
 router = APIRouter()
 
@@ -20,6 +22,23 @@ def get_db():
         yield db
     finally:
         db.close()
+
+@router.get("/career-goals")
+def get_all_career_goals(db: Session = Depends(get_db)):
+    """Get all unique career goals from the database"""
+    try:
+        # Get distinct career goals that are not null or empty
+        career_goals = db.query(distinct(User.career_goal)).filter(
+            User.career_goal.isnot(None),
+            User.career_goal != ""
+        ).all()
+        
+        # Extract the career goals from the result
+        goals = [goal[0] for goal in career_goals if goal[0]]
+        
+        return {"career_goals": goals}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch career goals: {str(e)}")
 
 @router.post("/friendship", response_model=FriendshipResponse)
 def follow_user(friendship: FriendshipCreate, db: Session = Depends(get_db)):
@@ -45,12 +64,13 @@ def unfollow_user(follower_id: int, following_id: int, db: Session = Depends(get
 def search_users_endpoint(
     current_user_id: int = Query(..., description="Current user ID"),
     search_term: str = Query("", description="Search term for username or name"),
+    career_goal: str = Query("", description="Filter by career goal"),
     limit: int = Query(20, description="Maximum number of results")
 ):
     """Search for users to follow"""
     db = next(get_db())
     try:
-        return search_users(db, current_user_id, search_term, limit)
+        return search_users(db, current_user_id, search_term, career_goal, limit)
     finally:
         db.close()
 

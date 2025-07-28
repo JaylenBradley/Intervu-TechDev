@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { searchUsers, followUser, unfollowUser } from "../services/friendshipServices";
+import { searchUsers, followUser, unfollowUser, getAllCareerGoals } from "../services/friendshipServices";
 import { useNotification } from "./NotificationProvider";
 import { FaSearch, FaUserPlus, FaUserMinus, FaTimes } from "react-icons/fa";
 
@@ -9,16 +9,33 @@ const UserSearchModal = ({ isOpen, onClose, currentUser, onFriendsUpdated }) => 
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
   const [initialLoading, setInitialLoading] = useState(false);
+  const [selectedCareerGoal, setSelectedCareerGoal] = useState("");
+  const [availableCareerGoals, setAvailableCareerGoals] = useState([]);
+  const [loadingCareerGoals, setLoadingCareerGoals] = useState(false);
   const { showNotification } = useNotification();
 
   useEffect(() => {
     if (isOpen && currentUser?.id) {
       setInitialLoading(true);
+      setSelectedCareerGoal(""); // Reset filter when modal opens
       loadUsers().finally(() => setInitialLoading(false));
+      loadCareerGoals();
     }
   }, [isOpen, currentUser?.id]);
 
-  // Auto-search as user types
+  const loadCareerGoals = async () => {
+    setLoadingCareerGoals(true);
+    try {
+      const data = await getAllCareerGoals();
+      setAvailableCareerGoals(data.career_goals || []);
+    } catch (error) {
+      console.error("Failed to load career goals:", error);
+    } finally {
+      setLoadingCareerGoals(false);
+    }
+  };
+
+  // Auto-search as user types or career goal changes
   useEffect(() => {
     if (!isOpen || !currentUser?.id) return;
     
@@ -27,14 +44,14 @@ const UserSearchModal = ({ isOpen, onClose, currentUser, onFriendsUpdated }) => 
     }, 300); // 300ms delay to avoid too many API calls
     
     return () => clearTimeout(timeoutId);
-  }, [searchTerm, isOpen, currentUser?.id]);
+  }, [searchTerm, selectedCareerGoal, isOpen, currentUser?.id]);
 
   const loadUsers = async (term = "") => {
     if (!currentUser?.id) return;
     
     setSearching(true);
     try {
-      const results = await searchUsers(currentUser.id, term);
+      const results = await searchUsers(currentUser.id, term, selectedCareerGoal);
       setUsers(results);
     } catch (error) {
       showNotification("Failed to load users", "error");
@@ -111,7 +128,7 @@ const UserSearchModal = ({ isOpen, onClose, currentUser, onFriendsUpdated }) => 
           </div>
 
           <div className="mb-4">
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-3">
               <div className="flex-1 relative">
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
@@ -130,6 +147,46 @@ const UserSearchModal = ({ isOpen, onClose, currentUser, onFriendsUpdated }) => 
                 </div>
               )}
             </div>
+            
+            {/* Career Goal Filter */}
+            {!loadingCareerGoals && availableCareerGoals.length > 0 && (
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Career Goal:</label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setSelectedCareerGoal("")}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                      selectedCareerGoal === "" 
+                        ? "bg-app-primary text-white" 
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                  >
+                    All
+                  </button>
+                  {availableCareerGoals.map((goal) => (
+                    <button
+                      key={goal}
+                      onClick={() => setSelectedCareerGoal(goal)}
+                      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                        selectedCareerGoal === goal 
+                          ? "bg-app-primary text-white" 
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
+                    >
+                      {goal}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {loadingCareerGoals && (
+              <div className="mb-3">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-app-primary"></div>
+                  <span className="text-sm">Loading career goals...</span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex-1 overflow-y-auto">
@@ -144,7 +201,9 @@ const UserSearchModal = ({ isOpen, onClose, currentUser, onFriendsUpdated }) => 
               </div>
             ) : (
               <div className="space-y-3">
-                {users.map((user) => (
+                {users
+                  .filter(user => !selectedCareerGoal || user.career_goal === selectedCareerGoal)
+                  .map((user) => (
                   <div key={user.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
                     <div className="flex items-center gap-3">
                       {user.avatar ? (
@@ -158,11 +217,17 @@ const UserSearchModal = ({ isOpen, onClose, currentUser, onFriendsUpdated }) => 
                           {user.username[0].toUpperCase()}
                         </div>
                       )}
-                      <div>
-                        <div className="font-semibold text-gray-900">{user.username}</div>
-                        {user.name && <div className="text-sm text-gray-600">{user.name}</div>}
-                        {user.career_goal && <div className="text-xs text-gray-500">{user.career_goal}</div>}
-                      </div>
+                                              <div>
+                          <div className="font-semibold text-gray-900">{user.username}</div>
+                          {user.name && <div className="text-sm text-gray-600">{user.name}</div>}
+                          {user.career_goal && (
+                            <div className="mt-1">
+                              <span className="inline-block bg-app-accent text-app-primary px-2 py-1 rounded-full text-xs font-medium">
+                                {user.career_goal}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                     </div>
                     <button
                       onClick={() => user.is_following ? handleUnfollow(user.id) : handleFollow(user.id)}

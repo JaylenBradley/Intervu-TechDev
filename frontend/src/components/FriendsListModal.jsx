@@ -74,8 +74,8 @@ const FriendsListModal = ({ isOpen, onClose, currentUser, type = "following" }) 
             ) : (
               <div className="space-y-3">
                 {friends.map((friend) => (
-                  <div key={friend.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                    <div className="flex items-center gap-3">
+                  <div key={friend.id} className="flex items-center p-3 border border-gray-200 rounded-lg">
+                    <div className="flex items-center gap-3 flex-1">
                       {friend.avatar ? (
                         <img
                           src={friend.avatar}
@@ -87,10 +87,14 @@ const FriendsListModal = ({ isOpen, onClose, currentUser, type = "following" }) 
                           {friend.username[0].toUpperCase()}
                         </div>
                       )}
-                      <div>
+                      <div className="flex flex-col gap-1">
                         <div className="font-semibold text-gray-900">{friend.username}</div>
                         {friend.name && <div className="text-sm text-gray-600">{friend.name}</div>}
-                        {friend.career_goal && <div className="text-xs text-gray-500">{friend.career_goal}</div>}
+                        {friend.career_goal && (
+                          <span className="inline-block bg-app-accent text-app-primary px-2 py-1 rounded-full text-xs font-medium w-fit -ml-2">
+                            {friend.career_goal}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

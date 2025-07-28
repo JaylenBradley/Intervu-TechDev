@@ -49,8 +49,8 @@ def get_following(db: Session, user_id: int):
     ).all()
     return following
 
-def search_users(db: Session, current_user_id: int, search_term: str = "", limit: int = 20):
-    """Search for users by username or name"""
+def search_users(db: Session, current_user_id: int, search_term: str = "", career_goal: str = "", limit: int = 20):
+    """Search for users by username or name and optionally filter by career goal"""
     query = db.query(User).filter(User.id != current_user_id)  # Exclude current user
     
     if search_term:
@@ -60,6 +60,9 @@ def search_users(db: Session, current_user_id: int, search_term: str = "", limit
                 User.name.ilike(f"%{search_term}%")
             )
         )
+    
+    if career_goal:
+        query = query.filter(User.career_goal == career_goal)
     
     users = query.limit(limit).all()
     

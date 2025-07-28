@@ -141,15 +141,26 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
               </button>
             )}
           </div>
-          {/* Bio & Education */}
-          <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary flex flex-col gap-2">
-            <div>
-              <span className="font-semibold text-app-primary">Bio:</span>
-              <span className="ml-2 text-gray-700">{profile.bio || "Add a short bio about yourself"}</span>
-            </div>
-            <div>
-              <span className="font-semibold text-app-primary">Education:</span>
-              <span className="ml-2 text-gray-700">{profile.education || "Add your education here"}</span>
+                      {/* Bio & Education */}
+            <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary flex flex-col gap-4">
+              <div>
+                <span className="font-semibold text-app-primary">Bio:</span>
+                <span className="ml-2 text-gray-700">{profile.bio || "Add a short bio about yourself"}</span>
+              </div>
+              <div>
+                <span className="font-semibold text-app-primary">Education:</span>
+                <span className="ml-2 text-gray-700">{profile.education || "Add your education here"}</span>
+              </div>
+              
+              {/* Career Goal Display */}
+              {profile.career_goal && (
+                <div className="flex items-center gap-3 pt-2 border-t border-gray-200">
+                  <span className="font-semibold text-app-primary">Career Goal:</span>
+                  <span className="inline-block bg-app-primary text-white px-3 py-1 rounded-full text-sm font-medium shadow-sm">
+                    {profile.career_goal}
+                  </span>
+                </div>
+              )}
 
               {profile.linkedin && (
                 <div className="mt-4">
@@ -177,11 +188,10 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
                 </div>
               )}
             </div>
-          </div>
         </div>
         {/* Friends List Section */}
         <div className="w-64 flex-shrink-0">
-          <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary">
+          <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary h-full flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <FaUserFriends size={22} className="text-app-primary" />
@@ -236,7 +246,12 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
                               {friend.username[0].toUpperCase()}
                             </div>
                           )}
-                          <span className="text-gray-700 text-sm">{friend.username}</span>
+                          <div className="flex flex-col">
+                            <span className="text-gray-700 text-sm">{friend.username}</span>
+                            {friend.career_goal && (
+                              <span className="text-xs text-gray-500">{friend.career_goal}</span>
+                            )}
+                          </div>
                         </li>
                       ))
                     )}
@@ -280,7 +295,12 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
                               {friend.username[0].toUpperCase()}
                             </div>
                           )}
-                          <span className="text-gray-700 text-sm">{friend.username}</span>
+                          <div className="flex flex-col">
+                            <span className="text-gray-700 text-sm">{friend.username}</span>
+                            {friend.career_goal && (
+                              <span className="text-xs text-gray-500">{friend.career_goal}</span>
+                            )}
+                          </div>
                         </li>
                       ))
                     )}
