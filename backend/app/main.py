@@ -9,7 +9,7 @@ else:
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import behavioral_prep, blind_75, daily_practice, interview, job_application, job_description_roadmap, questionnaire, resume, roadmap, user, videos
+from app.api import behavioral_prep, blind_75, daily_practice, interview, job_application, job_description_roadmap, questionnaire, resume, roadmap, user, videos, friendship
 from app.core.database import Base, engine
 
 app = FastAPI(
@@ -42,6 +42,7 @@ app.include_router(questionnaire.router, prefix="/api", tags=["Questionnaire"])
 app.include_router(resume.router, prefix="/api", tags=["Resume"])
 app.include_router(user.router, prefix="/api", tags=["User"])
 app.include_router(videos.router, prefix="/api", tags=["Videos"])
+app.include_router(friendship.router, prefix="/api", tags=["Friendship"])
 
 @app.on_event("startup")
 def on_startup():

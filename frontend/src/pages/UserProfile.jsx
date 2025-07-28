@@ -1,10 +1,13 @@
 import Modal from "../components/Modal";
+import UserSearchModal from "../components/UserSearchModal";
+import FriendsListModal from "../components/FriendsListModal";
 import { getUser, updateUser, deleteUser} from "../services/userServices";
+import { getFollowers, getFollowing } from "../services/friendshipServices";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
 import { useState } from "react";
-import { FaGithub, FaLinkedin, FaUserFriends } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaUserFriends, FaUserPlus, FaEye } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 
 const dummyFriends = [
@@ -31,14 +34,39 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editData, setEditData] = useState(profile);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [friendsListModalOpen, setFriendsListModalOpen] = useState(false);
+  const [friendsListType, setFriendsListType] = useState("following");
+  const [followers, setFollowers] = useState([]);
+  const [following, setFollowing] = useState([]);
+  const [loadingFriends, setLoadingFriends] = useState(false);
   const navigate = useNavigate();
   const { showNotification } = useNotification();
 
   useEffect(() => {
     if (user?.id) {
       getUser(user.id).then(setProfile);
+      loadFriends();
     }
   }, [user?.id]);
+
+  const loadFriends = async () => {
+    if (!user?.id) return;
+    
+    setLoadingFriends(true);
+    try {
+      const [followersData, followingData] = await Promise.all([
+        getFollowers(user.id),
+        getFollowing(user.id)
+      ]);
+      setFollowers(followersData);
+      setFollowing(followingData);
+    } catch (error) {
+      console.error("Failed to load friends:", error);
+    } finally {
+      setLoadingFriends(false);
+    }
+  };
 
   const handleEditClick = () => {
     setEditData(profile);
@@ -154,21 +182,115 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
         {/* Friends List Section */}
         <div className="w-64 flex-shrink-0">
           <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary">
-            <div className="flex items-center gap-2 mb-4">
-              <FaUserFriends size={22} className="text-app-primary" />
-              <span className="font-bold text-app-primary text-lg">Friends</span>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <FaUserFriends size={22} className="text-app-primary" />
+                <span className="font-bold text-app-primary text-lg">Friends</span>
+              </div>
+              {isCurrentUser && (
+                <button
+                  onClick={() => setSearchModalOpen(true)}
+                  className="btn-primary px-3 py-1 rounded-lg font-semibold text-sm flex items-center gap-1"
+                >
+                  <FaUserPlus size={14} />
+                  Add
+                </button>
+              )}
             </div>
-            <ul className="flex flex-col gap-3">
-              {dummyFriends.map((friend, i) => (
-                <li key={i} className="flex items-center gap-2">
-                  <div className="size-8 rounded-full bg-app-accent flex items-center justify-center text-lg font-bold text-app-primary">
-                    {friend.username[0].toUpperCase()}
+            
+            {loadingFriends ? (
+              <div className="text-center text-gray-500 py-4">Loading...</div>
+            ) : (
+              <>
+                {/* Following Section */}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-gray-700">Following ({following.length})</h4>
+                    {following.length > 0 && (
+                      <button
+                        onClick={() => {
+                          setFriendsListType("following");
+                          setFriendsListModalOpen(true);
+                        }}
+                        className="text-app-primary hover:text-app-primary-dark text-xs font-medium flex items-center gap-1"
+                      >
+                        <FaEye size={12} />
+                        View All
+                      </button>
+                    )}
                   </div>
-                  <span className="text-gray-700">{friend.username}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-4 text-gray-400 text-sm">Friends feature coming soon!</div>
+                  <ul className="flex flex-col gap-2">
+                    {following.length === 0 ? (
+                      <li className="text-gray-400 text-sm">Not following anyone yet</li>
+                    ) : (
+                      following.slice(0, 3).map((friend) => (
+                        <li key={friend.id} className="flex items-center gap-2">
+                          {friend.avatar ? (
+                            <img
+                              src={friend.avatar}
+                              alt={friend.username}
+                              className="size-6 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="size-6 rounded-full bg-app-accent flex items-center justify-center text-sm font-bold text-app-primary">
+                              {friend.username[0].toUpperCase()}
+                            </div>
+                          )}
+                          <span className="text-gray-700 text-sm">{friend.username}</span>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                  {following.length > 3 && (
+                    <div className="text-gray-400 text-xs mt-1">+{following.length - 3} more</div>
+                  )}
+                </div>
+
+                {/* Followers Section */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-gray-700">Followers ({followers.length})</h4>
+                    {followers.length > 0 && (
+                      <button
+                        onClick={() => {
+                          setFriendsListType("followers");
+                          setFriendsListModalOpen(true);
+                        }}
+                        className="text-app-primary hover:text-app-primary-dark text-xs font-medium flex items-center gap-1"
+                      >
+                        <FaEye size={12} />
+                        View All
+                      </button>
+                    )}
+                  </div>
+                  <ul className="flex flex-col gap-2">
+                    {followers.length === 0 ? (
+                      <li className="text-gray-400 text-sm">No followers yet</li>
+                    ) : (
+                      followers.slice(0, 3).map((friend) => (
+                        <li key={friend.id} className="flex items-center gap-2">
+                          {friend.avatar ? (
+                            <img
+                              src={friend.avatar}
+                              alt={friend.username}
+                              className="size-6 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="size-6 rounded-full bg-app-accent flex items-center justify-center text-sm font-bold text-app-primary">
+                              {friend.username[0].toUpperCase()}
+                            </div>
+                          )}
+                          <span className="text-gray-700 text-sm">{friend.username}</span>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                  {followers.length > 3 && (
+                    <div className="text-gray-400 text-xs mt-1">+{followers.length - 3} more</div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -270,6 +392,20 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
         onCancel={() => setDeleteModalOpen(false)}
         confirmText="Delete Account"
         cancelText="Cancel"
+      />
+
+      <UserSearchModal
+        isOpen={searchModalOpen}
+        onClose={() => setSearchModalOpen(false)}
+        currentUser={user}
+        onFriendsUpdated={loadFriends}
+      />
+
+      <FriendsListModal
+        isOpen={friendsListModalOpen}
+        onClose={() => setFriendsListModalOpen(false)}
+        currentUser={user}
+        type={friendsListType}
       />
     </div>
   );
