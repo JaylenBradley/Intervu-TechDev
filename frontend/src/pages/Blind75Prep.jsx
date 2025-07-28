@@ -307,6 +307,7 @@ export default function Blind75Prep({ user }) {
       setCurrent(0);
       resetStatus();
       setUiStep("quiz");
+      scrollToTop(); 
     } catch (err) {
       console.error(err);
       showNotification("Failed to load problems", "error");
