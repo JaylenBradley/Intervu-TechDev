@@ -35,6 +35,10 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
   const { showNotification } = useNotification();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     if (user?.id) {
       getUser(user.id).then(setProfile);
     }
