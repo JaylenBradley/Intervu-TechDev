@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.core.database import SessionLocal
@@ -104,7 +104,10 @@ def patch_user_endpoint(id: int, user: UserUpdate, db: Session = Depends(get_db)
 
 @router.delete("/user/{id}")
 def delete_user_endpoint(id: int, db: Session = Depends(get_db)):
-    success = delete_user(db, id)
+    db_user = get_user(db, id)
+    if not db_user:
+        return Response(status_code=204)
+    success = delete_user(db, id, db_user.firebase_id)
     if not success:
         raise HTTPException(status_code=404, detail="User not found")
     return {"detail": "User deleted"}

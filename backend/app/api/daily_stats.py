@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import SessionLocal
-from app.schemas.daily_practice import DailyStatCreate, DailyStatUpdate, DailyStatResponse, GoalUpdateRequest
-from app.crud.daily_practice import (
+from app.schemas.daily_stats import DailyStatCreate, DailyStatUpdate, DailyStatResponse, GoalUpdateRequest
+from app.crud.daily_stats import (
     get_daily_stat, 
     get_daily_stats_by_user,
     update_daily_stat,

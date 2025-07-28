@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from app.models.daily_practice import DailyStat
-from app.schemas.daily_practice import DailyStatCreate, DailyStatUpdate
+from app.models.daily_stats import DailyStat
+from app.schemas.daily_stats import DailyStatCreate, DailyStatUpdate
 from datetime import date
 
 def create_daily_stat(db: Session, daily_stat: DailyStatCreate):
