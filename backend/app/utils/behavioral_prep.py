@@ -15,7 +15,8 @@ def generate_behavioral_questions(target_role, seniority, company, num_questions
     res = client.models.generate_content(
         model="gemini-2.5-flash",
         config=types.GenerateContentConfig(
-            system_instruction="You are a professional behavioral interview assistant."
+            system_instruction="You are a professional behavioral interview assistant.",
+            temperature=1.2
         ),
         contents=prompt
     )

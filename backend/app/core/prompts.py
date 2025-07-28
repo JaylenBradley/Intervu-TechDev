@@ -1,27 +1,72 @@
 def behavioral_questions_prompt(target_role, seniority, company, num_questions, difficulty):
     return f"""
-    You are an expert behavioral interview assistant.
+    You are an expert behavioral interview assistant with extensive knowledge of diverse interview styles and question formats.
     
     Generate {num_questions} behavioral interview questions for a candidate applying to the role "{target_role}" at "{company}".
     The candidate is at a "{seniority}" level.
     Target difficulty: "{difficulty}" (e.g., easy, medium, hard). Match the complexity of the questions to this level.
     
-    Include a mix of STAR-based questions and hypothetical scenario questions.
+    CRITICAL VARIATION REQUIREMENTS:
+    - DO NOT start with the same question types every time
+    - Mix up the opening questions - don't always lead with technical challenges
+    - Vary between STAR format questions, hypothetical scenarios, opinion-based questions, and situational judgment questions
+    - Include unexpected angles and creative question formats
+    - Randomize the order and style of questions significantly
+    - Include both common and uncommon behavioral question types
+    
+    QUESTION CATEGORIES TO RANDOMLY MIX:
+    - Technical problem-solving and debugging
+    - Leadership and team dynamics
+    - Communication and collaboration
+    - Conflict resolution and difficult conversations
+    - Innovation and creative thinking
+    - Time management and prioritization
+    - Learning and adaptability
+    - Failure and resilience
+    - Ethics and decision-making
+    - Customer/stakeholder interaction
+    - Process improvement and efficiency
+    - Mentoring and knowledge sharing
+    - Risk management and trade-offs
+    - Cultural fit and values alignment
+    - Career motivation and growth
+    
+    QUESTION FORMATS TO VARY:
+    - "Tell me about a time when..." (classic STAR)
+    - "How would you handle..." (hypothetical)
+    - "What would you do if..." (scenario-based)
+    - "Describe a situation where..." (story-based)
+    - "Give me an example of..." (evidence-based)
+    - "Walk me through..." (process-focused)
+    - "What's your approach to..." (methodology)
+    - "How do you typically..." (behavioral patterns)
     
     The questions should be:
-    - Customized to reflect the expected skills, challenges, and behavioral traits of this role.
-    - Appropriate for the candidate’s seniority and discipline/team based on the role title.
-    - Focused on the kinds of situations and decisions relevant to the company’s domain and work culture.
-    - If known, reflect realistic company values or team dynamics (collaboration, innovation, customer obsession, etc.). Do not invent values—only use public/common patterns. If unsure, default to general workplace scenarios.
+    - Highly varied in structure, topic, and approach
+    - Customized to reflect the expected skills, challenges, and behavioral traits of this role
+    - Appropriate for the candidate's seniority and discipline/team based on the role title
+    - Focused on the kinds of situations and decisions relevant to the company's domain and work culture
+    - If known, reflect realistic company values or team dynamics (collaboration, innovation, customer obsession, etc.). Do not invent values—only use public/common patterns. If unsure, default to general workplace scenarios
+    - RANDOMIZED in order - don't follow predictable patterns
+    
+    AVOID REPETITIVE PATTERNS:
+    - Don't always start with technical questions for technical roles
+    - Don't follow the same question sequence
+    - Mix difficulty levels throughout, not in order
+    - Vary question length and complexity
+    - Include some unexpected but relevant angles
     
     Only return a numbered JSON array of strings like:
     [
-      "Tell me about a time you led a team through a difficult project.",
-      "How would you handle pushback on a technical decision from a senior colleague?"
+      "What motivates you most when working on a team project?",
+      "Tell me about a time you had to learn a completely new technology under a tight deadline.",
+      "How would you approach a situation where you disagree with your manager's technical decision?"
     ]
     
     Do not include any extra commentary, explanations, formatting, or markdown. Ensure output is valid JSON.
+    Be creative and unpredictable while staying professionally relevant.
     """
+
 
 def behavioral_feedback_prompt(target_role, seniority, company, question, answer, difficulty):
     return f"""
