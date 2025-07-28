@@ -99,7 +99,7 @@ return (
                     resetTimer();
                   }
                 }}
-                className="w-4 h-4 text-app-primary bg-gray-100 border-gray-300"
+                className="w-4 h-4 text-app-primary bg-gray-100 border-gray-300 cursor-pointer"
                 style={{ accentColor: 'var(--primary)' }}
               />
               <span className="text-sm font-medium text-app-text">Timer</span>
@@ -118,7 +118,9 @@ return (
                   {isRunning ? (
                     <button
                       onClick={pauseTimer}
-                      className="px-2 py-1 bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600 transition-colors"
+                      className="
+                          btn-danger px-2 py-1  text-white rounded text-xs
+                          font-medium transition-colors cursor-pointer"
                       title="Pause timer"
                     >
                       ⏸
@@ -126,7 +128,9 @@ return (
                   ) : (
                     <button
                       onClick={startTimer}
-                      className="px-2 py-1 bg-app-primary text-white rounded text-xs font-medium hover:bg-app-primary/90 transition-colors"
+                      className="
+                          px-2 py-1 bg-app-primary text-white rounded text-xs font-medium
+                          hover:bg-app-primary/90 transition-colors cursor-pointer"
                       title="Resume timer"
                     >
                       ▶
@@ -135,7 +139,9 @@ return (
                   
                   <button
                     onClick={resetTimer}
-                    className="px-2 py-1 bg-gray-500 text-white rounded text-xs font-medium hover:bg-gray-600 transition-colors"
+                    className="
+                        px-2 py-1 bg-gray-500 text-white rounded text-xs font-medium
+                      hover:bg-gray-600 transition-colors cursor-pointer"
                     title="Reset timer"
                   >
                     ↻
@@ -151,8 +157,9 @@ return (
         <select
             value={elimMode}
             onChange={(e) => setElimMode(e.target.value)}
-            className="px-4 py-1.5 text-sm font-semibold border rounded-lg
-                                bg-white text-app-text focus:ring-app-primary focus:border-app-primary"
+            className="
+                px-4 py-1.5 text-sm font-semibold border rounded-lg bg-white
+                text-app-text focus:ring-app-primary focus:border-app-primary cursor-pointer"
         >
             <option value="none">Off</option>
             <option value="random">Random N</option>
@@ -182,7 +189,7 @@ return (
                 )
             }
 
-            className="btn-primary px-4 py-1.5 rounded-lg font-semibold"
+            className="btn-primary px-4 py-1.5 rounded-lg font-semibold cursor-pointer"
             >
             Apply
             </button>
@@ -203,7 +210,7 @@ return (
                 <button
                     onClick={handleSubmit}
                     disabled={codeLoading || !codeAnswer.trim()}
-                    className="btn-primary px-6 py-2 rounded-lg font-semibold"
+                    className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
                 >
                     {codeLoading ? "Evaluating…" : "Submit"}
                 </button>
@@ -211,7 +218,7 @@ return (
                 <button
                     onClick={fetchHint}
                     disabled={hintLoading}
-                    className="btn-primary px-6 py-2 rounded-lg font-semibold"
+                    className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
                 >
                     {hintLoading ? "Loading…" : "Need a hint?"}
                 </button>
