@@ -16,6 +16,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@tailwindcss/vite": "^4.1.11",
     "@uiw/react-codemirror": "^4.24.1",
+    "@vercel/analytics": "^1.5.0",
     "axios": "^1.10.0",
     "firebase": "^11.10.0",
     "react": "^19.1.0",
