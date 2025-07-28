@@ -123,7 +123,7 @@ export default function Blind75Prep({ user }) {
       }
       
       setShowCode(true); 
-      scrollToTop(); 
+      setTimeout(scrollToTop, 100); 
       return; 
     }
     
@@ -142,11 +142,11 @@ export default function Blind75Prep({ user }) {
       setCurrent((c) => c + 1);
       setShowCode(false);
       resetStatus();
-      scrollToTop();
+      setTimeout(scrollToTop, 100);
     } else {
       // Last question - go to completion page
       setUiStep("completed");
-      scrollToTop();
+      setTimeout(scrollToTop, 100);
     }
   };
 
