@@ -87,7 +87,7 @@ starlette==0.47.2
 tenacity==8.5.0
 tensorboard==2.18.0
 tensorboard-data-server==0.7.2
-torch==2.5.1
+torch==2.6.0
 torchaudio==2.6.0
 torchvision==0.20.1
 typing-inspection==0.4.1
