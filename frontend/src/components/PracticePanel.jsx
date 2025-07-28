@@ -91,7 +91,7 @@ const borderSpace =
           value={approachSel}
           onChange={(e) => setApproachSel(e.target.value)}
           onFocus={() => setStatusA(null)}                  
-        className={`w-full md:w-64 px-3 py-2 border ${borderA} rounded-lg
+        className={`w-full md:w-67 px-3 py-2 border ${borderA} rounded-lg
                      bg-app-background text-app-text focus:outline-none`}
         >
           <option value="">-- select --</option>
