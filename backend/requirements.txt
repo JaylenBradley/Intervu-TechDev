@@ -89,7 +89,7 @@ tensorboard==2.18.0
 tensorboard-data-server==0.7.2
 torch==2.6.0
 torchaudio==2.6.0
-torchvision==0.20.1
+torchvision==0.21.0
 typing-inspection==0.4.1
 typing_extensions==4.14.0
 tzdata==2025.2
