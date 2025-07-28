@@ -162,6 +162,17 @@ export default function ConfigBlind75({
                 </button>
               </div>
 
+                {/* Instructions */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                  <p className="text-sm text-blue-800 font-medium mb-2">How it works:</p>
+                  <ul className="text-xs text-blue-700 space-y-1">
+                    <li><strong>Off:</strong> Shows only the first 2 lines of the solution</li>
+                    <li><strong>Random N:</strong> Randomly removes N lines and replaces them with "# Type answer here"</li>
+                    <li><strong>Last N:</strong> Removes the last N lines and replaces them with "# Type answer here"</li>
+                  </ul>
+               
+                </div>
+
               {/* auto‑blank */}
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                 <label className="block font-medium text-app-text mb-2">
