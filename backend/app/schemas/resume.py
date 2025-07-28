@@ -25,8 +25,15 @@ class ResumeResponse(ResumeBase):
 class ResumeImproveResponse(BaseModel):
     improved_resume: str
 
+class ResumeFeedbackItem(BaseModel):
+    original: str
+    grade: str
+    feedback: str
+    options: list[str]
+
 class ResumeFeedbackResponse(BaseModel):
     feedback: str
+    structured_feedback: list[ResumeFeedbackItem] = []
 
 class ResumeTailorRequest(BaseModel):
     user_id: int
