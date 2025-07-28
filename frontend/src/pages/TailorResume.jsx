@@ -1,3 +1,4 @@
+import ResumePageLayout from "../components/ResumePageLayout";
 import { useState, useRef, useEffect } from "react";
 import { tailorResumeToJobDescription, fetchUserResume, exportTailoredResume } from "../services/resumeServices";
 import { useNavigate } from "react-router-dom";

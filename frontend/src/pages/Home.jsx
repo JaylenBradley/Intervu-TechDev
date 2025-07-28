@@ -83,11 +83,11 @@ const Home = ({ user, questionnaireComplete, hasRoadmap }) => {
     <div className="min-h-screen flex flex-col items-center">
       <section className="w-full flex flex-col items-center justify-center mt-20 mb-12">
         <img src={intervuLogo} alt="Intervu Logo" className="h-40 mb-4 mx-auto" />
-        <h1 className="text-5xl font-bold text-app-primary mb-2">
+        <h1 className="text-5xl font-bold text-app-text mb-2">
           Welcome to Intervu{user ? `, ${user.username}` : ""}
         </h1>
         <p className="text-2xl text-app-text mb-4 font-medium">
-          Your AI-powered career planning and interview platform
+          Your ai-powered career planning and interview platform
         </p>
         <button
           className="btn-primary px-8 py-3 text-xl font-semibold rounded-lg mt-2 shadow cursor-pointer"

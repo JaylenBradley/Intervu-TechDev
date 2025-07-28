@@ -11,7 +11,7 @@ const RoadmapMain = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-cyan-300 via-gray-200 to-cyan-300">
+    <div className="min-h-screen flex flex-col items-center">
       <div className="w-full max-w-4xl mt-20 mb-20">
 
         <div className="bg-white rounded-2xl shadow-2xl p-10 mb-12 flex flex-col items-center border border-app-primary">

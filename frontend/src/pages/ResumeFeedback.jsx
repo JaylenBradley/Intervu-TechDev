@@ -1,4 +1,5 @@
-import {useEffect, useState} from "react";
+import ResumePageLayout from "../components/ResumePageLayout";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getResumeFeedbackByUserId } from "../services/resumeServices";
 import { parseFeedback } from "../utils/resumeParser";

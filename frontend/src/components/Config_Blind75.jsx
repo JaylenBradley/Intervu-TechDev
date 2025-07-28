@@ -97,7 +97,7 @@ export default function ConfigBlind75({
               value={numQuestions}
               onChange={(e) => setNumQuestions(+e.target.value)}
               className="w-full px-3 py-2 border border-app-primary rounded-lg
-                         bg-app-background focus:outline-none"
+                         bg-app-background focus:outline-none cursor-pointer"
             >
               {[3, 5, 10].map((n) => (
                 <option key={n} value={n}>

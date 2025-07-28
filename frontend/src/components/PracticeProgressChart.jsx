@@ -15,7 +15,7 @@ const PracticeProgressChart = ({ userId }) => {
             .sort((a, b) => new Date(a.date) - new Date(b.date))
             .map(stat => ({
               date: stat.date,
-              "Total Points": stat.answered ? +(stat.score / stat.answered).toFixed(2) : 0,
+              "Average Points": stat.answered ? +(stat.score / stat.answered).toFixed(2) : 0,
             }));
           setHistory(processed);
         } catch (err) {
@@ -43,9 +43,9 @@ const PracticeProgressChart = ({ userId }) => {
         <LineChart data={history}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="date" />
-          <YAxis label={{ value: "Total Points", angle: -90, position: "insideLeft" }} />
+          <YAxis label={{ value: "Average Points", angle: -90, position: "insideLeft" }} />
           <Tooltip />
-          <Line type="monotone" dataKey="Total Points" stroke="#2563eb" strokeWidth={3} dot />
+          <Line type="monotone" dataKey="Average Points" stroke="#2563eb" strokeWidth={3} dot />
         </LineChart>
       </ResponsiveContainer>
     </div>

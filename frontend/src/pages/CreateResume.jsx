@@ -1,3 +1,4 @@
+import ResumePageLayout from "../components/ResumePageLayout";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
