@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react';
 import { auth } from "./services/firebase";
 import { fetchQuestionnaireStatus, getUserByFirebaseId } from "./services/userServices";
 import { fetchRoadmap } from "./services/roadmapServices";
@@ -201,8 +202,9 @@ const App = () => {
         }/>
         <Route path="*" element={<ErrorPage/>}/>
       </Routes>
-      <ScrollToTopButton />
+      <ScrollToTopButton/>
       <Footer/>
+      <Analytics/>
     </NotificationProvider>
   );
 }

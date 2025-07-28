@@ -1,4 +1,4 @@
-# backend/app/schemas/job.py
+# backend/app/schemas/job_application.py
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime

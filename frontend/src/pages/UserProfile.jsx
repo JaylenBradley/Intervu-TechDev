@@ -1,5 +1,10 @@
+import Modal from "../components/Modal";
+import { getUser, updateUser, deleteUser} from "../services/userServices";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useNotification } from "../components/NotificationProvider";
 import { useState } from "react";
-import { FaGithub, FaGlobe, FaInstagram, FaLinkedin, FaTwitter, FaUserFriends } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaUserFriends } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 
 const dummyFriends = [
@@ -16,17 +21,24 @@ const defaultUser = {
   bio: "",
   education: "",
   avatar: "",
-  website: "",
   linkedin: "",
   github: "",
-  instagram: "",
-  twitter: "",
+  career_goal: "",
 };
 
 const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
   const [profile, setProfile] = useState(user);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editData, setEditData] = useState(profile);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const { showNotification } = useNotification();
+
+  useEffect(() => {
+    if (user?.id) {
+      getUser(user.id).then(setProfile);
+    }
+  }, [user?.id]);
 
   const handleEditClick = () => {
     setEditData(profile);
@@ -38,9 +50,24 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
     setEditData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleEditSave = () => {
-    setProfile(editData);
-    setEditModalOpen(false);
+  const handleEditSave = async () => {
+    if (!profile.id) {
+      showNotification("User ID missing. Cannot update profile.", "error");
+      return;
+    }
+    try {
+      const updated = await updateUser(profile.id, editData);
+      setProfile(updated);
+      setEditModalOpen(false);
+      showNotification("Profile updated successfully!", "success");
+    } catch (err) {
+      showNotification("Failed to update profile.", "error");
+    }
+  };
+
+  const formatUrl = url => {
+    if (!url) return "";
+    return url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
   };
 
   return (
@@ -87,46 +114,41 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
             )}
           </div>
           {/* Bio & Education */}
-          <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary flex flex-col gap-4">
+          <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary flex flex-col gap-2">
             <div>
               <span className="font-semibold text-app-primary">Bio:</span>
-              <span className="ml-2 text-gray-700">{profile.bio || "Add a short bio about yourself."}</span>
+              <span className="ml-2 text-gray-700">{profile.bio || "Add a short bio about yourself"}</span>
             </div>
             <div>
               <span className="font-semibold text-app-primary">Education:</span>
-              <span className="ml-2 text-gray-700">{profile.education || "Education info (placeholder)"}</span>
+              <span className="ml-2 text-gray-700">{profile.education || "Add your education here"}</span>
+
+              {profile.linkedin && (
+                <div className="mt-4">
+                  <a
+                    href={formatUrl(profile.linkedin)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-blue-500"
+                  >
+                    <FaLinkedin size={22} /> LinkedIn
+                  </a>
+                </div>
+              )}
+
+              {profile.github && (
+                <div className="mt-2">
+                  <a
+                    href={formatUrl(profile.github)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-gray-800"
+                  >
+                    <FaGithub size={22} /> GitHub
+                  </a>
+                </div>
+              )}
             </div>
-          </div>
-          {/* Social Links */}
-          <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary flex gap-6 items-center">
-            {profile.website && (
-              <a href={profile.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-app-primary">
-                <FaGlobe size={22} /> Website
-              </a>
-            )}
-            {profile.linkedin && (
-              <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-500">
-                <FaLinkedin size={22} /> LinkedIn
-              </a>
-            )}
-            {profile.github && (
-              <a href={profile.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-800">
-                <FaGithub size={22} /> GitHub
-              </a>
-            )}
-            {profile.instagram && (
-              <a href={profile.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-pink-500">
-                <FaInstagram size={22} /> Instagram
-              </a>
-            )}
-            {profile.twitter && (
-              <a href={profile.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-400">
-                <FaTwitter size={22} /> Twitter
-              </a>
-            )}
-            {!profile.website && !profile.linkedin && !profile.github && !profile.instagram && !profile.twitter && (
-              <span className="text-gray-400">No social links added.</span>
-            )}
           </div>
         </div>
         {/* Friends List Section */}
@@ -150,7 +172,7 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
           </div>
         </div>
       </div>
-      {/* Edit Modal */}
+
       {editModalOpen && (
         <>
           <div className="fixed inset-0 z-40 backdrop-blur-sm pointer-events-auto"></div>
@@ -159,62 +181,55 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
               <h3 className="text-xl font-bold mb-4 text-center">Edit Profile</h3>
               <form className="flex flex-col gap-4" onSubmit={e => { e.preventDefault(); handleEditSave(); }}>
                 <input
-                    name="name"
-                    value={editData.name}
-                    onChange={handleEditChange}
-                    placeholder="Full Name"
-                    className="bg-app-background border border-app-primary rounded px-3 py-2"
+                  name="username"
+                  value={editData.username}
+                  onChange={handleEditChange}
+                  placeholder="Username"
+                  className="bg-app-background border border-app-primary rounded px-3 py-2"
                 />
                 <input
-                    name="bio"
-                    value={editData.bio}
-                    onChange={handleEditChange}
-                    placeholder="Bio"
-                    className="bg-app-background border border-app-primary rounded px-3 py-2"
+                  name="name"
+                  value={editData.name}
+                  onChange={handleEditChange}
+                  placeholder="Full Name"
+                  className="bg-app-background border border-app-primary rounded px-3 py-2"
                 />
                 <input
-                    name="education"
-                    value={editData.education}
-                    onChange={handleEditChange}
-                    placeholder="Education"
-                    className="bg-app-background border border-app-primary rounded px-3 py-2"
+                  name="career_goal"
+                  value={editData.career_goal || ""}
+                  onChange={handleEditChange}
+                  placeholder="Career Goal"
+                  className="bg-app-background border border-app-primary rounded px-3 py-2"
                 />
                 <input
-                    name="website"
-                    value={editData.website}
-                    onChange={handleEditChange}
-                    placeholder="Website URL"
-                    className="bg-app-background border border-app-primary rounded px-3 py-2"
+                  name="bio"
+                  value={editData.bio}
+                  onChange={handleEditChange}
+                  placeholder="Bio"
+                  className="bg-app-background border border-app-primary rounded px-3 py-2"
                 />
                 <input
-                    name="linkedin"
-                    value={editData.linkedin}
-                    onChange={handleEditChange}
-                    placeholder="LinkedIn URL"
-                    className="bg-app-background border border-app-primary rounded px-3 py-2"
+                  name="education"
+                  value={editData.education}
+                  onChange={handleEditChange}
+                  placeholder="Education"
+                  className="bg-app-background border border-app-primary rounded px-3 py-2"
                 />
                 <input
-                    name="github"
-                    value={editData.github}
-                    onChange={handleEditChange}
-                    placeholder="GitHub URL"
-                    className="bg-app-background border border-app-primary rounded px-3 py-2"
+                  name="linkedin"
+                  value={editData.linkedin}
+                  onChange={handleEditChange}
+                  placeholder="LinkedIn URL"
+                  className="bg-app-background border border-app-primary rounded px-3 py-2"
                 />
                 <input
-                    name="instagram"
-                    value={editData.instagram}
-                    onChange={handleEditChange}
-                    placeholder="Instagram URL"
-                    className="bg-app-background border-app-primary border rounded px-3 py-2"
+                  name="github"
+                  value={editData.github}
+                  onChange={handleEditChange}
+                  placeholder="GitHub URL"
+                  className="bg-app-background border border-app-primary rounded px-3 py-2"
                 />
-                <input
-                    name="twitter"
-                    value={editData.twitter}
-                    onChange={handleEditChange}
-                    placeholder="Twitter URL"
-                    className="bg-app-background border border-app-primary rounded px-3 py-2"
-                />
-                <div className="flex justify-end gap-2 mt-2">
+                <div className="flex justify-center gap-2 mt-2">
                   <button type="button" className="btn-danger px-4 py-2 rounded-lg font-semibold cursor-pointer" onClick={() => setEditModalOpen(false)}>
                     Cancel
                   </button>
@@ -222,11 +237,40 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
                     Save
                   </button>
                 </div>
+                <div className="flex justify-center">
+                  <button
+                    type="button"
+                    className="btn-danger px-4 py-2 rounded-lg font-semibold cursor-pointer"
+                    onClick={() => setDeleteModalOpen(true)}
+                  >
+                    Delete Account
+                  </button>
+                </div>
               </form>
             </div>
           </div>
         </>
       )}
+
+      <Modal
+        open={deleteModalOpen}
+        message="Are you sure you want to delete your account? This aciton cannot be undone"
+        onConfirm={async () => {
+          try {
+            await deleteUser(profile.id);
+            showNotification("Account deleted.", "success");
+            setDeleteModalOpen(false);
+            navigate("/signup");
+            window.location.reload();
+          } catch {
+            showNotification("Failed to delete account.", "error");
+            setDeleteModalOpen(false);
+          }
+        }}
+        onCancel={() => setDeleteModalOpen(false)}
+        confirmText="Delete Account"
+        cancelText="Cancel"
+      />
     </div>
   );
 };

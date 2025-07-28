@@ -9,7 +9,7 @@ const ErrorPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-app-background">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="bg-app-accent text-app-text border border-app-primary
         p-8 rounded-xl shadow-lg w-full max-w-md flex flex-col items-center"
       >
@@ -20,7 +20,7 @@ const ErrorPage = () => {
           <span className="text-sm text-app-text">— Unknown</span>
         </blockquote>
         <button
-          className="btn btn-primary w-full py-3 rounded-lg font-semibold mt-2"
+          className="btn btn-primary w-full py-3 rounded-lg font-semibold mt-2 cursor-pointer"
           onClick={() => navigate("/")}
         >
           Go Home

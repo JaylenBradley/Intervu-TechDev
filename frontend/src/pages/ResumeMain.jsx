@@ -61,37 +61,6 @@ const ResumeMain = ({ user }) => {
     loadResume();
   }, [user]);
 
-  const handleImproveResume = async () => {
-    setImproving(true);
-    setImproveError("");
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/resume/improve?user_id=${user.id}`
-      );
-      if (!res.ok) throw new Error("Failed to improve resume");
-      const data = await res.json();
-      setImprovedResume(data.improved_resume);
-    } catch (err) {
-      setImproveError("Error improving resume. Please try again.");
-    } finally {
-      setImproving(false);
-    }
-  };
-
-  const handleTailorResume = async () => {
-    setTailorLoading(true);
-    setTailorError("");
-    setTailoredResume("");
-    try {
-      const data = await tailorResumeToJobDescription(user.id, jobDescription);
-      setTailoredResume(data.tailored_resume);
-    } catch (err) {
-      setTailorError("Error tailoring resume. Please try again.");
-    } finally {
-      setTailorLoading(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -108,7 +77,7 @@ const ResumeMain = ({ user }) => {
           <h1 className="text-4xl font-bold text-app-primary">Resume Center</h1>
         </div>
         <p className="text-xl text-app-text text-center font-medium">
-          Build, analyze, and optimize your resume for your target roles and companies.
+          Build, analyze, and optimize your resume for your target roles and companies
         </p>
       </div>
 
@@ -151,6 +120,24 @@ const ResumeMain = ({ user }) => {
                 ))}
               </ul>
             </div>
+            {resume.parsed_data.projects && resume.parsed_data.projects.length > 0 && (
+              <div className="mb-4">
+                <strong>Projects:</strong>
+                <ul className="list-disc ml-6">
+                  {resume.parsed_data.projects.map((proj, i) => (
+                    <li key={i}>
+                      <strong>{proj.name}</strong>: {proj.description && (
+                        <ul className="list-disc ml-6">
+                          {getBullets(proj.description).map((line, j) => (
+                            <li key={j}>{line}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {resume.parsed_data.leadership && resume.parsed_data.leadership.length > 0 && (
               <div className="mb-4">
                 <strong>Leadership:</strong>
@@ -178,24 +165,6 @@ const ResumeMain = ({ user }) => {
             {resume.parsed_data.certifications && resume.parsed_data.certifications.length > 0 && (
               <div className="mb-4">
                 <strong>Certifications:</strong> {resume.parsed_data.certifications.join(", ")}
-              </div>
-            )}
-            {resume.parsed_data.projects && resume.parsed_data.projects.length > 0 && (
-              <div className="mb-4">
-                <strong>Projects:</strong>
-                <ul className="list-disc ml-6">
-                  {resume.parsed_data.projects.map((proj, i) => (
-                    <li key={i}>
-                      <strong>{proj.name}</strong>: {proj.description && (
-                        <ul className="list-disc ml-6">
-                          {getBullets(proj.description).map((line, j) => (
-                            <li key={j}>{line}</li>
-                          ))}
-                        </ul>
-                      )}
-                    </li>
-                  ))}
-                </ul>
               </div>
             )}
           </div>

@@ -83,6 +83,20 @@ const SkillGapRoadmap = ({ user }) => {
         <h2 className="text-3xl font-bold mb-8 text-center text-app-primary">
           Skill Gap Roadmaps
         </h2>
+
+        <div className="mb-6 w-full max-w-2xl mx-auto">
+          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded">
+            <strong>Note:</strong> For best results, please upload your resume before generating a skill gap roadmap.
+            You can upload your resume from the{" "}
+            <button
+              className="underline app-primary-link bg-transparent border-none p-0 m-0 cursor-pointer inline"
+              onClick={() => navigate("/resume")}
+            >
+              Resume Center
+            </button>
+          </div>
+        </div>
+
         {/* Generation Card */}
         <div className="bg-white border border-app-primary rounded-xl shadow-lg p-8 mb-10 flex flex-col items-center">
           <h3 className="text-xl font-semibold mb-4 text-app-primary">Generate a New Roadmap</h3>

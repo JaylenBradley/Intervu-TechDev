@@ -119,7 +119,7 @@ const Navbar = ({ user }) => {
                     type="button"
                     onClick={handleAuthClick}
                   >
-                    Sign Out
+                    Log Out
                   </button>
                 </>
               ) : (

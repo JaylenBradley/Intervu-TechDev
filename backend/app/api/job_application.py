@@ -3,8 +3,8 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
 from typing import List
 from app.core.database import SessionLocal
-from app.schemas.job import JobApplicationCreate, JobApplicationUpdate, JobApplicationResponse
-from app.crud.job import (
+from app.schemas.job_application import JobApplicationCreate, JobApplicationUpdate, JobApplicationResponse
+from app.crud.job_application import (
     create_job_application,
     get_user_applications,
     get_application_by_id,
@@ -16,7 +16,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 import pathlib
-from app.models.job import JobApplication
+from app.models.job_application import JobApplication
 from google.auth.transport.requests import Request as GoogleRequest
 from app.core.config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_PROJECT_ID
 import os
