@@ -13,7 +13,7 @@ import {
 import ConfigBlind75 from "../components/Config_Blind75";
 import { useNotification } from "../components/NotificationProvider";
 
-
+import { useNavigate } from "react-router-dom";
 function useLocalStorage(key, fallback) {
   const [value, setValue] = useState(() => {
     try {
@@ -40,6 +40,7 @@ export default function Blind75Prep({ user }) {
     elimMode       : "none",
     elimCount      : 1,
   });
+  const navigate = useNavigate();
 
   /* ── per‑session / runtime copy ──────────────────────── */
   const [evaluationMode, setEvaluationMode] = useState(savedCfg.evaluationMode);
@@ -134,7 +135,6 @@ export default function Blind75Prep({ user }) {
       } else {
         await updateScore(currentQuestionScore);
       }
-    } else {
     }
     
     if (current < questions.length - 1) {
@@ -143,6 +143,9 @@ export default function Blind75Prep({ user }) {
       resetStatus();
       scrollToTop();
     } else {
+      // Last question - go to completion page
+      setUiStep("completed");
+      scrollToTop();
     }
   };
 
@@ -154,12 +157,13 @@ export default function Blind75Prep({ user }) {
       return; 
     }
     
-
-    
     if (current < questions.length - 1) {
       setCurrent((c) => c + 1);
       setShowCode(false);
       resetStatus();
+      scrollToTop();
+    } else {
+      setUiStep("completed");
       scrollToTop();
     }
   };
@@ -669,6 +673,67 @@ useEffect(() => {
     );
   }
 
+  if (uiStep === "completed") {
+    return (
+      <div className="min-h-screen flex items-center justify-center py-16">
+        <div className="bg-white rounded-xl shadow-lg p-8 text-center max-w-2xl mx-4">
+          <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
+            <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold text-app-primary mb-4">Well Done!</h1>
+          <p className="text-lg text-gray-600 mb-6">
+            You've completed {questions.length} questions! Great work on your practice session.
+          </p>
+          
+          {/* Show current stats */}
+          <div className="bg-gray-50 rounded-xl p-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-app-primary">{currentAnswered}</div>
+                <div className="text-sm text-gray-500">Questions Answered Today</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">▲ {currentStreak}</div>
+                <div className="text-sm text-gray-500">Current Streak</div>
+              </div>
+              <div className="text-center">
+                <div className={`text-2xl font-bold ${currentAnswered >= currentGoal && currentGoal > 0 ? 'text-green-600' : 'text-yellow-600'}`}>
+                  {currentAnswered >= currentGoal && currentGoal > 0 ? '✓' : '•'}
+                </div>
+                <div className="text-sm text-gray-500">
+                  {currentAnswered >= currentGoal && currentGoal > 0 ? 'Goal Met!' : 'Goal Progress'}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <button
+              onClick={() => navigate("/ai-interviewer")}
+              className="w-full bg-app-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-app-primary/90 transition-colors"
+            >
+              Back to Main Menu
+            </button>
+            <button
+              onClick={() => {
+                setUiStep("config");
+                setCurrent(0);
+                setQuestions([]);
+                setShowCode(false);
+                resetStatus();
+              }}
+              className="w-full border-2 border-app-primary text-app-primary py-3 px-6 rounded-lg font-semibold hover:bg-app-primary hover:text-white transition-colors"
+            >
+              Practice More Questions
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (uiStep === "quiz") {
     const q = questions[current];
     const atLastQ = current === questions.length - 1;
@@ -762,6 +827,8 @@ return (
           skip={skip}
           canAdvance={canAdvance()}
           atLastQ={current === questions.length - 1}
+          showCode={showCode}
+          evaluationMode={evaluationMode}
         />
       ) : (
         <PracticePanel
@@ -802,6 +869,8 @@ return (
           skip={skip}
           canAdvance={canAdvance()}
           atLastQ={current === questions.length - 1}
+          showCode={showCode}
+          evaluationMode={evaluationMode}
         />
       )}
 
@@ -809,10 +878,9 @@ return (
       <div className="flex justify-end gap-2">
         <button
           onClick={skip}
-          disabled={atLastQ && showCode}
           className="btn-primary w-full py-2 rounded-lg font-semibold"
         >
-          Skip →
+          {atLastQ && (!evaluationMode || showCode) ? 'Skip Final Question' : 'Skip'} →
         </button>
         <button
           onClick={() => {
@@ -821,7 +889,7 @@ return (
           disabled={!canAdvance()}
           className="btn-primary w-full py-2 rounded-lg font-semibold"
         >
-          Next →
+          {atLastQ && (!evaluationMode || showCode) ? 'Complete' : 'Next'} →
         </button>
       </div>
     </div>
