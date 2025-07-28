@@ -1,3 +1,4 @@
+from firebase_admin import auth
 from sqlalchemy.orm import Session
 from app.models.job_application import JobApplication
 from app.models.questionnaire import Questionnaire
@@ -42,7 +43,12 @@ def update_user(db: Session, id: int, user_data: dict):
     db.refresh(db_user)
     return db_user
 
-def delete_user(db: Session, id: int):
+def delete_user(db: Session, id: int, firebase_id: str):
+    try:
+        auth.delete_user(firebase_id)
+    except Exception as e:
+        pass
+
     db_user = db.query(User).filter(User.id == id).first()
     if not db_user:
         return False

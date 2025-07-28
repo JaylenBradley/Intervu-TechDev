@@ -1,16 +1,25 @@
 import os
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import firebase_admin
+from firebase_admin import credentials
+from app.api import behavioral_prep, blind_75, daily_practice, interview, job_application, job_description_roadmap, questionnaire, resume, roadmap, user, videos
+from app.core.database import Base, engine
 
 # Use the secret path in production, fallback to local path in development
 if os.path.exists("/etc/secrets/google-application-credentials.json"):
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/etc/secrets/google-application-credentials.json"
+    google_creds_path = "/etc/secrets/google-application-credentials.json"
 else:
-    local_path = os.path.join(os.path.dirname(__file__), "../app/gen-lang-client-0080872580-2e4a0982c79c.json")
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = local_path
+    google_creds_path = os.path.join(os.path.dirname(__file__), "../app/gen-lang-client-0080872580-2e4a0982c79c.json")
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = google_creds_path
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from app.api import behavioral_prep, blind_75, daily_practice, interview, job_application, job_description_roadmap, questionnaire, resume, roadmap, user, videos
-from app.core.database import Base, engine
+if os.path.exists("/etc/secrets/firebase-adminsdk.json"):
+    firebase_creds_path = "/etc/secrets/firebase-adminsdk.json"
+else:
+    firebase_creds_path = os.path.join(os.path.dirname(__file__), "../app/intervu-a38a4-firebase-adminsdk-fbsvc-9f7beccfc5.json")
+
+cred = credentials.Certificate(firebase_creds_path)
+firebase_admin.initialize_app(cred)
 
 app = FastAPI(
     title="Intervu API",
