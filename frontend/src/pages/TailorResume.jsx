@@ -48,7 +48,7 @@ const TailorResume = ({ user }) => {
     setExporting(true);
     setExportFormat(format);
     try {
-      const blob = await exportTailoredResume(user.id, format);
+      const blob = await exportTailoredResume(user.id, format, tailoredResume);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;

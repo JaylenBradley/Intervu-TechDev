@@ -193,3 +193,93 @@ async def export_resume(user_id: int, format: str = "pdf", db: Session = Depends
         else:
             raise HTTPException(status_code=400, detail="Invalid format")
         return FileResponse(out_tmp.name, filename=f"improved_resume.{format}")
+
+@router.post("/resume/export-tailored")
+async def export_tailored_resume(user_id: int = Form(...), format: str = Form("pdf"), tailored_resume: str = Form(...), db: Session = Depends(get_db)):
+    # Parse the tailored resume JSON
+    try:
+        tailored_data = json.loads(tailored_resume)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid tailored resume format")
+    
+    # Convert tailored resume data to formatted text
+    formatted_text = format_tailored_resume_to_text(tailored_data)
+    
+    # Export to requested format
+    with tempfile.NamedTemporaryFile(delete=False, suffix=f".{format}") as out_tmp:
+        if format == "pdf":
+            save_text_as_pdf(formatted_text, out_tmp.name)
+        elif format == "docx":
+            save_text_as_docx(formatted_text, out_tmp.name)
+        else:
+            raise HTTPException(status_code=400, detail="Invalid format")
+        return FileResponse(out_tmp.name, filename=f"tailored_resume.{format}")
+
+def format_tailored_resume_to_text(tailored_data: dict) -> str:
+    """Convert tailored resume JSON data to formatted text for export."""
+    text_parts = []
+    
+    # Contact info
+    if tailored_data.get("contact_info"):
+        contact = tailored_data["contact_info"]
+        text_parts.append(f"{contact.get('name', '')}")
+        if contact.get('email'):
+            text_parts.append(f"Email: {contact['email']}")
+        if contact.get('phone'):
+            text_parts.append(f"Phone: {contact['phone']}")
+        text_parts.append("")
+    
+    # Education
+    if tailored_data.get("education"):
+        text_parts.append("EDUCATION")
+        for edu in tailored_data["education"]:
+            text_parts.append(f"{edu.get('degree', '')} - {edu.get('institution', '')}")
+            text_parts.append(f"{edu.get('start_date', '')} - {edu.get('end_date', '')}")
+            text_parts.append("")
+    
+    # Experience
+    if tailored_data.get("experience"):
+        text_parts.append("EXPERIENCE")
+        for exp in tailored_data["experience"]:
+            text_parts.append(f"{exp.get('title', '')} at {exp.get('company', '')}")
+            text_parts.append(f"{exp.get('start_date', '')} - {exp.get('end_date', '')}")
+            if exp.get('description'):
+                for desc in exp['description']:
+                    text_parts.append(f"* {desc}")
+            text_parts.append("")
+    
+    # Leadership
+    if tailored_data.get("leadership"):
+        text_parts.append("LEADERSHIP")
+        for lead in tailored_data["leadership"]:
+            text_parts.append(f"{lead.get('title', '')} at {lead.get('organization', '')}")
+            text_parts.append(f"{lead.get('start_date', '')} - {lead.get('end_date', '')}")
+            if lead.get('description'):
+                for desc in lead['description']:
+                    text_parts.append(f"* {desc}")
+            text_parts.append("")
+    
+    # Projects
+    if tailored_data.get("projects"):
+        text_parts.append("PROJECTS")
+        for proj in tailored_data["projects"]:
+            text_parts.append(f"{proj.get('name', '')}")
+            if proj.get('description'):
+                for desc in proj['description']:
+                    text_parts.append(f"* {desc}")
+            text_parts.append("")
+    
+    # Skills
+    if tailored_data.get("skills"):
+        text_parts.append("SKILLS")
+        text_parts.append(", ".join(tailored_data["skills"]))
+        text_parts.append("")
+    
+    # Certifications
+    if tailored_data.get("certifications"):
+        text_parts.append("CERTIFICATIONS")
+        for cert in tailored_data["certifications"]:
+            text_parts.append(f"* {cert}")
+        text_parts.append("")
+    
+    return "\n".join(text_parts)

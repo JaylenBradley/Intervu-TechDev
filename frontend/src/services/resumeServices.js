@@ -39,8 +39,17 @@ export async function tailorResumeToJobDescription(userId, jobDescription) {
   }, "Failed to tailor resume");
 }
 
-export async function exportTailoredResume(userId, format) {
-  const response = await fetch(`${BASE_URL}/api/resume/export?user_id=${userId}&format=${format}`);
+export async function exportTailoredResume(userId, format, tailoredResume) {
+  const formData = new FormData();
+  formData.append('user_id', userId);
+  formData.append('format', format);
+  formData.append('tailored_resume', tailoredResume);
+  
+  const response = await fetch(`${BASE_URL}/api/resume/export-tailored`, {
+    method: 'POST',
+    body: formData
+  });
+  
   if (!response.ok) {
     throw new Error("Failed to export tailored resume");
   }

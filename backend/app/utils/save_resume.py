@@ -19,10 +19,23 @@ def save_text_as_pdf(text, output_path):
     pdf.add_page()
     pdf.set_font("Times", size=10)
 
-    for raw_line in text.split('\n'):
+    lines = text.split('\n')
+    first_line_processed = False
+    
+    for i, raw_line in enumerate(lines):
         line = raw_line.strip()
         if not line:
             pdf.ln(4)
+            continue
+
+        # Check if this is the first non-empty line (likely the name)
+        if not first_line_processed and line and not line.isupper() and not line.startswith('*'):
+            # This is likely the name - make it bold and larger
+            pdf.set_font("Times", style='B', size=16)
+            pdf.cell(0, 12, line)
+            pdf.ln(12)
+            pdf.set_font("Times", size=10)
+            first_line_processed = True
             continue
 
         # HEADINGS
@@ -84,10 +97,23 @@ def save_text_as_docx(text, output_path):
         text = text.replace(uni, ascii_char)
 
     doc = Document()
-    for raw_line in text.split('\n'):
+    lines = text.split('\n')
+    first_line_processed = False
+    
+    for i, raw_line in enumerate(lines):
         line = raw_line.strip()
         if not line:
             doc.add_paragraph()
+            continue
+
+        # Check if this is the first non-empty line (likely the name)
+        if not first_line_processed and line and not line.isupper() and not line.startswith('*'):
+            # This is likely the name - make it bold and larger
+            p = doc.add_paragraph()
+            run = p.add_run(line)
+            run.bold = True
+            run.font.size = Pt(18)
+            first_line_processed = True
             continue
 
         # HEADINGS
