@@ -1,6 +1,7 @@
 export default function ConfigBlind75({
   showConfig, setShowConfig,
   numQuestions, setNumQuestions,
+  difficulty, setDifficulty,
   evaluationMode, setEvaluationMode,
   elimMode, setElimMode,
   elimCount, setElimCount,
@@ -88,7 +89,7 @@ export default function ConfigBlind75({
           }}
           className="space-y-6"
         >
-          {/* always‑visible field */}
+          {/* always‑visible fields */}
           <div>
             <label className="block mb-1 font-medium text-app-text">
               Number of Questions
@@ -104,6 +105,24 @@ export default function ConfigBlind75({
                   {n}
                 </option>
               ))}
+            </select>
+          </div>
+
+          {/* difficulty filter */}
+          <div>
+            <label className="block mb-1 font-medium text-app-text">
+              Difficulty Level
+            </label>
+            <select
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+              className="w-full px-3 py-2 border border-app-primary rounded-lg
+                         bg-app-background focus:outline-none"
+            >
+              <option value="all">All Difficulties</option>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
             </select>
           </div>
 

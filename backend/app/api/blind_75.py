@@ -22,16 +22,21 @@ def get_db():
 router = APIRouter(prefix="/blind75", tags=["Blind75"])
 
 @router.get("/random", response_model=Problem)
-def get_random_problem(db: Session = Depends(get_db)):
-    count = db.query(func.count(Blind75Problem.id)).scalar()
+def get_random_problem(difficulty: str = None, db: Session = Depends(get_db)):
+    query = db.query(Blind75Problem)
+    
+    if difficulty and difficulty.lower() != "all":
+        query = query.filter(Blind75Problem.difficulty.ilike(f"%{difficulty}%"))
+    
+    count = query.count()
     if count == 0:
         raise HTTPException(
             status_code=500,
-            detail="Problem bank not initialised. POST /blind75/seed first.",
+            detail="Problem bank not initialised or no problems found for the specified difficulty.",
         )
 
     row = (
-        db.query(Blind75Problem)
+        query
         .offset(random.randint(0, count - 1))
         .limit(1)
         .one()

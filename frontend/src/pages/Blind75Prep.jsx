@@ -51,6 +51,7 @@ export default function Blind75Prep({ user }) {
   const [showConfig , setShowConfig ] = useState(false);
   const [uiStep     , setUiStep     ] = useState("config");
   const [numQuestions, setNumQuestions] = useState(3);
+  const [difficulty, setDifficulty] = useState("all");
   const [questions    , setQuestions    ] = useState([]);
   const [current      , setCurrent      ] = useState(0);
   const [showCode     , setShowCode     ] = useState(false);
@@ -291,7 +292,10 @@ export default function Blind75Prep({ user }) {
     try {
       const BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
       const fetchOne = async () => {
-        const r = await fetch(`${BASE}/api/blind75/random`);
+        const url = difficulty === "all" 
+          ? `${BASE}/api/blind75/random`
+          : `${BASE}/api/blind75/random?difficulty=${difficulty}`;
+        const r = await fetch(url);
         if (!r.ok) throw new Error("Bad response");
         return r.json();
       };
@@ -648,6 +652,7 @@ useEffect(() => {
       /* lift state down */
       showConfig={showConfig}       setShowConfig={setShowConfig}
       numQuestions={numQuestions}   setNumQuestions={setNumQuestions}
+      difficulty={difficulty}       setDifficulty={setDifficulty}
       evaluationMode={evaluationMode} setEvaluationMode={setEvaluationMode}
       elimMode={elimMode}           setElimMode={setElimMode}
       elimCount={elimCount}         setElimCount={setElimCount}
