@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { auth } from "../services/firebase.js";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { createUser, getUserByFirebaseId } from "../services/userServices.js";
-import { FcGoogle } from "react-icons/fc";
+import { useNavigate } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
+import { useState } from "react";
+import { FcGoogle } from "react-icons/fc";
 
 const AuthForm = ({ isSignUp }) => {
     const [username, setUsername] = useState("");
@@ -195,10 +195,23 @@ const AuthForm = ({ isSignUp }) => {
                         <button
                           type="button"
                           onClick={isSignUp ? handleSignUp : handleSignIn}
-                          className="w-full font-semibold py-2 rounded-lg btn cursor-pointer"
+                          className="flex items-center justify-center w-full font-semibold py-2 rounded-lg btn cursor-pointer"
                           disabled={loading}
                         >
-                          {isSignUp ? (loading ? "Signing up..." : "Sign up") : (loading ? "Signing in..." : "Sign in")}
+                        {isSignUp
+                          ? (
+                              <>
+                                {loading && <div className="loader-md mr-2"></div>}
+                                {loading ? "Signing up..." : "Sign up"}
+                              </>
+                            )
+                          : (
+                              <>
+                                {loading && <div className="loader-md mr-2"></div>}
+                                {loading ? "Signing in..." : "Sign in"}
+                              </>
+                            )
+                        }
                         </button>
                         <button
                             type="button"

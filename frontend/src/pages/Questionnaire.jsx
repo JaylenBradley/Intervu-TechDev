@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { submitQuestionnaire, fetchQuestionnaire } from "../services/questionnaireServices";
 import { completeQuestionnaire, fetchQuestionnaireStatus } from "../services/userServices";
 import { generateRoadmap } from "../services/roadmapServices";
+import { syncUserProfile } from "../services/userServices";
 
 const initialState = {
   career_goal: "",
@@ -109,6 +110,7 @@ const Questionnaire = ({ onComplete, user }) => {
       if (!wasComplete) {
         await completeQuestionnaire(user.id);
       }
+      await syncUserProfile(user.id);
       onComplete();
       setShowModal(true);
     } catch (err) {
@@ -311,7 +313,7 @@ const Questionnaire = ({ onComplete, user }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full font-semibold py-2 rounded-lg btn mt-4 flex items-center justify-center cursor-pointer"
+            className="flex items-center justify-center w-full font-semibold py-2 rounded-lg btn mt-4 cursor-pointer"
           >
             {loading && <div className="loader-md mr-2"></div>}
             {loading ? "Saving..." : "Save"}

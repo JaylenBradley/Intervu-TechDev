@@ -1,3 +1,8 @@
+import Modal from "../components/Modal";
+import { getUser, updateUser, deleteUser} from "../services/userServices";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useNotification } from "../components/NotificationProvider";
 import { useState } from "react";
 import { FaGithub, FaLinkedin, FaUserFriends } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
@@ -18,12 +23,22 @@ const defaultUser = {
   avatar: "",
   linkedin: "",
   github: "",
+  career_goal: "",
 };
 
 const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
   const [profile, setProfile] = useState(user);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editData, setEditData] = useState(profile);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const { showNotification } = useNotification();
+
+  useEffect(() => {
+    if (user?.id) {
+      getUser(user.id).then(setProfile);
+    }
+  }, [user?.id]);
 
   const handleEditClick = () => {
     setEditData(profile);
@@ -35,9 +50,19 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
     setEditData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleEditSave = () => {
-    setProfile(editData);
-    setEditModalOpen(false);
+  const handleEditSave = async () => {
+    if (!profile.id) {
+      showNotification("User ID missing. Cannot update profile.", "error");
+      return;
+    }
+    try {
+      const updated = await updateUser(profile.id, editData);
+      setProfile(updated);
+      setEditModalOpen(false);
+      showNotification("Profile updated successfully!", "success");
+    } catch (err) {
+      showNotification("Failed to update profile.", "error");
+    }
   };
 
   const formatUrl = url => {
@@ -89,14 +114,14 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
             )}
           </div>
           {/* Bio & Education */}
-          <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary flex flex-col gap-4">
+          <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary flex flex-col gap-2">
             <div>
               <span className="font-semibold text-app-primary">Bio:</span>
-              <span className="ml-2 text-gray-700">{profile.bio || "Add a short bio about yourself."}</span>
+              <span className="ml-2 text-gray-700">{profile.bio || "Add a short bio about yourself"}</span>
             </div>
             <div>
               <span className="font-semibold text-app-primary">Education:</span>
-              <span className="ml-2 text-gray-700">{profile.education || "Education info (placeholder)"}</span>
+              <span className="ml-2 text-gray-700">{profile.education || "Add your education here"}</span>
 
               {profile.linkedin && (
                 <div className="mt-4">
@@ -147,7 +172,7 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
           </div>
         </div>
       </div>
-      {/* Edit Modal */}
+
       {editModalOpen && (
         <>
           <div className="fixed inset-0 z-40 backdrop-blur-sm pointer-events-auto"></div>
@@ -156,41 +181,55 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
               <h3 className="text-xl font-bold mb-4 text-center">Edit Profile</h3>
               <form className="flex flex-col gap-4" onSubmit={e => { e.preventDefault(); handleEditSave(); }}>
                 <input
-                    name="name"
-                    value={editData.name}
-                    onChange={handleEditChange}
-                    placeholder="Full Name"
-                    className="bg-app-background border border-app-primary rounded px-3 py-2"
+                  name="username"
+                  value={editData.username}
+                  onChange={handleEditChange}
+                  placeholder="Username"
+                  className="bg-app-background border border-app-primary rounded px-3 py-2"
                 />
                 <input
-                    name="bio"
-                    value={editData.bio}
-                    onChange={handleEditChange}
-                    placeholder="Bio"
-                    className="bg-app-background border border-app-primary rounded px-3 py-2"
+                  name="name"
+                  value={editData.name}
+                  onChange={handleEditChange}
+                  placeholder="Full Name"
+                  className="bg-app-background border border-app-primary rounded px-3 py-2"
                 />
                 <input
-                    name="education"
-                    value={editData.education}
-                    onChange={handleEditChange}
-                    placeholder="Education"
-                    className="bg-app-background border border-app-primary rounded px-3 py-2"
+                  name="career_goal"
+                  value={editData.career_goal || ""}
+                  onChange={handleEditChange}
+                  placeholder="Career Goal"
+                  className="bg-app-background border border-app-primary rounded px-3 py-2"
                 />
                 <input
-                    name="linkedin"
-                    value={editData.linkedin}
-                    onChange={handleEditChange}
-                    placeholder="LinkedIn URL"
-                    className="bg-app-background border border-app-primary rounded px-3 py-2"
+                  name="bio"
+                  value={editData.bio}
+                  onChange={handleEditChange}
+                  placeholder="Bio"
+                  className="bg-app-background border border-app-primary rounded px-3 py-2"
                 />
                 <input
-                    name="github"
-                    value={editData.github}
-                    onChange={handleEditChange}
-                    placeholder="GitHub URL"
-                    className="bg-app-background border border-app-primary rounded px-3 py-2"
+                  name="education"
+                  value={editData.education}
+                  onChange={handleEditChange}
+                  placeholder="Education"
+                  className="bg-app-background border border-app-primary rounded px-3 py-2"
                 />
-                <div className="flex justify-end gap-2 mt-2">
+                <input
+                  name="linkedin"
+                  value={editData.linkedin}
+                  onChange={handleEditChange}
+                  placeholder="LinkedIn URL"
+                  className="bg-app-background border border-app-primary rounded px-3 py-2"
+                />
+                <input
+                  name="github"
+                  value={editData.github}
+                  onChange={handleEditChange}
+                  placeholder="GitHub URL"
+                  className="bg-app-background border border-app-primary rounded px-3 py-2"
+                />
+                <div className="flex justify-center gap-2 mt-2">
                   <button type="button" className="btn-danger px-4 py-2 rounded-lg font-semibold cursor-pointer" onClick={() => setEditModalOpen(false)}>
                     Cancel
                   </button>
@@ -198,11 +237,40 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
                     Save
                   </button>
                 </div>
+                <div className="flex justify-center">
+                  <button
+                    type="button"
+                    className="btn-danger px-4 py-2 rounded-lg font-semibold cursor-pointer"
+                    onClick={() => setDeleteModalOpen(true)}
+                  >
+                    Delete Account
+                  </button>
+                </div>
               </form>
             </div>
           </div>
         </>
       )}
+
+      <Modal
+        open={deleteModalOpen}
+        message="Are you sure you want to delete your account? This aciton cannot be undone"
+        onConfirm={async () => {
+          try {
+            await deleteUser(profile.id);
+            showNotification("Account deleted.", "success");
+            setDeleteModalOpen(false);
+            navigate("/signup");
+            window.location.reload();
+          } catch {
+            showNotification("Failed to delete account.", "error");
+            setDeleteModalOpen(false);
+          }
+        }}
+        onCancel={() => setDeleteModalOpen(false)}
+        confirmText="Delete Account"
+        cancelText="Cancel"
+      />
     </div>
   );
 };

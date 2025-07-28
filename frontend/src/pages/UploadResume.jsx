@@ -1,6 +1,7 @@
-import React, {useState, useRef, useEffect} from "react";
+import {useState, useRef, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
+import { syncUserProfile } from "../services/userServices";
 
 const UploadResume = ({ user }) => {
   const [file, setFile] = useState(null);
@@ -43,6 +44,7 @@ const UploadResume = ({ user }) => {
         body: formData,
       });
       if (!res.ok) throw new Error("Failed to upload resume");
+      await syncUserProfile(user.id);
       showNotification("Resume uploaded and parsed successfully!", "success");
       navigate("/resume");
     } catch (err) {

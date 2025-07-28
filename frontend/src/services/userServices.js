@@ -10,6 +10,14 @@ export async function createUser(userData) {
   return response.json();
 }
 
+export async function syncUserProfile(userId) {
+  const response = await fetch(`${BASE_URL}/api/user/${userId}/sync-profile`, {
+    method: "POST",
+  });
+  if (!response.ok) throw new Error("Failed to sync profile");
+  return response.json();
+}
+
 export async function getAllUsers() {
   const response = await fetch(`${BASE_URL}/api/users`);
   if (!response.ok) throw new Error("Failed to fetch users");
