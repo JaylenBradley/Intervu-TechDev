@@ -34,7 +34,7 @@ const PracticeProgressChart = ({ userId }) => {
   return (
     <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary mt-3.5">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-app-primary">Practice Progress</h3>
+        <h3 className="text-xl font-bold text-app-primary">Technical Practice Progress</h3>
         <span className="text-lg font-semibold text-app-primary">
           Current Streak: {streak} days
         </span>

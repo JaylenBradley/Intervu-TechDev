@@ -14,7 +14,7 @@ class Questionnaire(Base):
     interests = Column(String)
     institution = Column(String)
     target_companies = Column(String)
-    skills = Column(String)
+    skills = Column(String, nullable=True)
     certifications = Column(String, nullable=True)
     projects = Column(String, nullable=True)
     experience = Column(String, nullable=True)
