@@ -430,7 +430,9 @@ const fetchExplanation = async (answerType) => {
   let orderWrong  = false;
 
   currentLines.forEach((l, idx) => {
-    if (l.userIndent !== l.indentLevel) indentWrong = true;
+    // Treat undefined userIndent as 0 for comparison
+    const userIndent = l.userIndent ?? 0;
+    if (userIndent !== l.indentLevel) indentWrong = true;
     if (l.order       !== idx)          orderWrong  = true;
   });
 
@@ -452,7 +454,10 @@ const fetchExplanation = async (answerType) => {
   setWrongLineIds(
     new Set(
       currentLines
-        .filter((l, idx) => l.userIndent !== l.indentLevel || l.order !== idx)
+        .filter((l, idx) => {
+          const userIndent = l.userIndent ?? 0;
+          return userIndent !== l.indentLevel || l.order !== idx;
+        })
         .map((l) => l.id)
     )
   );}
