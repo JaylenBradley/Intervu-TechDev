@@ -217,17 +217,17 @@ const UserSearchModal = ({ isOpen, onClose, currentUser, onFriendsUpdated }) => 
                           {user.username[0].toUpperCase()}
                         </div>
                       )}
-                                              <div>
+                      <div>
+                        <div className="flex items-center gap-2">
                           <div className="font-semibold text-gray-900">{user.username}</div>
-                          {user.name && <div className="text-sm text-gray-600">{user.name}</div>}
                           {user.career_goal && (
-                            <div className="mt-1">
-                              <span className="inline-block bg-app-accent text-app-primary px-2 py-1 rounded-full text-xs font-medium">
-                                {user.career_goal}
-                              </span>
-                            </div>
+                            <span className="inline-block bg-app-accent text-app-primary px-2 py-1 rounded-full text-xs font-medium">
+                              {user.career_goal}
+                            </span>
                           )}
                         </div>
+                        {user.name && <div className="text-sm text-gray-600">{user.name}</div>}
+                      </div>
                     </div>
                     <button
                       onClick={() => user.is_following ? handleUnfollow(user.id) : handleFollow(user.id)}
