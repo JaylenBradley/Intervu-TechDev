@@ -1,11 +1,7 @@
 import {useState, useRef, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
-<<<<<<< HEAD
-import { syncUserProfile } from "../services/userServices";
-=======
 import { uploadResume } from "../services/resumeServices";
->>>>>>> justin/dev
 
 const UploadResume = ({ user }) => {
   const [file, setFile] = useState(null);
@@ -40,19 +36,7 @@ const UploadResume = ({ user }) => {
     setLoading(true);
     setError("");
     try {
-<<<<<<< HEAD
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("user_id", user.id);
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/resume/upload`, {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) throw new Error("Failed to upload resume");
-      await syncUserProfile(user.id);
-=======
       await uploadResume(user.id, file);
->>>>>>> justin/dev
       showNotification("Resume uploaded and parsed successfully!", "success");
       navigate("/resume");
     } catch (err) {

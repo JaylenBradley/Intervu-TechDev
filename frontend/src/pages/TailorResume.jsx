@@ -237,6 +237,24 @@ const TailorResume = ({ user }) => {
                       ))}
                     </ul>
                   </div>
+                  {resume.parsed_data.projects && resume.parsed_data.projects.length > 0 && (
+                    <div className="mb-4">
+                      <strong>Projects:</strong>
+                      <ul className="list-disc ml-6">
+                        {resume.parsed_data.projects.map((proj, i) => (
+                          <li key={i}>
+                            <strong>{proj.name}</strong>: {proj.description && (
+                              <ul className="list-disc ml-6">
+                                {getBullets(proj.description).map((line, j) => (
+                                  <li key={j}>{line}</li>
+                                ))}
+                              </ul>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                   {resume.parsed_data.leadership && resume.parsed_data.leadership.length > 0 && (
                     <div className="mb-4">
                       <strong>Leadership:</strong>
@@ -264,24 +282,6 @@ const TailorResume = ({ user }) => {
                   {resume.parsed_data.certifications && resume.parsed_data.certifications.length > 0 && (
                     <div className="mb-4">
                       <strong>Certifications:</strong> {resume.parsed_data.certifications.join(", ")}
-                    </div>
-                  )}
-                  {resume.parsed_data.projects && resume.parsed_data.projects.length > 0 && (
-                    <div className="mb-4">
-                      <strong>Projects:</strong>
-                      <ul className="list-disc ml-6">
-                        {resume.parsed_data.projects.map((proj, i) => (
-                          <li key={i}>
-                            <strong>{proj.name}</strong>: {proj.description && (
-                              <ul className="list-disc ml-6">
-                                {getBullets(proj.description).map((line, j) => (
-                                  <li key={j}>{line}</li>
-                                ))}
-                              </ul>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                   )}
                 </div>

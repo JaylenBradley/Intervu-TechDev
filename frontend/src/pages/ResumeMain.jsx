@@ -219,30 +219,6 @@ const ResumeMain = ({ user }) => {
                 <strong>Certifications:</strong> {resume.parsed_data.certifications.join(", ")}
               </div>
             )}
-            {resume.parsed_data.projects && resume.parsed_data.projects.length > 0 && (
-              <div className="mb-4">
-                <strong>Projects:</strong>
-                <ul className="list-disc ml-6">
-                  {resume.parsed_data.projects.map((proj, i) => (
-                    <li key={i}>
-                      <strong>{proj.name}</strong>: {proj.description && (
-                        <ul className="list-disc ml-6">
-                          {Array.isArray(proj.description) ? 
-                            proj.description.map((line, j) => (
-                              <li key={j}>{line}</li>
-                            )) :
-                            proj.description.split('\n').map((line, j) => {
-                              const cleanedLine = line.replace(/^[•\-▪\s]+/, '').trim();
-                              return cleanedLine ? <li key={j}>{cleanedLine}</li> : null;
-                            })
-                          }
-                        </ul>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
           <button
             className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer mb-2"
