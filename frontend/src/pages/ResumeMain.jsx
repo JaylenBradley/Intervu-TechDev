@@ -1,28 +1,10 @@
 import { FaFileAlt, FaSearch } from "react-icons/fa";
 import { FaFilePen } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { fetchUserResume } from "../services/resumeServices";
+import { useState, useRef, useEffect } from "react";
+import { fetchUserResume, improveResumeByUserId } from "../services/resumeServices";
 import { tailorResumeToJobDescription } from "../services/resumeServices";
-import { useRef } from "react";
 import Modal from "../components/Modal";
-
-const getBullets = (desc) => {
-  if (!desc) return [];
-  let bullets = desc
-    .split(/\r?\n/)
-    .map(line => line.replace(/^[-•▪\s]+/, '').trim())
-    .filter(Boolean);
-
-  if (bullets.length <= 1) {
-    // Try splitting on period+space, period+capital, or space+common action verb
-    bullets = desc
-      .split(/\. (?=[A-Z])|\.(?=[A-Z])| (?=Led |Implemented |Designed |Built |Created |Developed |Managed |Coordinated |Organized |Produced |Launched |Founded |Started |Initiated |Oversaw |Directed |Supervised |Enhanced |Improved |Increased |Reduced |Streamlined |Automated |Analyzed |Researched |Presented |Taught |Mentored |Tutored |Assisted |Supported |Collaborated )/g)
-      .map(line => line.replace(/^[-•▪\s]+/, '').trim())
-      .filter(Boolean);
-  }
-  return bullets;
-};
 
 const ResumeMain = ({ user }) => {
   const navigate = useNavigate();
@@ -38,6 +20,37 @@ const ResumeMain = ({ user }) => {
   const [showTailor, setShowTailor] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const jobDescRef = useRef();
+
+  // Helper function to parse bullet points from descriptions
+  const getBullets = (desc) => {
+    if (!desc) return [];
+    
+    // If it's already an array, return it directly
+    if (Array.isArray(desc)) {
+      return desc.filter(item => item && item.trim()); // Filter out empty items
+    }
+    
+    // If it's a string, parse it as before
+    if (typeof desc === 'string') {
+      let bullets = desc
+        .split(/\r?\n/)
+        .map(line => line.replace(/^[-\u2022\u25aa\s]+/, '').trim())
+        .filter(Boolean);
+
+      if (bullets.length <= 1) {
+        // Try splitting on period+space, period+capital, or space+common action verb
+        bullets = desc
+          .split(/\. (?=[A-Z])|\.(?=[A-Z])| (?=Led |Implemented |Designed |Built |Created |Developed |Managed |Coordinated |Organized |Produced |Launched |Founded |Started |Initiated |Oversaw |Directed |Supervised |Enhanced |Improved |Increased |Reduced |Streamlined |Automated |Analyzed |Researched |Presented |Taught |Mentored |Tutored |Assisted |Supported |Collaborated )/g)
+          .map(line => line.replace(/^[-\u2022\u25aa\s]+/, '').trim())
+          .filter(Boolean);
+      }
+      return bullets;
+    }
+    
+    // If it's neither array nor string, return empty array
+    console.warn('getBullets received unexpected data type:', typeof desc, desc);
+    return [];
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -60,6 +73,33 @@ const ResumeMain = ({ user }) => {
     };
     loadResume();
   }, [user]);
+
+  const handleImproveResume = async () => {
+    setImproving(true);
+    setImproveError("");
+    try {
+      const data = await improveResumeByUserId(user.id);
+      setImprovedResume(data.improved_resume);
+    } catch (err) {
+      setImproveError("Error improving resume. Please try again.");
+    } finally {
+      setImproving(false);
+    }
+  };
+
+  const handleTailorResume = async () => {
+    setTailorLoading(true);
+    setTailorError("");
+    setTailoredResume("");
+    try {
+      const data = await tailorResumeToJobDescription(user.id, jobDescription);
+      setTailoredResume(data.tailored_resume);
+    } catch (err) {
+      setTailorError("Error tailoring resume. Please try again.");
+    } finally {
+      setTailorLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -111,9 +151,15 @@ const ResumeMain = ({ user }) => {
                     <strong>{exp.title}</strong> at {exp.company} ({exp.start_date} - {exp.end_date})<br/>
                     {exp.description && (
                       <ul className="list-disc ml-6">
-                        {getBullets(exp.description).map((line, j) => (
-                          <li key={j}>{line}</li>
-                        ))}
+                        {Array.isArray(exp.description) ? 
+                          exp.description.map((line, j) => (
+                            <li key={j}>{line}</li>
+                          )) :
+                          exp.description.split('\n').map((line, j) => {
+                            const cleanedLine = line.replace(/^[•\-▪\s]+/, '').trim();
+                            return cleanedLine ? <li key={j}>{cleanedLine}</li> : null;
+                          })
+                        }
                       </ul>
                     )}
                   </li>
@@ -147,9 +193,15 @@ const ResumeMain = ({ user }) => {
                       <strong>{lead.title}</strong> at {lead.organization} ({lead.start_date} - {lead.end_date})<br/>
                       {lead.description && (
                         <ul className="list-disc ml-6">
-                          {getBullets(lead.description).map((line, j) => (
-                            <li key={j}>{line}</li>
-                          ))}
+                          {Array.isArray(lead.description) ? 
+                            lead.description.map((line, j) => (
+                              <li key={j}>{line}</li>
+                            )) :
+                            lead.description.split('\n').map((line, j) => {
+                              const cleanedLine = line.replace(/^[•\-▪\s]+/, '').trim();
+                              return cleanedLine ? <li key={j}>{cleanedLine}</li> : null;
+                            })
+                          }
                         </ul>
                       )}
                     </li>

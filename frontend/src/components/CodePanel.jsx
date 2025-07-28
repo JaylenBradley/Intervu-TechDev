@@ -1,5 +1,6 @@
 import CodeMirror      from "@uiw/react-codemirror";
 import { python }      from "@codemirror/lang-python";
+import { useState, useEffect, useRef } from "react";
 
 export default function CodePanel({
   codeAnswer,
@@ -16,14 +17,134 @@ export default function CodePanel({
   setElimCount,
   buildEliminatedCode,
 }) {
+  const [timerEnabled, setTimerEnabled] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
+  const [timeElapsed, setTimeElapsed] = useState(0);
+  const intervalRef = useRef(null);
+
+  // Format time as MM:SS
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Start timer
+  const startTimer = () => {
+    if (!timerEnabled) return;
+    setIsRunning(true);
+    intervalRef.current = setInterval(() => {
+      setTimeElapsed(prev => prev + 1);
+    }, 1000);
+  };
+
+  // Pause timer
+  const pauseTimer = () => {
+    setIsRunning(false);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  // Reset timer
+  const resetTimer = () => {
+    pauseTimer();
+    setTimeElapsed(0);
+  };
+
+  // Handle submit with timer stop
+  const handleSubmit = () => {
+    if (timerEnabled && isRunning) {
+      pauseTimer();
+    }
+    onSubmit();
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
+
+  // Auto-start timer when enabled
+  useEffect(() => {
+    if (timerEnabled && !isRunning && timeElapsed === 0) {
+      startTimer();
+    }
+  }, [timerEnabled]);
+
 return (
     <>
         {/* editor + actions */}
      
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
-        <label className="font-medium text-app-text block ml-1">
-                Auto‑blank lines in solution
-        </label>
+        <div className="flex justify-between items-center mb-3">
+          <label className="font-medium text-app-text block ml-1">
+                  Auto‑blank lines in solution
+          </label>
+          
+          {/* Timer Section */}
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={timerEnabled}
+                onChange={(e) => {
+                  setTimerEnabled(e.target.checked);
+                  if (!e.target.checked) {
+                    resetTimer();
+                  }
+                }}
+                className="w-4 h-4 text-app-primary bg-gray-100 border-gray-300"
+                style={{ accentColor: 'var(--primary)' }}
+              />
+              <span className="text-sm font-medium text-app-text">Timer</span>
+            </label>
+
+            {timerEnabled && (
+              <div className="flex items-center gap-2">
+                <div className="bg-white border border-gray-300 px-3 py-1 rounded-lg">
+                  <span className="text-lg font-mono font-bold text-app-primary">
+                    {formatTime(timeElapsed)}
+                  </span>
+                </div>
+                <div className={`w-2 h-2 rounded-full ${isRunning ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
+
+                <div className="flex gap-1">
+                  {isRunning ? (
+                    <button
+                      onClick={pauseTimer}
+                      className="px-2 py-1 bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600 transition-colors"
+                      title="Pause timer"
+                    >
+                      ⏸
+                    </button>
+                  ) : (
+                    <button
+                      onClick={startTimer}
+                      className="px-2 py-1 bg-app-primary text-white rounded text-xs font-medium hover:bg-app-primary/90 transition-colors"
+                      title="Resume timer"
+                    >
+                      ▶
+                    </button>
+                  )}
+                  
+                  <button
+                    onClick={resetTimer}
+                    className="px-2 py-1 bg-gray-500 text-white rounded text-xs font-medium hover:bg-gray-600 transition-colors"
+                    title="Reset timer"
+                  >
+                    ↻
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="flex flex-wrap items-center gap-3 mb-3">
             {/* dropdown instead of pill buttons */}
@@ -80,7 +201,7 @@ return (
 
             <div className="flex gap-4 mt-4 flex-wrap" >
                 <button
-                    onClick={onSubmit}
+                    onClick={handleSubmit}
                     disabled={codeLoading || !codeAnswer.trim()}
                     className="btn-primary px-6 py-2 rounded-lg font-semibold"
                 >

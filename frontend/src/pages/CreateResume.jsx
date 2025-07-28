@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
+import { improveResumeByUserId } from "../services/resumeServices";
 
 const CreateResume = ({ user }) => {
   const [improvedResume, setImprovedResume] = useState("");
@@ -19,15 +20,7 @@ const CreateResume = ({ user }) => {
     setImproveError("");
     setImprovedResume("");
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/resume/improve?user_id=${user.id}`
-      );
-      if (!res.ok) {
-        const data = await res.json();
-        setImproveError(data.detail || "Failed to improve resume.");
-        return;
-      }
-      const data = await res.json();
+      const data = await improveResumeByUserId(user.id);
       setImprovedResume(data.improved_resume);
     } catch (err) {
       setImproveError("Error improving resume. Please try again.");
