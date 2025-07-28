@@ -84,13 +84,21 @@ def parse_resume_prompt(resume_text: str) -> str:
     
     {{
       "education": [{{"institution": str, "degree": str, "start_date": str, "end_date": str}}],
-      "experience": [{{"company": str, "title": str, "start_date": str, "end_date": str, "description": str}}],
-      "leadership": [{{"organization": str, "title": str, "start_date": str, "end_date": str, "description": str}}],
+      "experience": [{{"company": str, "title": str, "start_date": str, "end_date": str, "description": [str]}}],
+      "leadership": [{{"organization": str, "title": str, "start_date": str, "end_date": str, "description": [str]}}],
       "certifications": [str],
-      "projects": [{{"name": str, "description": str}}],
+      "projects": [{{"name": str, "description": [str]}}],
       "contact_info": {{"name": str, "email": str, "phone": str}},
       "skills": [str]
     }}
+    
+    CRITICAL INSTRUCTIONS:
+    - For experience, leadership, and project descriptions, break down each achievement into individual bullet points
+    - Each bullet point should be a separate string in the description array
+    - Start each bullet point with a strong action verb
+    - Include specific achievements, technologies used, and measurable results
+    - Do not include bullet symbols (•, -, *) in the text - just the content
+    - Keep each bullet point concise but impactful
     
     If a field is missing, return an empty list or empty string for that field. Do not invent information. Return only the JSON object.
     
@@ -115,46 +123,64 @@ def improve_resume_prompt(resume_text: str) -> str:
 
 def feedback_resume_prompt(resume_text: str) -> str:
     return f"""
-    You are a resume feedback assistant. Analyze this resume and provide feedback ONLY for substantive content.
+    You are a resume feedback assistant. Analyze this resume and provide feedback for INDIVIDUAL bullet points within experience, projects, and leadership sections.
 
-    IMPORTANT RULES:
-    - SKIP these lines (do not output anything for them):
-      * Section headers: "Education, Experience", "Skills", "Projects", "Awards", "Employment History, Career Summary"
-      * Job titles/positions: "Manager", "Assistant, Specialist", "Coordinator", "Director"
-      * Company names and institutions
-      * Project names and titles
-      * Dates and locations
-      * Contact information
-      * Simple statements like "This is a clear entry" orThis is standard formatting"
-    
-    - ONLY analyze these types of lines:
-      * Bullet points with actual achievements (starting with • or -)
-      * Degree descriptions with specific details
-      * Certification descriptions with specific skills
-      * Skills lists with multiple items
-      * Achievement descriptions with quantifiable results
-    
-    - For EVERY substantive line you analyze, you MUST provide:
-      Original: [the line]
-      Feedback:brief evaluation]
-      - Option 1 [improved version]
-      - Option 2: [another improved version]
-    
-    - If a line is a header, title, company, project name, date, location, or simple statement, SKIP IT COMPLETELY.
-    
-    Examples of what to SKIP:
-    - "Education" (section header)
-    - Marketing Manager" (job title)
-    - "Company Name" (company)
-    - "Project Name (project title)
-    -2023224ate range)
-    - "This is a clear entry" (simple statement)
-    
-    Examples of what to ANALYZE:
-    -•Increased sales by 25% through targeted marketing campaigns..." (achievement bullet)
-    - "Bachelor of Science in Business Administration with 30.8(detailed degree)
-    - "Project management, data analysis, customer service" (skills list)
-    
+    CRITICAL INSTRUCTIONS:
+    - You MUST analyze EACH INDIVIDUAL bullet point separately
+    - Look for bullet points that start with •, -, *, or similar symbols
+    - For each bullet point, provide separate feedback
+    - Do NOT group multiple bullet points together
+    - Do NOT analyze section headers, job titles, company names, or dates
+
+    FORMAT FOR EACH BULLET POINT:
+    Original: [exact bullet point text]
+    Grade: [score out of 10] (e.g., "Grade: 7/10")
+    Feedback: [brief evaluation of this specific bullet point]
+    - Option 1: [complete improved version of this bullet point]
+    - Option 2: [complete improved version of this bullet point]
+
+    STRICT GRADING CRITERIA (out of 10):
+    - 10: Perfect - Quantified achievements with specific metrics, strong action verbs, clear measurable impact, industry-relevant keywords
+    - 9: Exceptional - Quantified achievements, strong action verbs, clear impact, some specific metrics
+    - 8: Excellent - Quantified achievements, strong action verbs, clear outcomes, good use of keywords
+    - 7: Very Good - Some quantification, strong action verbs, clear outcomes, minor room for improvement
+    - 6: Good - Basic quantification, good action verbs, clear outcomes, needs more specificity
+    - 5: Average - Some action verbs, vague outcomes, lacks quantification, needs significant improvement
+    - 4: Below Average - Weak action verbs, unclear outcomes, no quantification, poor structure
+    - 3: Poor - Very weak action verbs, no outcomes mentioned, no quantification, unclear impact
+    - 2: Very Poor - No action verbs, no outcomes, no quantification, unclear what was accomplished
+    - 1: Unacceptable - No action verbs, no outcomes, no quantification, no clear purpose or impact
+
+    SPECIFIC EVALUATION CRITERIA:
+    - QUANTIFICATION (30%): Does it include specific numbers, percentages, timeframes, or measurable results?
+    - ACTION VERBS (25%): Does it start with a strong, specific action verb (not "helped", "assisted", "worked on")?
+    - IMPACT/OUTCOME (25%): Does it clearly show what was accomplished or the result achieved?
+    - TECHNICAL DETAIL (20%): Does it include relevant technologies, methodologies, or industry-specific terms?
+
+    WHAT TO ANALYZE:
+    - Individual bullet points from experience sections
+    - Individual bullet points from project descriptions
+    - Individual bullet points from leadership/involvement sections
+    - Individual skills or certifications with specific details
+
+    WHAT TO SKIP:
+    - Section headers (Education, Experience, Skills, etc.)
+    - Job titles and positions
+    - Company names and institutions
+    - Project names and titles
+    - Dates and locations
+    - Contact information
+    - Simple statements without achievements
+
+    IMPORTANT:
+    - Each option must be a complete, standalone bullet point
+    - Do not cut off mid-sentence
+    - Provide exactly 2 options for each bullet point
+    - Be specific and actionable in feedback
+    - Do NOT include any introductory text like "Here's a detailed analysis" or similar phrases
+    - Start directly with the first bullet point analysis
+    - Be harsh but fair - most bullet points should score 4-7, with 8+ being truly exceptional
+
     Resume text:
     {resume_text}
     """
@@ -173,6 +199,15 @@ STRICT RULES:
 - Use clear, concise bullet points and section headings.
 - The tailored resume should be ATS-friendly and factual.
 
+CRITICAL FORMATTING REQUIREMENTS:
+- Each bullet point must be a complete sentence with proper punctuation
+- Start each bullet point with a strong action verb
+- Include specific technologies, methodologies, and measurable results
+- Ensure all bullet points are properly terminated (no incomplete sentences)
+- Use consistent formatting throughout
+- Keep bullet points concise but impactful (1-2 lines max)
+- Emphasize skills and experiences that directly relate to the job requirements
+
 CRITICAL: You MUST return ONLY valid JSON. No markdown, no commentary, no text before or after the JSON. Start with {{ and end with }}.
 
 Job Description:
@@ -185,13 +220,20 @@ Return ONLY valid JSON using this exact schema:
 
 {{
   "education": [{{"institution": str, "degree": str, "start_date": str, "end_date": str}}],
-  "experience": [{{"company": str, "title": str, "start_date": str, "end_date": str, "description": str}}],
-  "leadership": [{{"organization": str, "title": str, "start_date": str, "end_date": str, "description": str}}],
+  "experience": [{{"company": str, "title": str, "start_date": str, "end_date": str, "description": [str]}}],
+  "leadership": [{{"organization": str, "title": str, "start_date": str, "end_date": str, "description": [str]}}],
   "certifications": [str],
-  "projects": [{{"name": str, "description": str}}],
+  "projects": [{{"name": str, "description": [str]}}],
   "contact_info": {{"name": str, "email": str, "phone": str}},
   "skills": [str]
 }}
+
+IMPORTANT FORMATTING NOTES:
+- Each description array should contain complete, well-formatted bullet points
+- Every bullet point should be a complete sentence with proper punctuation
+- Focus on achievements that align with the job requirements
+- Emphasize technical skills, leadership, and quantifiable results
+- Ensure all bullet points are properly terminated
 
 If a field is missing, return an empty list or empty string for that field. Do not invent information. Return only the JSON object.
 

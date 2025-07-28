@@ -1,56 +1,7 @@
 import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
-
-// Helper to parse raw feedback string into structured data
-function parseFeedback(raw) {
-  if (typeof raw !== "string") return [];
-  
-  // Use a more robust regex approach to find all Original: sections
-  const pattern = /Original:\s*([^\n]+)\s*Grade:\s*([^\n]+)\s*Feedback:\s*([^\n]+(?:\n(?!- Option)[^\n]+)*)\s*(- Option 1:[^\n]+(?:\n(?!- Option)[^\n]+)*)\s*(- Option 2:[^\n]+(?:\n(?!Original:)[^\n]+)*)/g;
-  
-  const matches = [...raw.matchAll(pattern)];
-  const pairs = [];
-  
-  for (const match of matches) {
-    const originalText = match[1].trim().replace(/^[•\-]\s*/, '').replace(/^\s*[•\-]\s*/, '').trim();
-    const grade = match[2].trim();
-    const feedback = match[3].trim();
-    const option1 = match[4].replace('- Option 1:', '').trim();
-    const option2 = match[5].replace('- Option 2:', '').trim();
-    
-    // Skip items that are just intro text
-    if (originalText.toLowerCase().includes('detailed analysis') || 
-        originalText.toLowerCase().includes('here\'s') ||
-        originalText.toLowerCase().includes('analysis of')) {
-      continue;
-    }
-    
-         // Clean up options
-     const completeOptions = [];
-     for (const option of [option1, option2]) {
-       const optionText = option.trim();
-       if (optionText.length > 15 && 
-           !optionText.endsWith('...') && 
-           !optionText.endsWith('..') &&
-           !optionText.endsWith('etc') &&
-           !optionText.endsWith('etc.')) {
-         completeOptions.push(optionText);
-       }
-     }
-    
-    if (completeOptions.length >= 2) {
-      pairs.push({
-        original: originalText,
-        grade: grade,
-        feedback: feedback,
-        options: completeOptions
-      });
-    }
-  }
-  
-  console.log("Parsed pairs:", pairs);
-  return pairs;
-}
+import { getResumeFeedbackByUserId } from "../services/resumeServices";
+import { parseFeedback } from "../utils/resumeParser";
 
 const ResumeFeedback = ({ user }) => {
   const [feedback, setFeedback] = useState([]);
@@ -73,9 +24,7 @@ const ResumeFeedback = ({ user }) => {
     setFeedback([]);
     setRawFeedback("");
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/resume/feedback?user_id=${user.id}`);
-      if (!res.ok) throw new Error("Failed to get feedback");
-      const data = await res.json();
+      const data = await getResumeFeedbackByUserId(user.id);
       if (!data.feedback) throw new Error("No feedback received from server");
       
       // Handle structured feedback from backend
@@ -89,19 +38,20 @@ const ResumeFeedback = ({ user }) => {
         console.log("No structured feedback, parsing raw feedback");
         console.log("Raw feedback length:", data.feedback?.length);
         
-        // Try to parse the raw feedback into structured format
-        const parsedFeedback = parseFeedback(data.feedback);
-        if (parsedFeedback.length > 0) {
-          console.log("Successfully parsed raw feedback into structured format:", parsedFeedback);
-          setFeedback(parsedFeedback);
-          setRawFeedback("");
-        } else {
+          // Try to parse the raw feedback into structured format
+          const parsedFeedback = parseFeedback(data.feedback);
+          if (parsedFeedback.length > 0) {
+            console.log("Successfully parsed raw feedback into structured format:", parsedFeedback);
+            setFeedback(parsedFeedback);
+            setRawFeedback("");
+          } else {
           // If parsing fails, show the raw feedback
           console.log("Failed to parse feedback, showing raw feedback");
-          setRawFeedback(data.feedback);
+            setRawFeedback(data.feedback);
         }
       }
     } catch (err) {
+      console.error("Feedback error:", err);
       setError("Error getting feedback. Please try again.");
     } finally {
       setLoading(false);

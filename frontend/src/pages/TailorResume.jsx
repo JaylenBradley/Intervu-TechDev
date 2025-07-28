@@ -68,28 +68,110 @@ const TailorResume = ({ user }) => {
   // Add getBullets function from ResumeMain
   const getBullets = (desc) => {
     if (!desc) return [];
-    let bullets = desc
-      .split(/\r?\n/)
-      .map(line => line.replace(/^[-\u2022\u25aa\s]+/, '').trim())
-      .filter(Boolean);
-
-    if (bullets.length <= 1) {
-      // Try splitting on period+space, period+capital, or space+common action verb
-      bullets = desc
-        .split(/\. (?=[A-Z])|\.(?=[A-Z])| (?=Led |Implemented |Designed |Built |Created |Developed |Managed |Coordinated |Organized |Produced |Launched |Founded |Started |Initiated |Oversaw |Directed |Supervised |Enhanced |Improved |Increased |Reduced |Streamlined |Automated |Analyzed |Researched |Presented |Taught |Mentored |Tutored |Assisted |Supported |Collaborated )/g)
+    
+    // If it's already an array, return it directly
+    if (Array.isArray(desc)) {
+      return desc.filter(item => item && item.trim()); // Filter out empty items
+    }
+    
+    // If it's a string, parse it as before
+    if (typeof desc === 'string') {
+      let bullets = desc
+        .split(/\r?\n/)
         .map(line => line.replace(/^[-\u2022\u25aa\s]+/, '').trim())
         .filter(Boolean);
+
+      if (bullets.length <= 1) {
+        // Try splitting on period+space, period+capital, or space+common action verb
+        bullets = desc
+          .split(/\. (?=[A-Z])|\.(?=[A-Z])| (?=Led |Implemented |Designed |Built |Created |Developed |Managed |Coordinated |Organized |Produced |Launched |Founded |Started |Initiated |Oversaw |Directed |Supervised |Enhanced |Improved |Increased |Reduced |Streamlined |Automated |Analyzed |Researched |Presented |Taught |Mentored |Tutored |Assisted |Supported |Collaborated )/g)
+          .map(line => line.replace(/^[-\u2022\u25aa\s]+/, '').trim())
+          .filter(Boolean);
+      }
+      return bullets;
     }
-    return bullets;
+    
+    // If it's neither array nor string, return empty array
+    console.warn('getBullets received unexpected data type:', typeof desc, desc);
+    return [];
   };
 
-
+  // Helper to validate and clean tailored resume data
+  const cleanTailoredData = (data) => {
+    if (!data) return null;
+    
+    // Clean experience descriptions
+    if (data.experience) {
+      data.experience.forEach(exp => {
+        if (exp.description && Array.isArray(exp.description)) {
+          exp.description = exp.description
+            .filter(item => item && item.trim())
+            .map(item => {
+              // Ensure proper sentence termination
+              let cleaned = item.trim();
+              if (cleaned && !cleaned.endsWith('.') && !cleaned.endsWith('!') && !cleaned.endsWith('?')) {
+                cleaned += '.';
+              }
+              return cleaned;
+            });
+        }
+      });
+    }
+    
+    // Clean leadership descriptions
+    if (data.leadership) {
+      data.leadership.forEach(lead => {
+        if (lead.description && Array.isArray(lead.description)) {
+          lead.description = lead.description
+            .filter(item => item && item.trim())
+            .map(item => {
+              let cleaned = item.trim();
+              if (cleaned && !cleaned.endsWith('.') && !cleaned.endsWith('!') && !cleaned.endsWith('?')) {
+                cleaned += '.';
+              }
+              return cleaned;
+            });
+        }
+      });
+    }
+    
+    // Clean project descriptions
+    if (data.projects) {
+      data.projects.forEach(proj => {
+        if (proj.description && Array.isArray(proj.description)) {
+          proj.description = proj.description
+            .filter(item => item && item.trim())
+            .map(item => {
+              let cleaned = item.trim();
+              if (cleaned && !cleaned.endsWith('.') && !cleaned.endsWith('!') && !cleaned.endsWith('?')) {
+                cleaned += '.';
+              }
+              return cleaned;
+            });
+        }
+      });
+    }
+    
+    return data;
+  };
 
   // Helper to parse tailoredResume as JSON
   let tailoredParsed = null;
   try {
     tailoredParsed = tailoredResume ? JSON.parse(tailoredResume) : null;
+    if (tailoredParsed) {
+      console.log('Tailored resume parsed:', tailoredParsed);
+      // Clean and validate the data
+      tailoredParsed = cleanTailoredData(tailoredParsed);
+      // Debug the structure of experience descriptions
+      if (tailoredParsed.experience) {
+        tailoredParsed.experience.forEach((exp, i) => {
+          console.log(`Experience ${i} description type:`, typeof exp.description, exp.description);
+        });
+      }
+    }
   } catch (e) {
+    console.error('Error parsing tailored resume:', e);
     tailoredParsed = null;
   }
 

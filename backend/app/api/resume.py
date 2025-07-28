@@ -6,12 +6,19 @@ from app.schemas.resume import ResumeImproveResponse, ResumeFeedbackResponse, Re
 from app.crud.resume import upsert_resume, get_resume
 from app.core.prompts import improve_resume_prompt, feedback_resume_prompt, parse_resume_prompt, tailor_resume_prompt
 from app.utils.save_resume import save_text_as_pdf, save_text_as_docx
+from app.utils.resume_parser import parse_feedback_response
 from PyPDF2 import PdfReader
 import os
 import tempfile
 import json
 from google import genai
 from google.genai import types
+
+# Constants
+MAX_TEXT_LENGTH = 30000
+DEFAULT_TEMPERATURE = 0.3
+MAX_TOKENS = 8000
+GEMINI_MODEL = "gemini-2.5-flash"
 
 genai.api_key = os.getenv('GEMINI_API_KEY')
 client = genai.Client(api_key=genai.api_key)
@@ -26,11 +33,66 @@ def get_db():
         db.close()
 
 def extract_text_from_pdf_file(file: UploadFile) -> str:
+    """Extract text from uploaded PDF file."""
     reader = PdfReader(file.file)
     text = ""
     for page in reader.pages:
         text += (page.extract_text() or "") + "\n"
     return text
+
+def extract_text_from_stored_pdf(file_data: bytes) -> str:
+    """Extract text from stored PDF data."""
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        tmp.write(file_data)
+        tmp.flush()
+        tmp_path = tmp.name
+    try:
+        reader = PdfReader(tmp_path)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text() or ""
+        return text
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Resume file is corrupted or not a valid PDF. Please re-upload.")
+
+def get_resume_or_404(user_id: int, db: Session):
+    """Get resume from database or raise 404 if not found."""
+    db_obj = get_resume(db, user_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Resume not found")
+    return db_obj
+
+def call_gemini_api(prompt: str, temperature: float = DEFAULT_TEMPERATURE, max_tokens: int = None) -> str:
+    """Call Gemini API with consistent configuration."""
+    config = types.GenerateContentConfig(temperature=temperature)
+    if max_tokens:
+        config.max_output_tokens = max_tokens
+    
+    response = client.models.generate_content(
+        model=GEMINI_MODEL,
+        config=config,
+        contents=prompt
+    )
+    return response.text
+
+def parse_json_response(response_text: str, error_message: str = "Failed to parse response") -> dict:
+    """Parse JSON response from Gemini with fallback cleaning."""
+    try:
+        return json.loads(response_text)
+    except Exception as e:
+        # Fallback: Try to clean the response and parse again
+        cleaned_response = response_text.strip()
+        # Remove any markdown formatting
+        if cleaned_response.startswith('```json'):
+            cleaned_response = cleaned_response[7:]
+        if cleaned_response.endswith('```'):
+            cleaned_response = cleaned_response[:-3]
+        cleaned_response = cleaned_response.strip()
+        
+        try:
+            return json.loads(cleaned_response)
+        except Exception as e2:
+            raise HTTPException(status_code=500, detail=f"{error_message}: {str(e)}")
 
 @router.post("/resume/upload", response_model=ResumeResponse)
 async def upload_and_parse_resume(
@@ -41,17 +103,13 @@ async def upload_and_parse_resume(
     # Extract text from PDF
     text = extract_text_from_pdf_file(file)
     file.file.seek(0)  # Reset pointer so the full file is saved
+    
     # Parse with Gemini
     prompt = parse_resume_prompt(text)
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        config=types.GenerateContentConfig(temperature=0.0),
-        contents=prompt
-    )
-    try:
-        parsed_data = json.loads(response.text)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to parse resume: {str(e)}")
+    response_text = call_gemini_api(prompt, temperature=0.0)
+    
+    parsed_data = parse_json_response(response_text, "Failed to parse resume")
+    
     # Store in DB
     db_obj = upsert_resume(
         db=db,
@@ -64,204 +122,74 @@ async def upload_and_parse_resume(
 
 @router.get("/resume/me", response_model=ResumeResponse)
 async def get_my_resume(user_id: int, db: Session = Depends(get_db)):
-    db_obj = get_resume(db, user_id)
-    if not db_obj:
-        raise HTTPException(status_code=404, detail="Resume not found")
-    return db_obj
+    return get_resume_or_404(user_id, db)
 
 @router.get("/resume/improve", response_model=ResumeImproveResponse)
 async def improve_resume(user_id: int, db: Session = Depends(get_db)):
-    db_obj = get_resume(db, user_id)
-    if not db_obj:
-        raise HTTPException(status_code=404, detail="Resume not found")
-    import tempfile
-    from PyPDF2 import PdfReader
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-        tmp.write(db_obj.file_data)
-        tmp.flush()
-        tmp_path = tmp.name
-    try:
-        reader = PdfReader(tmp_path)
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text() or ""
-    except Exception as e:
-        raise HTTPException(status_code=400, detail="Resume file is corrupted or not a valid PDF. Please re-upload.")
+    db_obj = get_resume_or_404(user_id, db)
+    
+    text = extract_text_from_stored_pdf(db_obj.file_data)
     prompt = improve_resume_prompt(text)
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        config=types.GenerateContentConfig(temperature=0.3),
-        contents=prompt
-    )
-    return {"improved_resume": response.text}
+    response_text = call_gemini_api(prompt)
+    
+    return {"improved_resume": response_text}
 
 @router.get("/resume/feedback", response_model=ResumeFeedbackResponse)
 async def feedback_resume(user_id: int, db: Session = Depends(get_db)):
-    db_obj = get_resume(db, user_id)
-    if not db_obj:
-        raise HTTPException(status_code=404, detail="Resume not found")
-    import tempfile
-    from PyPDF2 import PdfReader
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-        tmp.write(db_obj.file_data)
-        tmp.flush()
-        tmp_path = tmp.name
-    try:
-        reader = PdfReader(tmp_path)
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text() or ""
-    except Exception as e:
-        raise HTTPException(status_code=400, detail="Resume file is corrupted or not a valid PDF. Please re-upload.")
-    if len(text) > 30000:
-        text = text[:30000]
-    prompt = feedback_resume_prompt(text)
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        config=types.GenerateContentConfig(
-            temperature=0.3,
-            max_output_tokens=8000
-        ),
-        contents=prompt
-    )
+    db_obj = get_resume_or_404(user_id, db)
     
-    # Parse the feedback to extract structured data
-    structured_feedback = parse_feedback_response(response.text)
+    text = extract_text_from_stored_pdf(db_obj.file_data)
+    
+    # Truncate text if too long
+    if len(text) > MAX_TEXT_LENGTH:
+        text = text[:MAX_TEXT_LENGTH]
+    
+    prompt = feedback_resume_prompt(text)
+    response_text = call_gemini_api(prompt, max_tokens=MAX_TOKENS)
+    
+    # Parse the feedback to extract structured data using centralized parser
+    structured_feedback = parse_feedback_response(response_text)
     
     # Add debugging info
-    print(f"Raw feedback length: {len(response.text)}")
+    print(f"Raw feedback length: {len(response_text)}")
     print(f"Structured feedback items: {len(structured_feedback)}")
-    print(f"First few lines of raw feedback: {response.text[:500]}")
+    print(f"First few lines of raw feedback: {response_text[:500]}")
     
     # Debug: Print the structured feedback items
     for i, item in enumerate(structured_feedback):
         print(f"Item {i}: {item}")
     
     return {
-        "feedback": response.text or "",
+        "feedback": response_text or "",
         "structured_feedback": structured_feedback
     }
 
-def parse_feedback_response(feedback_text: str) -> list:
-    """Parse the AI feedback response to extract structured feedback items."""
-    import re
-    
-    if not feedback_text:
-        return []
-    
-    # Use a more robust approach to find all Original: sections
-    pattern = r'Original:\s*([^\n]+)\s*Grade:\s*([^\n]+)\s*Feedback:\s*([^\n]+(?:\n(?!- Option)[^\n]+)*)\s*(- Option 1:[^\n]+(?:\n(?!- Option)[^\n]+)*)\s*(- Option 2:[^\n]+(?:\n(?!Original:)[^\n]+)*)'
-    
-    matches = re.findall(pattern, feedback_text, re.DOTALL)
-    items = []
-    
-    for match in matches:
-        original_text = match[0].strip()
-        grade = match[1].strip()
-        feedback = match[2].strip()
-        option1 = match[3].replace('- Option 1:', '').strip()
-        option2 = match[4].replace('- Option 2:', '').strip()
-        
-        # Remove bullet points from original text
-        original_text = re.sub(r'^[•\-]\s*', '', original_text)
-        original_text = re.sub(r'^\s*[•\-]\s*', '', original_text)
-        original_text = original_text.strip()
-        
-        # Skip items that are just intro text
-        original_lower = original_text.lower()
-        if ('detailed analysis' in original_lower or 
-            'here\'s' in original_lower or
-            'analysis of' in original_lower):
-            continue
-        
-        # Clean up options
-        complete_options = []
-        for option in [option1, option2]:
-            option_text = option.strip()
-            if (len(option_text) > 15 and 
-                not option_text.endswith('...') and 
-                not option_text.endswith('..') and
-                not option_text.endswith('etc') and
-                not option_text.endswith('etc.')):
-                complete_options.append(option_text)
-        
-        if len(complete_options) >= 2:
-            items.append({
-                "original": original_text,
-                "grade": grade,
-                "feedback": feedback,
-                "options": complete_options
-            })
-    
-    return items
-
 @router.post("/resume/tailor", response_model=ResumeTailorResponse)
 async def tailor_resume(request: ResumeTailorRequest, db: Session = Depends(get_db)):
-    db_obj = get_resume(db, request.user_id)
-    if not db_obj:
-        raise HTTPException(status_code=404, detail="Resume not found")
-    import tempfile
-    from PyPDF2 import PdfReader
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-        tmp.write(db_obj.file_data)
-        tmp.flush()
-        tmp_path = tmp.name
-    try:
-        reader = PdfReader(tmp_path)
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text() or ""
-    except Exception as e:
-        raise HTTPException(status_code=400, detail="Resume file is corrupted or not a valid PDF. Please re-upload.")
-    prompt = tailor_resume_prompt(text, request.job_description)
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        config=types.GenerateContentConfig(temperature=0.2),
-        contents=prompt
-    )
+    db_obj = get_resume_or_404(request.user_id, db)
     
-    try:
-        parsed_data = json.loads(response.text)
-    except Exception as e:
-        # Fallback: Try to clean the response and parse again
-        cleaned_response = response.text.strip()
-        # Remove any markdown formatting
-        if cleaned_response.startswith('```json'):
-            cleaned_response = cleaned_response[7:]
-        if cleaned_response.endswith('```'):
-            cleaned_response = cleaned_response[:-3]
-        cleaned_response = cleaned_response.strip()
-        
-        try:
-            parsed_data = json.loads(cleaned_response)
-        except Exception as e2:
-            raise HTTPException(status_code=500, detail=f"Failed to parse tailored resume: {str(e)}")
+    text = extract_text_from_stored_pdf(db_obj.file_data)
+    prompt = tailor_resume_prompt(text, request.job_description)
+    response_text = call_gemini_api(prompt, temperature=0.2)
+    
+    parsed_data = parse_json_response(response_text, "Failed to parse tailored resume")
     
     return {"tailored_resume": json.dumps(parsed_data)}
 
 @router.get("/resume/export")
 async def export_resume(user_id: int, format: str = "pdf", db: Session = Depends(get_db)):
-    db_obj = get_resume(db, user_id)
-    if not db_obj:
-        raise HTTPException(status_code=404, detail="Resume not found")
-    # Use the stored file_data
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-        tmp.write(db_obj.file_data)
-        tmp.flush()
-        reader = PdfReader(tmp.name)
-        text = ""
-        for page in reader.pages:
-            text += (page.extract_text() or "") + "\n"
-    improved = client.models.generate_content(
-        model="gemini-2.5-flash",
-        config=types.GenerateContentConfig(temperature=0.3),
-        contents=improve_resume_prompt(text)
-    ).text
+    db_obj = get_resume_or_404(user_id, db)
+    
+    # Extract text and improve it
+    text = extract_text_from_stored_pdf(db_obj.file_data)
+    improved_text = call_gemini_api(improve_resume_prompt(text))
+    
+    # Export to requested format
     with tempfile.NamedTemporaryFile(delete=False, suffix=f".{format}") as out_tmp:
         if format == "pdf":
-            save_text_as_pdf(improved, out_tmp.name)
+            save_text_as_pdf(improved_text, out_tmp.name)
         elif format == "docx":
-            save_text_as_docx(improved, out_tmp.name)
+            save_text_as_docx(improved_text, out_tmp.name)
         else:
             raise HTTPException(status_code=400, detail="Invalid format")
         return FileResponse(out_tmp.name, filename=f"improved_resume.{format}")
