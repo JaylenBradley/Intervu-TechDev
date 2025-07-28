@@ -1,5 +1,6 @@
 from firebase_admin import auth
 from sqlalchemy.orm import Session
+from app.models.daily_stats import DailyStat
 from app.models.job_application import JobApplication
 from app.models.job_description_roadmap import JobDescriptionRoadmap
 from app.models.questionnaire import Questionnaire

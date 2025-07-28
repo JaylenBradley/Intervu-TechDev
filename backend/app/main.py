@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
@@ -6,17 +7,19 @@ from firebase_admin import credentials
 from app.api import behavioral_prep, blind_75, daily_stats, interview, job_application, job_description_roadmap, questionnaire, resume, roadmap, user, videos
 from app.core.database import Base, engine
 
+load_dotenv()
+
 # Use the secret path in production, fallback to local path in development
 if os.path.exists("/etc/secrets/google-application-credentials.json"):
     google_creds_path = "/etc/secrets/google-application-credentials.json"
 else:
-    google_creds_path = os.path.join(os.path.dirname(__file__), "../app/gen-lang-client-0080872580-2e4a0982c79c.json")
+    google_creds_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = google_creds_path
 
 if os.path.exists("/etc/secrets/firebase-adminsdk.json"):
     firebase_creds_path = "/etc/secrets/firebase-adminsdk.json"
 else:
-    firebase_creds_path = os.path.join(os.path.dirname(__file__), "../app/intervu-a38a4-firebase-adminsdk-fbsvc-9f7beccfc5.json")
+    firebase_creds_path = os.getenv("FIREBASE_CREDENTIALS")
 
 cred = credentials.Certificate(firebase_creds_path)
 firebase_admin.initialize_app(cred)

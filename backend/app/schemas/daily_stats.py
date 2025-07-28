@@ -23,7 +23,7 @@ class GoalUpdateRequest(BaseModel):
     goal: int
 
 class DailyStatResponse(DailyStatBase):
-    id: int
+    id: str
     user_id: int
     date: date
 

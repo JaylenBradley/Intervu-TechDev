@@ -1,4 +1,5 @@
 import Modal from "../components/Modal";
+import PracticeProgressChart from "../components/PracticeProgressChart.jsx";
 import { getUser, updateUser, deleteUser} from "../services/userServices";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -26,10 +27,10 @@ const defaultUser = {
   career_goal: "",
 };
 
-const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
-  const [profile, setProfile] = useState(user);
+const UserProfile = ({ user: initialUser = defaultUser, isCurrentUser = true }) => {
+  const [user, setUser] = useState(initialUser);
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editData, setEditData] = useState(profile);
+  const [editData, setEditData] = useState(initialUser);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const navigate = useNavigate();
   const { showNotification } = useNotification();
@@ -40,12 +41,12 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
 
   useEffect(() => {
     if (user?.id) {
-      getUser(user.id).then(setProfile);
+      getUser(user.id).then(setUser);
     }
   }, [user?.id]);
 
   const handleEditClick = () => {
-    setEditData(profile);
+    setEditData(user);
     setEditModalOpen(true);
   };
 
@@ -55,17 +56,17 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
   };
 
   const handleEditSave = async () => {
-    if (!profile.id) {
-      showNotification("User ID missing. Cannot update profile.", "error");
+    if (!user.id) {
+      showNotification("User ID missing. Cannot update user.", "error");
       return;
     }
     try {
-      const updated = await updateUser(profile.id, editData);
-      setProfile(updated);
+      const updated = await updateUser(user.id, editData);
+      setUser(updated);
       setEditModalOpen(false);
       showNotification("Profile updated successfully!", "success");
     } catch (err) {
-      showNotification("Failed to update profile.", "error");
+      showNotification("Failed to update user.", "error");
     }
   };
 
@@ -82,15 +83,15 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
           {/* Avatar and Basic Info */}
           <div className="flex items-center gap-6">
             <div className="relative">
-              {profile.avatar ? (
+              {user.avatar ? (
                 <img
-                  src={profile.avatar}
+                  src={user.avatar}
                   alt="Avatar"
                   className="size-28 rounded-full border-4 border-app-primary object-cover"
                 />
               ) : (
                 <div className="size-28 rounded-full bg-app-accent border-4 border-app-primary flex items-center justify-center text-5xl font-bold text-app-primary">
-                  {profile.username ? profile.username[0].toUpperCase() : "U"}
+                  {user.username ? user.username[0].toUpperCase() : "U"}
                 </div>
               )}
               {isCurrentUser && (
@@ -104,9 +105,9 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
               )}
             </div>
             <div>
-              <div className="text-3xl font-extrabold text-app-primary">{profile.username}</div>
-              <div className="text-lg text-gray-700">{profile.name || "Full Name (placeholder)"}</div>
-              <div className="text-md text-gray-500">{profile.email || "Email (placeholder)"}</div>
+              <div className="text-3xl font-extrabold text-app-primary">{user.username}</div>
+              <div className="text-lg text-gray-700">{user.name || "Full Name (placeholder)"}</div>
+              <div className="text-md text-gray-500">{user.email || "Email (placeholder)"}</div>
             </div>
             {isCurrentUser && (
               <button
@@ -121,16 +122,16 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
           <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary flex flex-col gap-2">
             <div>
               <span className="font-semibold text-app-primary">Bio:</span>
-              <span className="ml-2 text-gray-700">{profile.bio || "Add a short bio about yourself"}</span>
+              <span className="ml-2 text-gray-700">{user.bio || "Add a short bio about yourself"}</span>
             </div>
             <div>
               <span className="font-semibold text-app-primary">Education:</span>
-              <span className="ml-2 text-gray-700">{profile.education || "Add your education here"}</span>
+              <span className="ml-2 text-gray-700">{user.education || "Add your education here"}</span>
 
-              {profile.linkedin && (
+              {user.linkedin && (
                 <div className="mt-4">
                   <a
-                    href={formatUrl(profile.linkedin)}
+                    href={formatUrl(user.linkedin)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 text-blue-500"
@@ -140,10 +141,10 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
                 </div>
               )}
 
-              {profile.github && (
+              {user.github && (
                 <div className="mt-2">
                   <a
-                    href={formatUrl(profile.github)}
+                    href={formatUrl(user.github)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 text-gray-800"
@@ -154,7 +155,9 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
               )}
             </div>
           </div>
+          <PracticeProgressChart userId={user.id}/>
         </div>
+
         {/* Friends List Section */}
         <div className="w-64 flex-shrink-0">
           <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary">
@@ -261,7 +264,7 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
         message="Are you sure you want to delete your account? This aciton cannot be undone"
         onConfirm={async () => {
           try {
-            await deleteUser(profile.id);
+            await deleteUser(user.id);
             showNotification("Account deleted.", "success");
             setDeleteModalOpen(false);
             navigate("/signup");
