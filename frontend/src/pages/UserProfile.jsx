@@ -426,6 +426,7 @@ const UserProfile = ({ user = defaultUser, isCurrentUser = true }) => {
         onClose={() => setFriendsListModalOpen(false)}
         currentUser={user}
         type={friendsListType}
+        onFriendsUpdated={loadFriends}
       />
     </div>
   );

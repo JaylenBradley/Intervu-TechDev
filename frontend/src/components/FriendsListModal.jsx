@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { getFollowers, getFollowing } from "../services/friendshipServices";
+import { getFollowers, getFollowing, unfollowUser } from "../services/friendshipServices";
 import { useNotification } from "./NotificationProvider";
-import { FaTimes, FaUserFriends, FaUsers } from "react-icons/fa";
+import { FaTimes, FaUserFriends, FaUsers, FaUserMinus } from "react-icons/fa";
 
-const FriendsListModal = ({ isOpen, onClose, currentUser, type = "following" }) => {
+const FriendsListModal = ({ isOpen, onClose, currentUser, type = "following", onFriendsUpdated }) => {
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [unfollowingId, setUnfollowingId] = useState(null);
   const { showNotification } = useNotification();
 
   useEffect(() => {
@@ -36,6 +37,26 @@ const FriendsListModal = ({ isOpen, onClose, currentUser, type = "following" }) 
 
   const getIcon = () => {
     return type === "following" ? <FaUsers size={20} /> : <FaUserFriends size={20} />;
+  };
+
+  const handleUnfollow = async (friendId) => {
+    if (!currentUser?.id) return;
+    
+    setUnfollowingId(friendId);
+    try {
+      await unfollowUser(currentUser.id, friendId);
+      // Remove the user from the list
+      setFriends(prev => prev.filter(friend => friend.id !== friendId));
+      showNotification("User unfollowed successfully!", "success");
+      // Notify parent component to refresh friends list
+      if (onFriendsUpdated) {
+        onFriendsUpdated();
+      }
+    } catch (error) {
+      showNotification("Failed to unfollow user", "error");
+    } finally {
+      setUnfollowingId(null);
+    }
   };
 
   if (!isOpen) return null;
@@ -74,7 +95,7 @@ const FriendsListModal = ({ isOpen, onClose, currentUser, type = "following" }) 
             ) : (
               <div className="space-y-3">
                 {friends.map((friend) => (
-                  <div key={friend.id} className="flex items-center p-3 border border-gray-200 rounded-lg">
+                  <div key={friend.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
                     <div className="flex items-center gap-3 flex-1">
                       {friend.avatar ? (
                         <img
@@ -97,6 +118,20 @@ const FriendsListModal = ({ isOpen, onClose, currentUser, type = "following" }) 
                         )}
                       </div>
                     </div>
+                    {type === "following" && (
+                      <button
+                        onClick={() => handleUnfollow(friend.id)}
+                        disabled={unfollowingId === friend.id}
+                        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        {unfollowingId === friend.id ? (
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-600"></div>
+                        ) : (
+                          <FaUserMinus size={14} />
+                        )}
+                        Unfollow
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
