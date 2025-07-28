@@ -1,7 +1,11 @@
 import {useState, useRef, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
+<<<<<<< HEAD
 import { syncUserProfile } from "../services/userServices";
+=======
+import { uploadResume } from "../services/resumeServices";
+>>>>>>> justin/dev
 
 const UploadResume = ({ user }) => {
   const [file, setFile] = useState(null);
@@ -36,6 +40,7 @@ const UploadResume = ({ user }) => {
     setLoading(true);
     setError("");
     try {
+<<<<<<< HEAD
       const formData = new FormData();
       formData.append("file", file);
       formData.append("user_id", user.id);
@@ -45,6 +50,9 @@ const UploadResume = ({ user }) => {
       });
       if (!res.ok) throw new Error("Failed to upload resume");
       await syncUserProfile(user.id);
+=======
+      await uploadResume(user.id, file);
+>>>>>>> justin/dev
       showNotification("Resume uploaded and parsed successfully!", "success");
       navigate("/resume");
     } catch (err) {
@@ -55,7 +63,7 @@ const UploadResume = ({ user }) => {
   };
 
   return (
-    <div className="min-h-screen bg-app-background flex flex-col items-center justify-center py-20">
+    <div className="min-h-screen bg-gradient-to-br from-white to-app-accent flex flex-col items-center justify-center py-20">
       <div className={`w-full max-w-2xl flex flex-col items-center`}>
         <button
           onClick={() => navigate("/")}
@@ -63,7 +71,7 @@ const UploadResume = ({ user }) => {
         >
           ← Back
         </button>
-        <div className="bg-white rounded-2xl shadow-2xl p-10 w-full flex flex-col items-center border-2 border-app-primary">
+        <div className="bg-app-accent rounded-2xl shadow-2xl p-10 w-full flex flex-col items-center border-2 border-app-primary">
           <h1 className="text-3xl font-extrabold text-app-primary mb-8">Upload Your Resume</h1>
           <input
             type="file"
