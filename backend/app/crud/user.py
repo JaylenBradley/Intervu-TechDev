@@ -1,6 +1,7 @@
 from firebase_admin import auth
 from sqlalchemy.orm import Session
 from app.models.job_application import JobApplication
+from app.models.job_description_roadmap import JobDescriptionRoadmap
 from app.models.questionnaire import Questionnaire
 from app.models.resume import Resume
 from app.models.roadmap import Roadmap
@@ -53,8 +54,11 @@ def delete_user(db: Session, id: int, firebase_id: str):
     if not db_user:
         return False
 
-    db.query(Resume).filter(Resume.user_id == id).delete()
+    db.query(DailyStat).filter(DailyStat.user_id == id).delete()
+    db.query(JobApplication).filter(JobApplication.user_id == id).delete()
+    db.query(JobDescriptionRoadmap).filter(JobDescriptionRoadmap.user_id == id).delete()
     db.query(Questionnaire).filter(Questionnaire.user_id == id).delete()
+    db.query(Resume).filter(Resume.user_id == id).delete()
     db.query(Roadmap).filter(Roadmap.user_id == id).delete()
 
     db.delete(db_user)
