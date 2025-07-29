@@ -2,6 +2,7 @@ import Modal from "../components/Modal";
 import UserSearchModal from "../components/UserSearchModal";
 import FriendsListModal from "../components/FriendsListModal";
 import PracticeProgressChart from "../components/PracticeProgressChart";
+import Leaderboard from "../components/Leaderboard";
 import { getUser, updateUser, deleteUser} from "../services/userServices";
 import { getFollowers, getFollowing } from "../services/friendshipServices";
 import { useEffect } from "react";
@@ -197,6 +198,9 @@ const UserProfile = ({ user: initialUser = defaultUser, isCurrentUser = true }) 
           
           {/* Progress Chart */}
           <PracticeProgressChart userId={user.id} />
+          
+          {/* Leaderboard */}
+          <Leaderboard />
         </div>
 
         {/* Friends List Section */}

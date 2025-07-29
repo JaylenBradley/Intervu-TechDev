@@ -245,7 +245,7 @@ def format_tailored_resume_to_text(tailored_data: dict) -> str:
             text_parts.append(f"{exp.get('start_date', '')} - {exp.get('end_date', '')}")
             if exp.get('description'):
                 for desc in exp['description']:
-                    text_parts.append(f"* {desc}")
+                    text_parts.append(f"• {desc}")
             text_parts.append("")
     
     # Leadership
@@ -256,7 +256,7 @@ def format_tailored_resume_to_text(tailored_data: dict) -> str:
             text_parts.append(f"{lead.get('start_date', '')} - {lead.get('end_date', '')}")
             if lead.get('description'):
                 for desc in lead['description']:
-                    text_parts.append(f"* {desc}")
+                    text_parts.append(f"• {desc}")
             text_parts.append("")
     
     # Projects
@@ -266,7 +266,7 @@ def format_tailored_resume_to_text(tailored_data: dict) -> str:
             text_parts.append(f"{proj.get('name', '')}")
             if proj.get('description'):
                 for desc in proj['description']:
-                    text_parts.append(f"* {desc}")
+                    text_parts.append(f"• {desc}")
             text_parts.append("")
     
     # Skills
@@ -279,7 +279,7 @@ def format_tailored_resume_to_text(tailored_data: dict) -> str:
     if tailored_data.get("certifications"):
         text_parts.append("CERTIFICATIONS")
         for cert in tailored_data["certifications"]:
-            text_parts.append(f"* {cert}")
+            text_parts.append(f"• {cert}")
         text_parts.append("")
     
     return "\n".join(text_parts)

@@ -13,6 +13,10 @@ def save_text_as_pdf(text, output_path):
     }
     for uni, ascii_char in sanitize_map.items():
         text = text.replace(uni, ascii_char)
+    
+    # Remove markdown bold markers and ensure consistent bullet points
+    text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)  # Remove ** ** bold markers
+    text = text.replace('* ', '• ')  # Convert asterisk bullets to proper bullet points
 
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
@@ -47,10 +51,10 @@ def save_text_as_pdf(text, output_path):
             continue
 
         # BULLETS
-        if line.startswith('* '):
+        if line.startswith('* ') or line.startswith('• '):
             bullet_text = line[2:].strip()
             pdf.cell(6)
-            pdf.cell(4, 8, '-')
+            pdf.cell(4, 8, '•')
             parts = BOLD_RE.split(bullet_text)
             if len(parts) > 1:
                 for part in parts:
@@ -95,6 +99,10 @@ def save_text_as_docx(text, output_path):
     }
     for uni, ascii_char in sanitize_map.items():
         text = text.replace(uni, ascii_char)
+    
+    # Remove markdown bold markers and ensure consistent bullet points
+    text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)  # Remove ** ** bold markers
+    text = text.replace('* ', '• ')  # Convert asterisk bullets to proper bullet points
 
     doc = Document()
     lines = text.split('\n')
@@ -125,7 +133,7 @@ def save_text_as_docx(text, output_path):
             continue
 
         # BULLETS
-        if line.startswith('* '):
+        if line.startswith('* ') or line.startswith('• '):
             bullet_text = line[2:].strip()
             p = doc.add_paragraph(style='List Bullet')
             parts = BOLD_RE.split(bullet_text)

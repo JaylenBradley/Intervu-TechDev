@@ -58,6 +58,22 @@ export async function getPracticeHistory(userId, limit = 30) {
   return res.json();
 }
 
+export async function getLeaderboardByStreaks(limit = 10) {
+  const url = new URL(`${BASE_URL}/api/leaderboards/streaks`);
+  url.searchParams.append("limit", limit);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to get streaks leaderboard");
+  return res.json();
+}
+
+export async function getLeaderboardByPoints(limit = 10) {
+  const url = new URL(`${BASE_URL}/api/leaderboards/points`);
+  url.searchParams.append("limit", limit);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to get points leaderboard");
+  return res.json();
+}
+
 export async function getStatsByDate(userId, statDate) {
   const url = new URL(`${BASE_URL}/api/daily-practice/${userId}/${statDate}`);
   const res = await fetch(url);

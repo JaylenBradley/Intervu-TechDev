@@ -58,6 +58,23 @@ const ResumeFeedback = ({ user }) => {
     }
   };
 
+  // Helper function to parse grade and get color
+  const getGradeColor = (gradeText) => {
+    if (!gradeText) return 'bg-gray-100 text-gray-800';
+    
+    // Extract numeric value from grade text (e.g., "7/10" -> 7, "8.5" -> 8.5)
+    const gradeMatch = gradeText.match(/(\d+(?:\.\d+)?)/);
+    if (!gradeMatch) return 'bg-gray-100 text-gray-800';
+    
+    const grade = parseFloat(gradeMatch[1]);
+    
+    if (grade >= 9) return 'bg-green-100 text-green-800';
+    if (grade >= 7) return 'bg-blue-100 text-blue-800';
+    if (grade >= 5) return 'bg-yellow-100 text-yellow-800';
+    if (grade >= 3) return 'bg-orange-100 text-orange-800';
+    return 'bg-red-100 text-red-800';
+  };
+
   // If feedback is structured, render as before
   const renderStructured = () => (
     <div className="w-full flex flex-col gap-4 mt-4">
@@ -67,13 +84,7 @@ const ResumeFeedback = ({ user }) => {
           {item.grade && (
             <div className="mb-3">
               <strong className="text-app-text">Grade:</strong> 
-              <span className={`ml-2 px-3 py-1 rounded-full text-sm font-bold ${
-                item.grade.includes('9') || item.grade.includes('10') ? 'bg-green-100 text-green-800' :
-                item.grade.includes('7') || item.grade.includes('8') ? 'bg-blue-100 text-blue-800' :
-                item.grade.includes('5') || item.grade.includes('6') ? 'bg-yellow-100 text-yellow-800' :
-                item.grade.includes('3') || item.grade.includes('4') ? 'bg-orange-100 text-orange-800' :
-                'bg-red-100 text-red-800'
-              }`}>
+              <span className={`ml-2 px-3 py-1 rounded-full text-sm font-bold ${getGradeColor(item.grade)}`}>
                 {item.grade}
               </span>
             </div>
@@ -121,13 +132,7 @@ const ResumeFeedback = ({ user }) => {
               {pair.grade && (
                 <div className="mt-2">
                   <strong>Grade:</strong> 
-                  <span className={`ml-2 px-3 py-1 rounded-full text-sm font-bold ${
-                    pair.grade.includes('9') || pair.grade.includes('10') ? 'bg-green-100 text-green-800' :
-                    pair.grade.includes('7') || pair.grade.includes('8') ? 'bg-blue-100 text-blue-800' :
-                    pair.grade.includes('5') || pair.grade.includes('6') ? 'bg-yellow-100 text-yellow-800' :
-                    pair.grade.includes('3') || pair.grade.includes('4') ? 'bg-orange-100 text-orange-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
+                  <span className={`ml-2 px-3 py-1 rounded-full text-sm font-bold ${getGradeColor(pair.grade)}`}>
                     {pair.grade}
                   </span>
                 </div>

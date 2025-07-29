@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials
-from app.api import behavioral_prep, blind_75, daily_stats, interview, job_application, job_description_roadmap, questionnaire, resume, roadmap, user, videos, friendship
+from app.api import behavioral_prep, blind_75, daily_stats, interview, job_application, job_description_roadmap, questionnaire, resume, roadmap, user, videos, friendship, leaderboard
 from app.core.database import Base, engine
 
 load_dotenv()
@@ -46,6 +46,7 @@ app.add_middleware(
 app.include_router(behavioral_prep.router, prefix="/api", tags=["Behavioral Prep"])
 app.include_router(blind_75.router, prefix="/api", tags=["Blind75"])
 app.include_router(daily_stats.router, prefix="/api", tags=["Daily Stats"])
+app.include_router(leaderboard.router, prefix="/api", tags=["Leaderboard"])
 app.include_router(roadmap.router, prefix="/api", tags=["Career Goal Roadmap"])
 app.include_router(interview.router, prefix="/api", tags=["Interview"])
 app.include_router(job_application.router, prefix="/api", tags=["Job Application"])

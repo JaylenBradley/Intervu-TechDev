@@ -172,12 +172,15 @@ def improve_resume_prompt(resume_text: str) -> str:
     return f"""
     You are a senior professional resume coach. Here is a candidate’s raw resume text. Rewrite the entire resume to:
 
-    - Use concise bullet points under clear section headings, and maintain important information such as date, location.
+    - Use concise bullet points under clear section headings (EDUCATION, EXPERIENCE, SKILLS, PROJECTS, etc.), and maintain important information such as date, location.
     - Lead with strong action verbs.
     - Quantify every achievement (e.g., “Improved X by 35%,” “Managed a team of 5,” “Reduced runtime from 10s to 3s”). Don't make up numbers though, if you don't know numbers put X.
     - Keep it to 1 page max and maintain a clean, ATS-friendly format.
+    - Use consistent bullet points with proper bullets (•) instead of asterisks (*)
+    - Do NOT use any markdown formatting, bold markers (** **), or special characters
+    - Return only plain text with no formatting symbols
     
-    Return only the fully rewritten resume in plain text (no markdown fences, no JSON, no commentary).
+    Return only the fully rewritten resume in plain text (no markdown fences, no JSON, no commentary, no bold markers).
     
     Raw resume text:
     {resume_text}
@@ -258,7 +261,7 @@ STRICT RULES:
 - You may rephrase, reorganize, or emphasize content from the resume to better match the job description, but do not add new content.
 - If you are unsure about any information, leave it out.
 - Do not make up numbers, companies, or job titles.
-- Use clear, concise bullet points and section headings.
+- Use clear, concise bullet points and section headings (EDUCATION, EXPERIENCE, SKILLS, PROJECTS, etc.).
 - The tailored resume should be ATS-friendly and factual.
 
 CRITICAL FORMATTING REQUIREMENTS:
@@ -269,6 +272,8 @@ CRITICAL FORMATTING REQUIREMENTS:
 - Use consistent formatting throughout
 - Keep bullet points concise but impactful (1-2 lines max)
 - Emphasize skills and experiences that directly relate to the job requirements
+- Do NOT use any markdown formatting, bold markers (** **), or special characters
+- Return only plain text with no formatting symbols
 
 CRITICAL: You MUST return ONLY valid JSON. No markdown, no commentary, no text before or after the JSON. Start with {{ and end with }}.
 
