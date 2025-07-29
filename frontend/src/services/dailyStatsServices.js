@@ -61,39 +61,17 @@ export async function getPracticeHistory(userId, limit = 30) {
 export async function getLeaderboardByStreaks(limit = 10) {
   const url = new URL(`${BASE_URL}/api/leaderboards/streaks`);
   url.searchParams.append("limit", limit);
-  try {
-    const res = await fetch(url);
-    if (!res.ok) {
-      console.error(`Failed to get streaks leaderboard: ${res.status} ${res.statusText}`);
-      throw new Error(`Failed to get streaks leaderboard: ${res.status}`);
-    }
-    return res.json();
-  } catch (error) {
-    // Check if it's a CORS or network error
-    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-      throw new Error('CORS/Network error - server may be warming up');
-    }
-    throw error;
-  }
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to get streaks leaderboard");
+  return res.json();
 }
 
 export async function getLeaderboardByPoints(limit = 10) {
   const url = new URL(`${BASE_URL}/api/leaderboards/points`);
   url.searchParams.append("limit", limit);
-  try {
-    const res = await fetch(url);
-    if (!res.ok) {
-      console.error(`Failed to get points leaderboard: ${res.status} ${res.statusText}`);
-      throw new Error(`Failed to get points leaderboard: ${res.status}`);
-    }
-    return res.json();
-  } catch (error) {
-    // Check if it's a CORS or network error
-    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-      throw new Error('CORS/Network error - server may be warming up');
-    }
-    throw error;
-  }
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to get points leaderboard");
+  return res.json();
 }
 
 export async function getStatsByDate(userId, statDate) {

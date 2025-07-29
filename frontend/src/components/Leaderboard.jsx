@@ -8,24 +8,16 @@ const Leaderboard = () => {
   const [pointsData, setPointsData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [retryCount, setRetryCount] = useState(0);
-  const [isRetrying, setIsRetrying] = useState(false);
 
   useEffect(() => {
     fetchLeaderboardData();
   }, []);
 
-  const fetchLeaderboardData = async (isRetry = false) => {
-    if (isRetry) {
-      setIsRetrying(true);
-    } else {
-      setLoading(true);
-      setError(null);
-      setRetryCount(0);
-    }
-    
+  const fetchLeaderboardData = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      console.log(`Fetching leaderboard data... ${isRetry ? `(Retry ${retryCount + 1})` : ''}`);
+      console.log("Fetching leaderboard data...");
       const [streaks, points] = await Promise.all([
         getLeaderboardByStreaks(5),
         getLeaderboardByPoints(5)
@@ -34,33 +26,11 @@ const Leaderboard = () => {
       console.log("Points data:", points);
       setStreaksData(streaks);
       setPointsData(points);
-      setError(null);
-      setRetryCount(0);
     } catch (error) {
       console.error("Failed to fetch leaderboard data:", error);
-      
-      // Check if it's a CORS or network error that might be temporary
-      const isTemporaryError = error.message.includes('Failed to fetch') || 
-                              error.message.includes('NetworkError') ||
-                              error.message.includes('CORS') ||
-                              retryCount < 3; // Allow up to 3 retries
-      
-      if (isTemporaryError && retryCount < 3) {
-        // Retry with exponential backoff
-        const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
-        console.log(`Retrying in ${delay}ms...`);
-        setRetryCount(prev => prev + 1);
-        setTimeout(() => {
-          fetchLeaderboardData(true);
-        }, delay);
-        return; // Don't set error or stop loading yet
-      } else {
-        // Give up after 3 retries or if it's a permanent error
-        setError("Failed to load leaderboard data. Please try again later.");
-      }
+      setError("Failed to load leaderboard data");
     } finally {
       setLoading(false);
-      setIsRetrying(false);
     }
   };
 
@@ -136,14 +106,11 @@ const Leaderboard = () => {
       <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary">
         <div className="text-center py-8">
           <p className="text-red-500 mb-2">{error}</p>
-          <p className="text-sm text-gray-500 mb-4">
-            The server might be warming up. Try again in a moment.
-          </p>
           <button 
-            onClick={() => fetchLeaderboardData()}
+            onClick={fetchLeaderboardData}
             className="btn-primary px-4 py-2 rounded-lg"
           >
-            Try Again
+            Retry
           </button>
         </div>
       </div>
@@ -187,17 +154,7 @@ const Leaderboard = () => {
       {loading ? (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-app-primary mx-auto"></div>
-          <p className="text-gray-500 mt-2">
-            {isRetrying 
-              ? `Loading leaderboard... (Retry ${retryCount}/3)`
-              : "Loading leaderboard..."
-            }
-          </p>
-          {isRetrying && (
-            <p className="text-sm text-gray-400 mt-1">
-              Server is warming up, please wait...
-            </p>
-          )}
+          <p className="text-gray-500 mt-2">Loading leaderboard...</p>
         </div>
       ) : (
         <div className="space-y-3">
