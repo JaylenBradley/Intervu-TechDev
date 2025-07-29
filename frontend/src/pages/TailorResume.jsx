@@ -298,7 +298,7 @@ const TailorResume = ({ user }) => {
                     )}
                     {tailoredParsed.leadership && tailoredParsed.leadership.length > 0 && (
                       <div className="mb-4">
-                        <strong>Leadership & Involvement:</strong>
+                        <strong>Leadership:</strong>
                         <ul className="list-disc ml-6">
                           {tailoredParsed.leadership.map((lead, i) => (
                             <li key={i}>
@@ -317,7 +317,7 @@ const TailorResume = ({ user }) => {
                     )}
                     {tailoredParsed.skills && tailoredParsed.skills.length > 0 && (
                       <div className="mb-4">
-                        <strong>Technical Skills:</strong> {tailoredParsed.skills.join(", ")}
+                        <strong>Skills:</strong> {tailoredParsed.skills.join(", ")}
                       </div>
                     )}
                     {tailoredParsed.certifications && tailoredParsed.certifications.length > 0 && (

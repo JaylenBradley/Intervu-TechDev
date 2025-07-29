@@ -261,7 +261,7 @@ STRICT RULES:
 - You may highlight specific aspects of existing experiences that align with the job requirements.
 - If you are unsure about any information, leave it out.
 - Do not make up numbers, companies, or job titles.
-- Use clear, concise bullet points and section headings (EDUCATION, EXPERIENCE, SKILLS, PROJECTS, etc.).
+- Use clear, concise bullet points and section headings (EDUCATION, EXPERIENCE, SKILLS, PROJECTS, LEADERSHIP, etc.).
 - The tailored resume should be ATS-friendly and factual.
 - Focus on emphasizing relevant skills, technologies, and achievements that match the job requirements.
 
@@ -305,6 +305,12 @@ IMPORTANT FORMATTING NOTES:
 - Tailor language to match the job description's terminology and focus areas
 - Highlight experiences that demonstrate the specific skills and qualities mentioned in the job description
 - Emphasize relevant technologies, methodologies, and industry-specific terminology from the job posting
+- Use consistent section headers: "EXPERIENCE", "PROJECTS", "LEADERSHIP", "SKILLS", "EDUCATION"
+- Ensure all bullet points end with proper punctuation (periods, exclamation marks, or question marks)
+- Quantify achievements where possible using numbers, percentages, or timeframes
+- Focus on transferable skills and experiences that directly relate to the job requirements
+- Emphasize technical competencies, problem-solving abilities, and collaborative experiences
+- Highlight any experience with technologies, tools, or methodologies mentioned in the job description
 
 If a field is missing, return an empty list or empty string for that field. Do not invent information. Return only the JSON object.
 
