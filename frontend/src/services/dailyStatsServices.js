@@ -46,7 +46,10 @@ export async function getTodayStats(userId) {
 
 export async function getCurrentStreak(userId) {
   const res = await fetch(`${BASE_URL}/api/daily-practice/${userId}/streak`);
-  if (!res.ok) throw new Error("Failed to get current streak");
+  if (!res.ok) {
+    console.error(`Failed to get current streak for user ${userId}: ${res.status} ${res.statusText}`);
+    throw new Error(`Failed to get current streak: ${res.status}`);
+  }
   return res.json();
 }
 
@@ -54,23 +57,46 @@ export async function getPracticeHistory(userId, limit = 30) {
   const url = new URL(`${BASE_URL}/api/daily-practice/${userId}/history`);
   url.searchParams.append("limit", limit);
   const res = await fetch(url);
-  if (!res.ok) throw new Error("Failed to get practice history");
+  if (!res.ok) {
+    console.error(`Failed to get practice history for user ${userId}: ${res.status} ${res.statusText}`);
+    throw new Error(`Failed to get practice history: ${res.status}`);
+  }
   return res.json();
 }
 
 export async function getLeaderboardByStreaks(limit = 10) {
   const url = new URL(`${BASE_URL}/api/leaderboards/streaks`);
   url.searchParams.append("limit", limit);
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Failed to get streaks leaderboard");
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    mode: 'cors',
+    cache: 'no-cache', // Prevent caching of failed responses
+  });
+  if (!res.ok) {
+    console.error(`Failed to get streaks leaderboard: ${res.status} ${res.statusText}`);
+    throw new Error(`Failed to get streaks leaderboard: ${res.status}`);
+  }
   return res.json();
 }
 
 export async function getLeaderboardByPoints(limit = 10) {
   const url = new URL(`${BASE_URL}/api/leaderboards/points`);
   url.searchParams.append("limit", limit);
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Failed to get points leaderboard");
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    mode: 'cors',
+    cache: 'no-cache', // Prevent caching of failed responses
+  });
+  if (!res.ok) {
+    console.error(`Failed to get points leaderboard: ${res.status} ${res.statusText}`);
+    throw new Error(`Failed to get points leaderboard: ${res.status}`);
+  }
   return res.json();
 }
 

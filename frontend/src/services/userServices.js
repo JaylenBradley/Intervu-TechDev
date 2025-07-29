@@ -26,7 +26,10 @@ export async function getAllUsers() {
 
 export async function getUser(id) {
   const response = await fetch(`${BASE_URL}/api/user/${id}`);
-  if (!response.ok) throw new Error("User not found");
+  if (!response.ok) {
+    console.error(`Failed to get user ${id}: ${response.status} ${response.statusText}`);
+    throw new Error(`User not found: ${response.status}`);
+  }
   return response.json();
 }
 

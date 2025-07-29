@@ -18,6 +18,10 @@ const Leaderboard = () => {
     setError(null);
     try {
       console.log("Fetching leaderboard data...");
+      
+      // Add a small delay to prevent overwhelming the server
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const [streaks, points] = await Promise.all([
         getLeaderboardByStreaks(5),
         getLeaderboardByPoints(5)
