@@ -8,6 +8,7 @@ from app.models.daily_stats import DailyStat
 from typing import List
 from sqlalchemy import func, desc
 
+# Leaderboard API router for streaks and points
 router = APIRouter()
 
 def get_db():
