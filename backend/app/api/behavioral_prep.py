@@ -1,4 +1,5 @@
 import os
+import tempfile
 from fastapi import APIRouter, UploadFile, File
 from app.schemas.behavioral_prep import (
     BehavioralQuestionsRequest,
@@ -30,9 +31,14 @@ async def get_behavioral_feedback(req: BehavioralFeedbackRequest):
 
 @router.post("/behavioral-prep/transcribe")
 async def transcribe_audio_endpoint(audio: UploadFile = File(...)):
-    temp_path = f"/tmp/{audio.filename}"
-    with open(temp_path, "wb") as f:
-        f.write(await audio.read())
-    transcript = transcribe_audio(temp_path)
-    os.remove(temp_path)
-    return {"transcript": transcript}
+    # Create a temporary file with proper cross-platform path
+    with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{audio.filename}") as temp_file:
+        temp_path = temp_file.name
+        temp_file.write(await audio.read())
+    
+    try:
+        transcript = transcribe_audio(temp_path)
+        return {"transcript": transcript}
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
