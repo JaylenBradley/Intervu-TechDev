@@ -113,6 +113,7 @@ Evaluate the answer and provide detailed feedback. Return ONLY a valid JSON obje
 
 Scoring rules:
 - Score is out of 100
+-BE STRICT WITH INCOMPLETE CODE, do not give a good score for something thats missing important parts. LIKE IF ITS ONLY CLASS AND FUNCTION DEFINITION THATS SUPER INCOMPLETE
 -DO NOT GIVE DECIMAL SCORES, THE SCORES MUST BE INTS, FOR EXAMPLE DONT GIVE 40.0 GIVE 40 
 - Only give a score of 100 if the solution is fully correct, optimal, well-explained, and handles all edge cases.
 - Deduct up to 40 points for correctness issues (wrong or incomplete solution).
@@ -120,7 +121,7 @@ Scoring rules:
 - Deduct up to 20 points for code quality issues (poor readability, bad structure).
 - Deduct up to 10 points for missing edge cases.
 - If the solution is perfect, give 100 If there are minor issues, deduct points as specified above. Be specific and consistent.
- - If you see a line that says "# Type line here" that means there is a missing line, deduct points accordingly.
+ - If you see a line that says "# Type answer here" (even if its the last line) that means there is a missing line, deduct points accordingly.
 - Do not give arbitrary scores like 85 for a perfect solution.
 
 Evaluation criteria:
