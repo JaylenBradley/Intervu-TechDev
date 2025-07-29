@@ -142,3 +142,4 @@ def get_stats_by_date(user_id: int, stat_date: date, db: Session = Depends(get_d
     if not db_stat:
         raise HTTPException(status_code=404, detail="No statistics found for this date")
     return db_stat
+

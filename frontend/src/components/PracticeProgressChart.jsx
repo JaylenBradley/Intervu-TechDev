@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getPracticeHistory, getCurrentStreak } from "../services/dailyStatsServices";
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
+import { FaFire } from "react-icons/fa";
 
 const PracticeProgressChart = ({ userId }) => {
   const [history, setHistory] = useState([]);
@@ -35,9 +36,12 @@ const PracticeProgressChart = ({ userId }) => {
     <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary mt-3.5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-bold text-app-primary">Practice Progress</h3>
-        <span className="text-lg font-semibold text-app-primary">
-          Current Streak: {streak} days
-        </span>
+        <div className="flex items-center gap-2">
+          <FaFire className="text-orange-500" />
+          <span className="text-sm text-gray-500">Streak:</span>
+          <span className="font-bold text-lg text-orange-600">{streak}</span>
+          <span className="text-sm text-gray-500">days</span>
+        </div>
       </div>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={history}>
