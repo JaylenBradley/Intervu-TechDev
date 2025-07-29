@@ -358,7 +358,7 @@ const JobDashboard = ({ user }) => {
             <div key={status} className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
               <div className="text-2xl font-bold text-app-primary">{count}</div>
               <div className="text-sm text-app-text capitalize">{status}</div>
-              {status === 'interviewing' && stats.total > 0 && (
+              {stats.total > 0 && (
                 <div className="text-xs text-app-primary mt-1">{Math.round((count / stats.total) * 100)}% of total</div>
               )}
             </div>
@@ -562,16 +562,16 @@ const JobDashboard = ({ user }) => {
                       </select>
                       <button
                         onClick={() => handleEdit(job)}
-                        className="flex items-center justify-center gap-0.5 cursor-pointer job-edit-button text-sm"
+                        className="flex items-center justify-center gap-1 px-3 py-1.5 btn-primary rounded-md text-sm font-medium cursor-pointer"
                       >
-                        <FaPencilAlt/>
+                        <FaPencilAlt size={14}/>
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(job.id)}
-                        className="flex items-center justify-center gap-0.5 cursor-pointer text-red-500 hover:text-red-700 text-sm"
+                        className="flex items-center justify-center gap-1 px-3 py-1.5 btn-danger rounded-md text-sm font-medium cursor-pointer"
                       >
-                        <IoTrashBinOutline/>
+                        <IoTrashBinOutline size={14}/>
                         Delete
                       </button>
                     </div>
