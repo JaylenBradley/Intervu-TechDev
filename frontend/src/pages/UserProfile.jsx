@@ -134,7 +134,7 @@ const UserProfile = ({ user: initialUser = defaultUser, isCurrentUser = true }) 
               )}
             </div>
             <div>
-              <div className="text-3xl font-extrabold text-app-primary">{user.username}</div>
+              <div className="text-3xl font-extrabold">{user.username}</div>
               <div className="text-lg text-gray-700">{user.name || "Full Name (placeholder)"}</div>
               <div className="text-md text-gray-500">{user.email || "Email (placeholder)"}</div>
             </div>

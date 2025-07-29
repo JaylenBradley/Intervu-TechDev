@@ -12,6 +12,7 @@ import {
 } from "../utils/constants";
 import ConfigBlind75 from "../components/Config_Blind75";
 import { useNotification } from "../components/NotificationProvider";
+import { FaFire } from "react-icons/fa";
 
 import { useNavigate } from "react-router-dom";
 function useLocalStorage(key, fallback) {
@@ -706,7 +707,9 @@ useEffect(() => {
                 <div className="text-sm text-gray-500">Questions Answered Today</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">▲ {currentStreak}</div>
+                <div className="text-2xl font-bold text-orange-600 flex items-center justify-center gap-1">
+                  <FaFire className="text-orange-500" /> {currentStreak}
+                </div>
                 <div className="text-sm text-gray-500">Current Streak</div>
               </div>
               <div className="text-center">
@@ -811,8 +814,8 @@ return (
           {/* Streak */}
           <div className="text-center">
             <div className="text-sm text-gray-500">Current Streak</div>
-            <div className="text-2xl font-bold text-orange-600">
-              ▲ {currentStreak}
+            <div className="text-2xl font-bold text-orange-600 flex items-center justify-center gap-1">
+              <FaFire className="text-orange-500" /> {currentStreak}
             </div>
             <div className="text-xs text-gray-400">
               {currentStreak > 0 ? 'Days in a row!' : 'Start your streak!'}
