@@ -1,5 +1,5 @@
 export const INDENT_WIDTH = 48;
-export const MAX_INDENT   = 4;
+export const MAX_INDENT   = 5;
 
 export const COMPLEXITIES = [
   "O(1)", "O(log n)", "O(n)", "O(n log n)", "O(n^2)",
