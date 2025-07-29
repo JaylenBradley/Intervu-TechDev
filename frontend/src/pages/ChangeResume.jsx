@@ -44,7 +44,7 @@ const ChangeResume = ({ user }) => {
   };
 
   return (
-    <ResumePageLayout>
+    <ResumePageLayout cardClassName="w-full">
       <h1 className="text-3xl font-extrabold text-app-primary mb-4">Change Your Resume</h1>
       <input
         type="file"
@@ -55,14 +55,14 @@ const ChangeResume = ({ user }) => {
       />
       <button
         onClick={handleChooseFile}
-        className="btn-primary px-8 py-3 rounded-xl mb-4 cursor-pointer"
+        className="btn-primary font-bold px-8 py-3 rounded-xl mb-4 cursor-pointer"
       >
         {fileName ? `Selected: ${fileName}` : "Choose File"}
       </button>
       <button
         onClick={handleUpload}
         disabled={!file || loading}
-        className="btn-primary px-8 py-3 rounded-xl mb-4 cursor-pointer min-w-[200px] min-h-[56px]"
+        className="btn-primary font-bold px-8 py-3 rounded-xl mb-4 cursor-pointer min-w-[200px] min-h-[56px]"
       >
         {loading ? (
           <span className="flex items-center gap-2">

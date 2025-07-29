@@ -48,7 +48,7 @@ const UploadResume = ({ user }) => {
   };
 
   return (
-    <ResumePageLayout>
+    <ResumePageLayout cardClassName="w-full">
       <h1 className="text-3xl font-extrabold text-app-primary mb-4">Upload Your Resume</h1>
       <input
         type="file"
@@ -66,7 +66,7 @@ const UploadResume = ({ user }) => {
       <button
         onClick={handleUpload}
         disabled={!file || loading}
-        className="btn-primary px-8 py-3 rounded-xl mb-4 cursor-pointer min-w-[200px] min-h-[56px]"
+        className="btn-primary font-bold px-8 py-3 rounded-xl mb-4 cursor-pointer min-w-[200px] min-h-[56px]"
       >
         {loading ? (
           <span className="flex items-center gap-2">

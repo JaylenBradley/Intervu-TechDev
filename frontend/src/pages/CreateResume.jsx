@@ -9,6 +9,7 @@ const CreateResume = ({ user }) => {
   const [improveError, setImproveError] = useState("");
   const [improvedResume, setImprovedResume] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [exportFormat, setExportFormat] = useState(null);
   const navigate = useNavigate();
   const { showNotification } = useNotification();
 
@@ -32,6 +33,7 @@ const CreateResume = ({ user }) => {
 
   const handleExport = async (format) => {
     setExporting(true);
+    setExportFormat(format);
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/resume/export?user_id=${user.id}&format=${format}`
@@ -50,16 +52,17 @@ const CreateResume = ({ user }) => {
       showNotification("Error exporting resume. Please try again.", "error");
     } finally {
       setExporting(false);
+      setExportFormat(null);
     }
   };
 
   return (
-    <ResumePageLayout>
+    <ResumePageLayout cardClassName="w-full">
       <h1 className="text-3xl font-extrabold text-app-primary mb-4">Improve Your Resume</h1>
       <button
         onClick={handleImproveResume}
         disabled={improving}
-        className="btn-primary px-8 py-3 rounded-xl mb-4 cursor-pointer min-w-[200px] min-h-[56px]"
+        className="btn-primary font-bold px-8 py-3 rounded-xl mb-4 cursor-pointer min-w-[200px] min-h-[56px]"
       >
         {improving ? (
           <span className="flex items-center gap-2">
