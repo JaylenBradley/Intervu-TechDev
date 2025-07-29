@@ -15,7 +15,9 @@ export const renderFeedback = (feedback) => {
             ? <ul className="list-disc ml-6">{data.structure.missing_parts.map((p, i) => <li key={i}>{p}</li>)}</ul>
             : "None"}
         </li>
-        <li>Notes: {data.structure?.notes}</li>
+        {data.structure?.notes && data.structure.notes.trim() && (
+          <li>Notes: {data.structure.notes}</li>
+        )}
       </ul>
       <h4 className="font-bold mt-3 mb-2">Content</h4>
       <ul className="list-disc ml-6">
@@ -40,7 +42,9 @@ export const renderFeedback = (feedback) => {
             : "None"}
         </li>
         <li>Pauses: {data.tone?.pauses || "No speech analysis available"}</li>
-        <li>Notes: {data.tone?.notes}</li>
+        {data.tone?.notes && data.tone.notes.trim() && (
+          <li>Notes: {data.tone.notes}</li>
+        )}
       </ul>
       <h4 className="font-bold mt-3 mb-2">Overall Assessment</h4>
       <div>{data.overall_assessment}</div>
