@@ -1,7 +1,6 @@
 import os
-import logging
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials
@@ -33,12 +32,15 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for now to fix the CORS issue
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "https://useintervu.vercel.app",
+    ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],
-    max_age=86400,  # Cache preflight for 24 hours
 )
 
 app.include_router(behavioral_prep.router, prefix="/api", tags=["Behavioral Prep"])
@@ -66,17 +68,3 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
-
-@app.options("/{full_path:path}")
-async def options_handler(full_path: str):
-    """Handle CORS preflight requests"""
-    return {"message": "OK"}
-
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    """Log all requests for debugging"""
-    logging.info(f"Request: {request.method} {request.url}")
-    logging.info(f"Headers: {dict(request.headers)}")
-    response = await call_next(request)
-    logging.info(f"Response status: {response.status_code}")
-    return response
