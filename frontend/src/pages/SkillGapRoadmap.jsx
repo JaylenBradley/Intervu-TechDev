@@ -75,7 +75,7 @@ const SkillGapRoadmap = ({ user }) => {
     <div className="min-h-screen flex flex-col items-center">
       <div className="w-full max-w-5xl mt-16 mb-16">
         <button
-          className="mb-4 btn-primary px-4 py-2 rounded-md cursor-pointer"
+          className="mb-4 btn-primary font-bold px-4 py-2 rounded-lg cursor-pointer"
           onClick={() => navigate("/roadmaps")}
         >
           &larr; Back to Roadmap Hub

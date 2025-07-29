@@ -47,7 +47,7 @@ const ResumeFeedback = ({ user }) => {
   const renderStructured = () => (
     <div className="w-full flex flex-col gap-4 mt-4">
       {feedback.map((item, idx) => (
-        <div key={idx} className="bg-white border-2 border-app-primary rounded-xl shadow-lg p-6 mb-4">
+        <div key={idx} className="bg-white border border-app-primary rounded-xl shadow-lg p-6 mb-4">
           <div className="font-bold text-app-primary mb-3 text-lg">{item.original || item.bullet}</div>
           {item.grade && (
             <div className="mb-3">
