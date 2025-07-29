@@ -41,14 +41,18 @@ const AuthForm = ({ isSignUp }) => {
             };
 
             await createUser(data);
-            setTimeout(() => {
-              navigate("/", { state: { showSignUpToast: true } });
-              window.location.reload();
-            }, 1200);
+            showNotification("Sign up successful! Welcome", "success");
+            navigate("/");
 
         } catch (error) {
             if (error.code === "auth/email-already-in-use") {
                 setFormError("Email is already in use");
+            } else if (error.code === "auth/weak-password") {
+                setFormError("Password is too weak");
+            } else if (error.code === "auth/invalid-email") {
+                setEmailError("Invalid email address");
+            } else if (error.code === "auth/operation-not-allowed") {
+                setFormError("Email/password accounts are not enabled. Contact support.");
             } else if (error.message) {
                 if (error.message.toLowerCase().includes("email")) setEmailError(error.message);
                 else setFormError(error.message);
@@ -75,12 +79,8 @@ const AuthForm = ({ isSignUp }) => {
         setLoading(true);
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const firebaseId = userCredential.user.uid;
-            await getUserByFirebaseId(firebaseId);
-            setTimeout(() => {
-              navigate("/", { state: { showSignInToast: true } });
-              window.location.reload();
-            }, 1200);
+            showNotification("Sign in successful! Welcome back", "success");
+            navigate("/");
         } catch (error) {
             if (error.code === "auth/user-not-found") {
                 setFormError("No user found with this email");
@@ -107,9 +107,8 @@ const AuthForm = ({ isSignUp }) => {
             const firebaseId = result.user.uid;
 
             try {
-                await getUserByFirebaseId(firebaseId);
                 showNotification("Sign in successful! Welcome back", "success");
-                setTimeout(() => { navigate("/", { state: { showSignInToast: true } }); }, 1200);
+                navigate("/");
             } catch {
                 await createUser({
                     username,
@@ -118,7 +117,7 @@ const AuthForm = ({ isSignUp }) => {
                     firebase_id: firebaseId,
                 });
                 showNotification("Sign up successful! Welcome", "success");
-                setTimeout(() => { navigate("/", { state: { showSignUpToast: true } }); }, 1200);
+                navigate("/");
             }
         } catch (error) {
             showNotification("Google authentication failed: " + error.message, "error");

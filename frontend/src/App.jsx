@@ -45,7 +45,8 @@ const App = () => {
         try {
           const backendUser = await getUserByFirebaseId(firebaseUser.uid);
           setUser(backendUser);
-        } catch {
+        } catch (error) {
+          console.error("Failed to fetch user:", error);
           setUser(null);
         }
       } else {
