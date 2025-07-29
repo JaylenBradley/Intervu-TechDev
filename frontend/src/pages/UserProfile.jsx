@@ -1,6 +1,7 @@
 import Modal from "../components/Modal";
 import UserSearchModal from "../components/UserSearchModal";
 import FriendsListModal from "../components/FriendsListModal";
+import PracticeProgressChart from "../components/PracticeProgressChart";
 import { getUser, updateUser, deleteUser} from "../services/userServices";
 import { getFollowers, getFollowing } from "../services/friendshipServices";
 import { useEffect } from "react";
@@ -145,6 +146,7 @@ const UserProfile = ({ user: initialUser = defaultUser, isCurrentUser = true }) 
               </button>
             )}
           </div>
+          
           {/* Bio & Education */}
           <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary flex flex-col gap-4">
             <div>
@@ -166,37 +168,40 @@ const UserProfile = ({ user: initialUser = defaultUser, isCurrentUser = true }) 
               </div>
             )}
 
-              {user.linkedin && (
-                <div className="mt-4">
-                  <a
-                    href={formatUrl(user.linkedin)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-blue-500"
-                  >
-                    <FaLinkedin size={22} /> LinkedIn
-                  </a>
-                </div>
-              )}
+            {user.linkedin && (
+              <div className="mt-4">
+                <a
+                  href={formatUrl(user.linkedin)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-blue-500"
+                >
+                  <FaLinkedin size={22} /> LinkedIn
+                </a>
+              </div>
+            )}
 
-              {user.github && (
-                <div className="mt-2">
-                  <a
-                    href={formatUrl(user.github)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-gray-800"
-                  >
-                    <FaGithub size={22} /> GitHub
-                  </a>
-                </div>
-              )}
-            </div>
+            {user.github && (
+              <div className="mt-2">
+                <a
+                  href={formatUrl(user.github)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-gray-800"
+                >
+                  <FaGithub size={22} /> GitHub
+                </a>
+              </div>
+            )}
+          </div>
+          
+          {/* Progress Chart */}
+          <PracticeProgressChart userId={user.id} />
         </div>
 
         {/* Friends List Section */}
         <div className="w-64 flex-shrink-0">
-          <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary h-full flex flex-col">
+          <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary flex flex-col pb-11">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <FaUserFriends size={22} className="text-app-primary" />

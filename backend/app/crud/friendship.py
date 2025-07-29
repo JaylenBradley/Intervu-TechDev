@@ -49,7 +49,7 @@ def get_following(db: Session, user_id: int):
     ).all()
     return following
 
-def search_users(db: Session, current_user_id: int, search_term: str = "", career_goal: str = "", limit: int = 20):
+def search_users(db: Session, current_user_id: int, search_term: str = "", career_goal: str = ""):
     """Search for users by username or name and optionally filter by career goal"""
     query = db.query(User).filter(User.id != current_user_id)  # Exclude current user
     
@@ -64,7 +64,7 @@ def search_users(db: Session, current_user_id: int, search_term: str = "", caree
     if career_goal:
         query = query.filter(User.career_goal == career_goal)
     
-    users = query.limit(limit).all()
+    users = query.all()
     
     # Get current user's following list to mark who they're already following
     following_ids = set()

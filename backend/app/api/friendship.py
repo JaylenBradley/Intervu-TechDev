@@ -64,13 +64,12 @@ def unfollow_user(follower_id: int, following_id: int, db: Session = Depends(get
 def search_users_endpoint(
     current_user_id: int = Query(..., description="Current user ID"),
     search_term: str = Query("", description="Search term for username or name"),
-    career_goal: str = Query("", description="Filter by career goal"),
-    limit: int = Query(20, description="Maximum number of results")
+    career_goal: str = Query("", description="Filter by career goal")
 ):
     """Search for users to follow"""
     db = next(get_db())
     try:
-        return search_users(db, current_user_id, search_term, career_goal, limit)
+        return search_users(db, current_user_id, search_term, career_goal)
     finally:
         db.close()
 
