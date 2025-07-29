@@ -30,6 +30,7 @@ import TechnicalPrep from "./pages/TechnicalPrep.jsx";
 import UploadResume from "./pages/UploadResume.jsx";
 import UserProfile from "./pages/UserProfile.jsx";
 import NotificationProvider from "./components/NotificationProvider";
+import BackgroundBlobs from "./components/BackgroundBlobs.jsx";
 
 const App = () => {
   const [questionnaireComplete, setQuestionnaireComplete] = useState(false);
@@ -98,114 +99,119 @@ const App = () => {
     );
 
   return (
-    <NotificationProvider>
-      <Navbar user={user}/>
-      <Routes>
-        <Route path="/signup" element={<AuthForm isSignUp={true}/>}/>
-        <Route path="/signin" element={<AuthForm isSignUp={false} />} />
-        <Route path="/" element={
-          <Home
-              user={user}
-              questionnaireComplete={questionnaireComplete}
-              hasRoadmap={hasRoadmap}
-          />
-        }/>
-        <Route path="/profile" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <UserProfile user={user}/>
-          </ProtectedRoute>
-        }/>
-        {/*<Route path="/user/:id" element={*/}
-        {/*  <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>*/}
+    <div className="min-h-screen bg-gradient-to-br from-cyan-400 via-blue-200 to-cyan-400 relative overflow-x-hidden">
+      <BackgroundBlobs />
+      <div className="relative z-10">
+        <NotificationProvider>
+          <Navbar user={user}/>
+          <Routes>
+            <Route path="/signup" element={<AuthForm isSignUp={true}/>}/>
+            <Route path="/signin" element={<AuthForm isSignUp={false} />} />
+            <Route path="/" element={
+              <Home
+                  user={user}
+                  questionnaireComplete={questionnaireComplete}
+                  hasRoadmap={hasRoadmap}
+              />
+            }/>
+            <Route path="/profile" element={
+              <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+                <UserProfile user={user}/>
+              </ProtectedRoute>
+            }/>
+            {/*<Route path="/user/:id" element={*/}
+            {/*  <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>*/}
 
-        {/*  </ProtectedRoute>*/}
-        {/*}/>*/}
-        <Route path="/questionnaire" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <Questionnaire onComplete={() => setQuestionnaireComplete(true)} user={user}/>
-          </ProtectedRoute>
-        }/>
-        <Route path="/roadmaps" element={
-        <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-          <RoadmapMain user={user}/>
-        </ProtectedRoute>
-        }/>
-        <Route path="/roadmaps/career-goal-roadmap" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <CareerGoalRoadmap user={user} onRoadmapGenerated={() => setHasRoadmap(true)}/>
-          </ProtectedRoute>
-        }/>
-        <Route path="/roadmaps/skill-gap-roadmap" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <SkillGapRoadmap user={user}/>
-          </ProtectedRoute>
-        }/>
-        <Route path="/roadmaps/skill-gap-roadmap/:id" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <SkillGapRoadmapDetail user={user}/>
-          </ProtectedRoute>
-        }/>
-        <Route path="/resume" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <ResumeMain user={user}/>
-          </ProtectedRoute>
-        }/>
-        <Route path="/resume/upload" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <UploadResume user={user}/>
-          </ProtectedRoute>
-        }/>
-        <Route path="/resume/change" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <ChangeResume user={user}/>
-          </ProtectedRoute>
-        }/>
-        <Route path="/resume/improve" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <CreateResume user={user}/>
-          </ProtectedRoute>
-        }/>
-        <Route path="/resume/feedback" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <ResumeFeedback user={user}/>
-          </ProtectedRoute>
-        }/>
-        <Route path="/resume/tailor" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <TailorResume user={user}/>
-          </ProtectedRoute>
-        }/>
-        <Route path="/dashboard" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <JobDashboard user={user}/>
-          </ProtectedRoute>
-        }/>
-        <Route path="/ai-interviewer" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <AiInterviewerMain />
-          </ProtectedRoute>
-        }/>
-        <Route path="/ai-interviewer/technical" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <TechnicalPrep user={user} />
-          </ProtectedRoute>
-        }/>
-        <Route path="/ai-interviewer/behavioral" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <BehavioralPrep user={user}/>
-          </ProtectedRoute>
-        }/>
-        <Route path="/ai-interviewer/blind75" element={
-          <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
-            <Blind75Prep user={user}/>
-          </ProtectedRoute>
-        }/>
-        <Route path="*" element={<ErrorPage/>}/>
-      </Routes>
-      <ScrollToTopButton/>
-      <Footer/>
-      <Analytics/>
-    </NotificationProvider>
+            {/*  </ProtectedRoute>*/}
+            {/*}/>*/}
+            <Route path="/questionnaire" element={
+              <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+                <Questionnaire onComplete={() => setQuestionnaireComplete(true)} user={user}/>
+              </ProtectedRoute>
+            }/>
+            <Route path="/roadmaps" element={
+            <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+              <RoadmapMain user={user}/>
+            </ProtectedRoute>
+            }/>
+            <Route path="/roadmaps/career-goal-roadmap" element={
+              <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+                <CareerGoalRoadmap user={user} onRoadmapGenerated={() => setHasRoadmap(true)}/>
+              </ProtectedRoute>
+            }/>
+            <Route path="/roadmaps/skill-gap-roadmap" element={
+              <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+                <SkillGapRoadmap user={user}/>
+              </ProtectedRoute>
+            }/>
+            <Route path="/roadmaps/skill-gap-roadmap/:id" element={
+              <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+                <SkillGapRoadmapDetail user={user}/>
+              </ProtectedRoute>
+            }/>
+            <Route path="/resume" element={
+              <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+                <ResumeMain user={user}/>
+              </ProtectedRoute>
+            }/>
+            <Route path="/resume/upload" element={
+              <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+                <UploadResume user={user}/>
+              </ProtectedRoute>
+            }/>
+            <Route path="/resume/change" element={
+              <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+                <ChangeResume user={user}/>
+              </ProtectedRoute>
+            }/>
+            <Route path="/resume/improve" element={
+              <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+                <CreateResume user={user}/>
+              </ProtectedRoute>
+            }/>
+            <Route path="/resume/feedback" element={
+              <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+                <ResumeFeedback user={user}/>
+              </ProtectedRoute>
+            }/>
+            <Route path="/resume/tailor" element={
+              <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+                <TailorResume user={user}/>
+              </ProtectedRoute>
+            }/>
+            <Route path="/dashboard" element={
+              <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+                <JobDashboard user={user}/>
+              </ProtectedRoute>
+            }/>
+            <Route path="/ai-interviewer" element={
+              <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+                <AiInterviewerMain />
+              </ProtectedRoute>
+            }/>
+            <Route path="/ai-interviewer/technical" element={
+              <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+                <TechnicalPrep user={user} />
+              </ProtectedRoute>
+            }/>
+            <Route path="/ai-interviewer/behavioral" element={
+              <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+                <BehavioralPrep user={user}/>
+              </ProtectedRoute>
+            }/>
+            <Route path="/ai-interviewer/blind75" element={
+              <ProtectedRoute user={user} questionnaireComplete={questionnaireComplete}>
+                <Blind75Prep user={user}/>
+              </ProtectedRoute>
+            }/>
+            <Route path="*" element={<ErrorPage/>}/>
+          </Routes>
+          <ScrollToTopButton/>
+          <Footer/>
+          <Analytics/>
+        </NotificationProvider>
+      </div>
+    </div>
   );
 }
 

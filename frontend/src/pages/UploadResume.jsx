@@ -1,3 +1,4 @@
+import ResumePageLayout from "../components/ResumePageLayout";
 import {useState, useRef, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
@@ -47,42 +48,35 @@ const UploadResume = ({ user }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-app-accent flex flex-col items-center justify-center py-20">
-      <div className={`w-full max-w-2xl flex flex-col items-center`}>
-        <button
-          onClick={() => navigate("/")}
-          className="mb-6 bg-white text-app-primary px-6 py-3 text-lg rounded-xl border-2 border-app-primary hover:bg-app-primary hover:text-white transition-colors shadow font-semibold"
-        >
-          ← Back
-        </button>
-        <div className="bg-app-accent rounded-2xl shadow-2xl p-10 w-full flex flex-col items-center border-2 border-app-primary">
-          <h1 className="text-3xl font-extrabold text-app-primary mb-8">Upload Your Resume</h1>
-          <input
-            type="file"
-            accept=".pdf,.docx"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            className="hidden"
-          />
-          <button
-            onClick={handleChooseFile}
-            className="bg-app-primary text-white px-8 py-3 text-lg rounded-xl mb-6 hover:bg-app-primary/90 transition-colors font-semibold"
-          >
-            {fileName ? `Selected: ${fileName}` : "Choose File"}
-          </button>
-          <button
-            onClick={handleUpload}
-            disabled={!file || loading}
-            className="bg-app-primary text-white px-8 py-3 text-lg rounded-xl mb-6 hover:bg-app-primary/90 transition-colors disabled:opacity-50 font-semibold flex items-center justify-center min-w-[200px] min-h-[56px]"
-          >
-            {loading ? <div className="loader-md" /> : "Upload Resume"}
-          </button>
-          {error && (
-            <div className="mb-6 text-red-600 font-bold text-lg">{error}</div>
-          )}
-        </div>
-      </div>
-    </div>
+    <ResumePageLayout cardClassName="w-full">
+      <h1 className="text-3xl font-extrabold text-app-primary mb-4">Upload Your Resume</h1>
+      <input
+        type="file"
+        accept=".pdf,.docx"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+      />
+      <button
+        onClick={handleChooseFile}
+        className="btn-primary px-8 py-3 rounded-xl mb-4 cursor-pointer"
+      >
+        {fileName ? `Selected: ${fileName}` : "Choose File"}
+      </button>
+      <button
+        onClick={handleUpload}
+        disabled={!file || loading}
+        className="btn-primary font-bold px-8 py-3 rounded-xl mb-4 cursor-pointer min-w-[200px] min-h-[56px]"
+      >
+        {loading ? (
+          <span className="flex items-center gap-2">
+            <div className="loader-md" /> Uploading...
+          </span>
+        ) : (
+          "Upload Resume"
+        )}
+      </button>
+    </ResumePageLayout>
   );
 };
 

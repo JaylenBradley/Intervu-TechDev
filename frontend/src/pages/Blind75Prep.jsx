@@ -723,7 +723,9 @@ useEffect(() => {
           <div className="space-y-4">
             <button
               onClick={() => navigate("/ai-interviewer")}
-              className="w-full bg-app-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-app-primary/90 transition-colors"
+              className="
+                w-full bg-app-primary text-white py-3 px-6 rounded-lg font-semibold
+                hover:bg-app-primary/90 transition-colors cursor-pointer"
             >
               Back to Main Menu
             </button>
@@ -735,7 +737,9 @@ useEffect(() => {
                 setShowCode(false);
                 resetStatus();
               }}
-              className="w-full border-2 border-app-primary text-app-primary py-3 px-6 rounded-lg font-semibold hover:bg-app-primary hover:text-white transition-colors"
+              className="
+                w-full border-2 border-app-primary text-app-primary py-3 px-6 rounded-lg font-semibold
+                hover:bg-app-primary hover:text-white transition-colors cursor-pointer"
             >
               Practice More Questions
             </button>
@@ -889,7 +893,7 @@ return (
       <div className="flex justify-end gap-2">
         <button
           onClick={skip}
-          className="btn-primary w-full py-2 rounded-lg font-semibold"
+          className="btn-primary w-full py-2 rounded-lg font-semibold cursor-pointer"
         >
           {atLastQ && (!evaluationMode || showCode) ? 'Skip Final Question' : 'Skip'} →
         </button>
@@ -898,7 +902,7 @@ return (
             next();
           }}
           disabled={!canAdvance()}
-          className="btn-primary w-full py-2 rounded-lg font-semibold"
+          className="btn-primary w-full py-2 rounded-lg font-semibold cursor-pointer"
         >
           {atLastQ && (!evaluationMode || showCode) ? 'Complete' : 'Next'} →
         </button>

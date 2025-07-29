@@ -76,7 +76,7 @@ const SkillGapRoadmapDetail = ({ user }) => {
     <div className="min-h-screen flex flex-col items-center justify-center">
       <div className="bg-app-accent text-app-text border border-app-primary p-8 rounded-xl shadow-lg w-full max-w-4xl mt-16 mb-16">
         <button
-          className="mb-4 btn-primary px-4 py-2 rounded-md cursor-pointer"
+          className="mb-4 btn-primary font-bold px-4 py-2 rounded-lg cursor-pointer"
           onClick={() => navigate("/roadmaps/skill-gap-roadmap")}
         >
           &larr; Back to Skill Gap Roadmaps

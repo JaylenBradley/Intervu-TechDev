@@ -1,13 +1,15 @@
+import ResumePageLayout from "../components/ResumePageLayout";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
 import { improveResumeByUserId } from "../services/resumeServices";
 
 const CreateResume = ({ user }) => {
-  const [improvedResume, setImprovedResume] = useState("");
   const [improving, setImproving] = useState(false);
   const [improveError, setImproveError] = useState("");
+  const [improvedResume, setImprovedResume] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [exportFormat, setExportFormat] = useState(null);
   const navigate = useNavigate();
   const { showNotification } = useNotification();
 
@@ -31,6 +33,7 @@ const CreateResume = ({ user }) => {
 
   const handleExport = async (format) => {
     setExporting(true);
+    setExportFormat(format);
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api/resume/export?user_id=${user.id}&format=${format}`
@@ -49,62 +52,56 @@ const CreateResume = ({ user }) => {
       showNotification("Error exporting resume. Please try again.", "error");
     } finally {
       setExporting(false);
+      setExportFormat(null);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center py-16">
-      <div className={`w-full max-w-2xl flex flex-col items-center`}>
-        <button
-          onClick={() => navigate("/resume")}
-          className="mb-6 bg-white text-app-primary px-6 py-3 text-lg rounded-xl border-2 border-app-primary hover:bg-app-primary hover:text-white transition-colors shadow font-semibold"
-        >
-          ← Back
-        </button>
-        <div className="bg-white rounded-2xl shadow-2xl p-10 w-full flex flex-col items-center border-2 border-app-primary">
-          <h1 className="text-3xl font-extrabold text-app-primary mb-8">Improve Your Resume</h1>
-          <button
-            onClick={handleImproveResume}
-            disabled={improving}
-            className="bg-app-primary text-white px-8 py-3 text-lg rounded-xl mb-6 hover:bg-app-primary/90 transition-colors font-semibold flex items-center justify-center min-w-[200px] min-h-[56px]"
-          >
-            {improving ? (
-              <div className="loader-md" />
-            ) : (
-              "Improve Resume"
-            )}
-          </button>
-          {improveError && (
-            <div className="mb-6 text-red-600 font-bold text-lg">{improveError}</div>
-          )}
-          {improvedResume && (
-            <>
-              <textarea
-                className="w-full h-72 border-2 border-app-primary rounded-xl p-5 mt-4 text-lg"
-                value={improvedResume}
-                readOnly
-              />
-              <div className="flex gap-4 mt-6">
-                <button
-                  onClick={() => handleExport("pdf")}
-                  disabled={exporting}
-                  className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-app-primary/90 transition-colors flex items-center justify-center min-w-[160px] min-h-[44px]"
-                >
-                  {exporting ? <div className="loader-md" /> : "Export as PDF"}
-                </button>
-                <button
-                  onClick={() => handleExport("docx")}
-                  disabled={exporting}
-                  className="bg-app-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-app-primary/90 transition-colors flex items-center justify-center min-w-[160px] min-h-[44px]"
-                >
-                  {exporting ? <div className="loader-md" /> : "Export as Word"}
-                </button>
-              </div>
-            </>
-          )}
+    <ResumePageLayout cardClassName="w-full">
+      <h1 className="text-3xl font-extrabold text-app-primary mb-4">Improve Your Resume</h1>
+      <button
+        onClick={handleImproveResume}
+        disabled={improving}
+        className="btn-primary font-bold px-8 py-3 rounded-xl mb-4 cursor-pointer min-w-[200px] min-h-[56px]"
+      >
+        {improving ? (
+          <span className="flex items-center gap-2">
+            <div className="loader-md" /> Improving...
+          </span>
+        ) : (
+          "Improve Resume"
+        )}
+      </button>
+      {improveError && (
+        <div className="mb-4 text-red-600 font-bold text-lg">{improveError}</div>
+      )}
+      {improvedResume && (
+        <div className="w-full bg-white border-2 border-app-primary rounded-xl shadow p-6 mb-4 whitespace-pre-wrap text-base">
+          {improvedResume}
         </div>
-      </div>
-    </div>
+      )}
+      {improvedResume && (
+        <div className="flex gap-4 mt-2">
+          <button
+            onClick={() => handleExport("pdf")}
+            disabled={exporting}
+            className="btn-primary px-6 py-2 rounded-lg font-semibold hover:bg-app-primary/90 transition-colors
+            flex items-center justify-center min-w-[160px] min-h-[44px] cursor-pointer"
+          >
+            {exporting && exportFormat === "pdf" ? <div className="loader-md" /> : "Export as PDF"}
+          </button>
+          <button
+            onClick={() => handleExport("docx")}
+            disabled={exporting}
+            className="
+              btn-primary px-6 py-2 rounded-lg font-semibold hover:bg-app-primary/90 transition-colors
+              flex items-center justify-center min-w-[160px] min-h-[44px] cursor-pointer"
+          >
+            {exporting && exportFormat === "docx" ? <div className="loader-md" /> : "Export as Word"}
+          </button>
+        </div>
+      )}
+    </ResumePageLayout>
   );
 };
 

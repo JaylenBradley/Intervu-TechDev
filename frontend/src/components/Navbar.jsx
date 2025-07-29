@@ -57,7 +57,7 @@ const Navbar = ({ user }) => {
   };
 
   return (
-    <nav className="flex items-center justify-between px-6 py-3 shadow bg-cyan-50">
+    <nav className="flex items-center justify-between px-6 py-3 shadow bg-gradient-to-br from-cyan-100 via-blue-100 to-cyan-100">
       {/* Left: Logo and Home */}
       <div className="flex items-center min-w-0">
         <button

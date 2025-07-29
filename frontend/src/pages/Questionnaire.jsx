@@ -160,7 +160,7 @@ const Questionnaire = ({ onComplete, user }) => {
         </h2>
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <div>
-            <label className="block mb-1 font-medium">Career Goal</label>
+            <label className="block mb-1 font-medium">Career Goal *</label>
             <input
               name="career_goal"
               value={form.career_goal}
@@ -171,7 +171,7 @@ const Questionnaire = ({ onComplete, user }) => {
             />
           </div>
           <div>
-            <label className="block mb-1 font-medium">Institution</label>
+            <label className="block mb-1 font-medium">Institution *</label>
             <input
               name="institution"
               value={form.institution}
@@ -182,7 +182,7 @@ const Questionnaire = ({ onComplete, user }) => {
             />
           </div>
           <div>
-            <label className="block mb-1 font-medium">Major</label>
+            <label className="block mb-1 font-medium">Major *</label>
             <input
               name="major"
               value={form.major}
@@ -203,7 +203,7 @@ const Questionnaire = ({ onComplete, user }) => {
             />
           </div>
           <div>
-            <label className="block mb-1 font-medium">Education Level</label>
+            <label className="block mb-1 font-medium">Education Level *</label>
             <input
               name="education_level"
               value={form.education_level}
@@ -214,7 +214,7 @@ const Questionnaire = ({ onComplete, user }) => {
             />
           </div>
           <div>
-            <label className="block mb-1 font-medium">Target Companies</label>
+            <label className="block mb-1 font-medium">Target Companies *</label>
             <input
               name="target_companies"
               value={form.target_companies}
@@ -252,7 +252,6 @@ const Questionnaire = ({ onComplete, user }) => {
               onChange={handleChange}
               className="w-full px-3 py-2 border border-app-primary rounded-lg focus:outline-none bg-app-background text-app-text"
               placeholder="Skills - (Ex: Python, Excel, Graphic Design)"
-              required
             />
           </div>
           <div>
@@ -266,7 +265,7 @@ const Questionnaire = ({ onComplete, user }) => {
             />
           </div>
           <div>
-            <label className="block mb-1 font-medium">Interests</label>
+            <label className="block mb-1 font-medium">Interests *</label>
             <input
               name="interests"
               value={form.interests}
@@ -277,7 +276,7 @@ const Questionnaire = ({ onComplete, user }) => {
             />
           </div>
           <div>
-            <label className="block mb-1 font-medium">Learning Preference</label>
+            <label className="block mb-1 font-medium">Learning Preference *</label>
             <input
               name="learning_preference"
               value={form.learning_preference}
@@ -288,7 +287,7 @@ const Questionnaire = ({ onComplete, user }) => {
             />
           </div>
           <div>
-            <label className="block mb-1 font-medium">Timeline</label>
+            <label className="block mb-1 font-medium">Timeline *</label>
             <input
               name="timeline"
               value={form.timeline}
@@ -299,7 +298,7 @@ const Questionnaire = ({ onComplete, user }) => {
             />
           </div>
           <div>
-            <label className="block mb-1 font-medium">Available Hours Per Week</label>
+            <label className="block mb-1 font-medium">Available Hours Per Week *</label>
             <input
               name="available_hours_per_week"
               value={form.available_hours_per_week}

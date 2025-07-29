@@ -310,7 +310,7 @@ const JobDashboard = ({ user }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-app-primary">Job Tracker Dashboard</h1>
+            <h1 className="text-3xl font-bold text-app-text">Job Tracker Dashboard</h1>
             <p className="text-app-text mt-2">Track your job applications and interview progress</p>
           </div>
           <div className="flex gap-2">
@@ -378,7 +378,9 @@ const JobDashboard = ({ user }) => {
                 <select
                   value={filters.company_name}
                   onChange={e => setFilters(f => ({ ...f, company_name: e.target.value }))}
-                  className="rounded-full border border-blue-200 px-3 py-1 text-sm bg-white focus:ring-2 focus:ring-blue-300 shadow-sm w-full"
+                  className="
+                    rounded-full border border-blue-200 px-3 py-1 text-sm bg-white
+                    focus:ring-2 focus:ring-blue-300 shadow-sm w-full cursor-pointer"
                 >
                   <option value="">All</option>
                   {filterOptions.company_names.map(name => (
@@ -387,7 +389,9 @@ const JobDashboard = ({ user }) => {
                 </select>
                 <button
                   type="button"
-                  className="ml-1 px-2 py-1 border border-blue-200 rounded-full text-xs bg-blue-100 hover:bg-blue-200 transition-colors"
+                  className="
+                    ml-1 px-2 py-1 border border-blue-200 rounded-full text-xs bg-blue-100
+                    hover:bg-blue-200 transition-colors cursor-pointer"
                   onClick={() => setFilters(f => ({ ...f, company_sort: f.company_sort === "asc" ? "desc" : "asc" }))}
                   title="Toggle sort order"
                 >
@@ -404,7 +408,9 @@ const JobDashboard = ({ user }) => {
               <select
                 value={filters.job_title}
                 onChange={e => setFilters(f => ({ ...f, job_title: e.target.value }))}
-                className="rounded-full border border-green-200 px-3 py-1 text-sm bg-white focus:ring-2 focus:ring-green-300 shadow-sm w-full"
+                className="
+                  rounded-full border border-green-200 px-3 py-1 text-sm bg-white focus:ring-2
+                  focus:ring-green-300 shadow-sm w-full cursor-pointer"
               >
                 <option value="">All</option>
                 {filterOptions.job_titles.map(title => (
@@ -421,7 +427,9 @@ const JobDashboard = ({ user }) => {
               <select
                 value={filters.status}
                 onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
-                className="rounded-full border border-yellow-200 px-3 py-1 text-sm bg-white focus:ring-2 focus:ring-yellow-300 shadow-sm w-full"
+                className="
+                  rounded-full border border-yellow-200 px-3 py-1 text-sm bg-white focus:ring-2
+                  focus:ring-yellow-300 shadow-sm w-full cursor-pointer"
               >
                 <option value="">All</option>
                 {filterOptions.statuses.map(status => (
@@ -438,7 +446,9 @@ const JobDashboard = ({ user }) => {
               <select
                 value={filters.applied_date}
                 onChange={e => setFilters(f => ({ ...f, applied_date: e.target.value }))}
-                className="rounded-full border border-purple-200 px-3 py-1 text-sm bg-white focus:ring-2 focus:ring-purple-300 shadow-sm w-full"
+                className="
+                  rounded-full border border-purple-200 px-3 py-1 text-sm bg-white focus:ring-2
+                  focus:ring-purple-300 shadow-sm w-full cursor-pointer"
               >
                 <option value="">All</option>
                 {filterOptions.applied_dates.map(date => (
@@ -455,7 +465,9 @@ const JobDashboard = ({ user }) => {
               <select
                 value={filters.location}
                 onChange={e => setFilters(f => ({ ...f, location: e.target.value }))}
-                className="rounded-full border border-pink-200 px-3 py-1 text-sm bg-white focus:ring-2 focus:ring-pink-300 shadow-sm w-full"
+                className="
+                  rounded-full border border-pink-200 px-3 py-1 text-sm bg-white focus:ring-2
+                  focus:ring-pink-300 shadow-sm w-full cursor-pointer"
               >
                 <option value="">All</option>
                 {filterOptions.locations.map(loc => (
@@ -472,7 +484,9 @@ const JobDashboard = ({ user }) => {
               <select
                 value={filters.salary_range}
                 onChange={e => setFilters(f => ({ ...f, salary_range: e.target.value }))}
-                className="rounded-full border border-indigo-200 px-3 py-1 text-sm bg-white focus:ring-2 focus:ring-indigo-300 shadow-sm w-full"
+                className="
+                  rounded-full border border-indigo-200 px-3 py-1 text-sm bg-white focus:ring-2
+                  focus:ring-indigo-300 shadow-sm w-full cursor-pointer"
               >
                 <option value="">All</option>
                 {filterOptions.salary_ranges.map(sal => (
@@ -484,7 +498,9 @@ const JobDashboard = ({ user }) => {
             <div className="flex flex-col items-end justify-end h-full">
               <button
                 type="button"
-                className="px-4 py-2 rounded-full text-xs font-semibold bg-gray-200 hover:bg-gray-300 text-gray-700 border border-gray-300 shadow-sm mt-4 sm:mt-0"
+                className="
+                  px-4 py-2 rounded-full text-xs font-semibold bg-gray-200 hover:bg-gray-300
+                  text-gray-700 border border-gray-300 shadow-sm mt-4 sm:mt-0 cursor-pointer"
                 onClick={() => setFilters({
                   company_name: "",
                   company_sort: "asc",

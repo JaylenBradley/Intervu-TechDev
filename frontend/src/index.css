@@ -5,7 +5,7 @@
   --background: #f1f5f9;
   --primary: #38bdf8;
   --secondary: #ecfeff;
-  --accent: #ffffff;
+  --accent: #fafaf9;
   --text: #1F2937;
   --danger: #ef4444;
 }
@@ -174,15 +174,21 @@ body {
   border-color: var(--secondary);
 }
 
+.glass-card {
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-radius: 2rem;
+  border: 1.5px solid rgba(56, 189, 248, 0.25);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
 .icon-pop {
   transition: transform 0.18s, box-shadow 0.18s;
 }
 .icon-pop:hover {
   transform: scale(1.25);
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 .loader-md {
@@ -202,3 +208,23 @@ body {
   height: 256px;
   animation: spin 1s linear infinite;
 }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes blob1 {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.15) translateY(20px); }
+}
+@keyframes blob2 {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.1) translateY(-30px); }
+}
+@keyframes blob3 {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.2) translateY(15px); }
+}
+.animate-blob1 { animation: blob1 10s infinite ease-in-out; }
+.animate-blob2 { animation: blob2 12s infinite ease-in-out; }
+.animate-blob3 { animation: blob3 14s infinite ease-in-out; }

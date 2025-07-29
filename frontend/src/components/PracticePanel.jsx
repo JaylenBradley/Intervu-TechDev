@@ -92,7 +92,7 @@ const borderSpace =
           onChange={(e) => setApproachSel(e.target.value)}
           onFocus={() => setStatusA(null)}                  
         className={`w-full md:w-67 px-3 py-2 border ${borderA} rounded-lg
-                     bg-app-background text-app-text focus:outline-none`}
+                     bg-app-background text-app-text focus:outline-none cursor-pointer`}
         >
           <option value="">-- select --</option>
           {APPROACHES.map((a) => (
@@ -103,13 +103,15 @@ const borderSpace =
         <div className="flex flex-wrap mt-4 gap-4">
           <button
             onClick={checkApproach}
-            className="btn-primary px-6 py-2 rounded-lg font-semibold"
+            className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
           >
             Check
           </button>
             <button
              onClick={() => fetchExplanation("approach")}
-            className="btn-secondary px-6 py-2 rounded-lg font-semibold border border-app-primary hover:bg-black hover:text-white  transition-colors"
+            className="
+              btn px-6 py-2 rounded-lg font-semibold border border-app-primary
+              transition-colors cursor-pointer"
             >
             Explain Answer 
             </button>
@@ -164,19 +166,21 @@ const borderSpace =
         <div className="flex flex-wrap gap-4">
           <button
             onClick={checkLines}
-            className="btn-primary px-6 py-2 rounded-lg font-semibold"
+            className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
           >
             Check Code
           </button>
           <button
             onClick={shuffleCurrent}
-            className="btn-primary px-6 py-2 rounded-lg font-semibold"
+            className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
           >
             Shuffle
           </button>
             <button
              onClick={() => fetchExplanation("indent")}
-            className="btn-secondary px-6 py-2 rounded-lg font-semibold border border-app-primary hover:bg-black hover:text-white  transition-colors"
+            className="
+              btn px-6 py-2 rounded-lg font-semibold border border-app-primary
+              transition-colors cursor-pointer"
             >
             Explain Answer 
             </button>
@@ -215,7 +219,7 @@ const borderSpace =
             onFocus={() => setStatusCx(null)}
             onChange={(e) => setTimeSel(e.target.value)}
             className={`w-full px-3 py-2 border ${borderTime} rounded-lg
-              bg-app-background text-app-text`}
+              bg-app-background text-app-text cursor-pointer`}
           >
             <option value="">-- time --</option>
             {COMPLEXITIES.map((c) => (
@@ -228,7 +232,7 @@ const borderSpace =
             onChange={(e) => setSpaceSel(e.target.value)}
              onFocus={() => setStatusCx(null)}
             className={`w-full px-3 py-2 border ${borderSpace} rounded-lg
-                        bg-app-background text-app-text`}
+                        bg-app-background text-app-text cursor-pointer`}
           >
             <option value="">-- space --</option>
             {COMPLEXITIES.map((c) => (
@@ -240,13 +244,15 @@ const borderSpace =
         <div className="flex flex-wrap mt-4 gap-4">
           <button
             onClick={checkComplexities}
-            className="btn-primary px-6 py-2 rounded-lg font-semibold"
+            className="btn-primary px-6 py-2 rounded-lg font-semibold cursor-pointer"
           >
             Check
           </button>
           <button
              onClick={() => fetchExplanation("complexity")}
-            className="btn-secondary px-6 py-2 rounded-lg font-semibold border border-app-primary hover:bg-black hover:text-white  transition-colors"
+            className="
+              btn px-6 py-2 rounded-lg font-semibold border border-app-primary
+              transition-colors cursor-pointer"
             >
             Explain Answer 
             </button>

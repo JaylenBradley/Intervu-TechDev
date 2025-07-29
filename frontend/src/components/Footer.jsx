@@ -1,7 +1,7 @@
 import intervuLogo from "../assets/images/intervu-logo-transparent.png";
 
 const Footer = () => (
-  <footer className="w-full bg-cyan-50 py-4 px-8 flex items-center justify-center shadow-lg h-20">
+  <footer className="bg-gradient-to-br from-cyan-100 via-blue-100 to-cyan-100 w-full py-4 px-8 flex items-center justify-center shadow-lg h-20">
     <div className="flex items-center mr-2">
       <img
         src={intervuLogo}

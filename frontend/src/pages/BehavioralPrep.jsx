@@ -263,7 +263,7 @@ const BehavioralPrep = ({ user }) => {
     <div className="min-h-screen flex flex-col items-center py-10">
       <div className="mb-2">
         <button
-          className="mb-2 btn-primary px-4 py-2 rounded-md cursor-pointer"
+          className="mb-2 btn-primary font-bold px-4 py-2 rounded-lg cursor-pointer"
           onClick={() => window.history.back()}
         >
           &larr; Back

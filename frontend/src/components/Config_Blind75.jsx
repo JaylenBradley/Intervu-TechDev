@@ -98,7 +98,7 @@ export default function ConfigBlind75({
               value={numQuestions}
               onChange={(e) => setNumQuestions(+e.target.value)}
               className="w-full px-3 py-2 border border-app-primary rounded-lg
-                         bg-app-background focus:outline-none"
+                         bg-app-background focus:outline-none cursor-pointer"
             >
               {[3, 5, 10].map((n) => (
                 <option key={n} value={n}>
@@ -163,7 +163,7 @@ export default function ConfigBlind75({
                 <button
                   type="button"
                   onClick={() => setEvaluationMode(!evaluationMode)}
-                  className="relative w-11 h-6 focus:outline-none"
+                  className="relative w-11 h-6 focus:outline-none cursor-pointer"
                 >
                   <span
                     className={`block w-full h-full rounded-full transition-colors
@@ -202,7 +202,7 @@ export default function ConfigBlind75({
                   <select
                     value={elimMode}
                     onChange={(e) => setElimMode(e.target.value)}
-                    className="px-3 py-2 border rounded-lg bg-white focus:outline-none"
+                    className="px-3 py-2 border rounded-lg bg-white focus:outline-none cursor-pointer"
                   >
                     <option value="none">Off</option>
                     <option value="random">Random N</option>
@@ -217,25 +217,25 @@ export default function ConfigBlind75({
                     value={elimCount}
                     onChange={(e) => setElimCount(+e.target.value)}
                     className="w-20 px-3 py-2 border rounded-lg bg-white
-                               focus:outline-none disabled:opacity-50"
+                               focus:outline-none disabled:opacity-50 "
                   />
                   <span className="text-sm text-gray-500">lines</span>
                 </div>
               </div>
 
               {/* save / cancel */}
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-center gap-2">
                 <button
                   type="button"
                   onClick={handleCancelCfg}
-                  className="px-4 py-1 rounded-lg text-sm border"
+                  className="btn-danger w-24 px-2 py-1 rounded-lg text-sm border cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveCfg}
-                  className="btn-primary px-4 py-1 rounded-lg text-sm"
+                  className="btn-primary w-24 px-2 py-1 rounded-lg text-sm  cursor-pointer"
                 >
                   Save
                 </button>
@@ -243,7 +243,7 @@ export default function ConfigBlind75({
             </>
           )}
 
-          <button className="btn-primary w-full py-2 rounded-lg font-semibold">
+          <button className="btn-primary w-full py-2 rounded-lg font-semibold cursor-pointer">
             Start Practice
           </button>
         </form>
