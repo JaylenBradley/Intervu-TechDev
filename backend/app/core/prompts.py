@@ -192,13 +192,14 @@ def feedback_resume_prompt(resume_text: str) -> str:
 
     CRITICAL INSTRUCTIONS:
     - You MUST analyze EACH INDIVIDUAL bullet point separately
-    - Look for bullet points that start with •, -, *, or similar symbols
+    - Look for bullet points that start with •, -, *, ▪, or similar symbols
     - For each bullet point, provide separate feedback
     - Do NOT group multiple bullet points together
     - Do NOT analyze section headers, job titles, company names, or dates
+    - When showing the "Original:" text, REMOVE all bullet point symbols (•, -, *, ▪, etc.) and show only the actual content
 
     FORMAT FOR EACH BULLET POINT:
-    Original: [exact bullet point text]
+    Original: [bullet point text WITHOUT bullet symbols (•, -, *, ▪, etc.)]
     Grade: [score out of 10] (e.g., "Grade: 7/10")
     Feedback: [brief evaluation of this specific bullet point]
     - Option 1: [complete improved version of this bullet point]
