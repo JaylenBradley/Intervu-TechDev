@@ -68,7 +68,22 @@ def behavioral_questions_prompt(target_role, seniority, company, num_questions, 
     """
 
 
-def behavioral_feedback_prompt(target_role, seniority, company, question, answer, difficulty):
+def behavioral_feedback_prompt(target_role, seniority, company, question, answer, difficulty, pause_analysis=None):
+    pause_section = ""
+    if pause_analysis:
+        pause_section = f"""
+    Speech Analysis (IMPORTANT - Include this in your tone evaluation):
+    - Total significant pauses ≥1 seconds: {pause_analysis.get('total_pauses', 0)}
+    - Long pauses ≥2 seconds: {pause_analysis.get('long_pauses', 0)}
+    - Average pause duration: {pause_analysis.get('average_pause_duration', 0)} seconds
+    
+    MANDATORY: Include pause analysis in the "pauses" field of your tone section with specific numbers:
+    - If 0-1 total pauses: "Excellent fluency with {pause_analysis.get('total_pauses', 0)} pause(s) detected"
+    - If 2-3 total pauses: "Good fluency with {pause_analysis.get('total_pauses', 0)} pause(s) averaging {pause_analysis.get('average_pause_duration', 0)}s each"
+    - If 4+ total pauses or 2+ long pauses: "Noticeable hesitation: {pause_analysis.get('total_pauses', 0)} pauses detected ({pause_analysis.get('long_pauses', 0)} long pauses), practice for smoother delivery"
+    - Always mention the specific number of pauses and duration information in your response
+    """
+    
     return f"""
     You are a professional behavioral interview coach evaluating a candidate's response to a behavioral interview question.
 
@@ -81,13 +96,14 @@ def behavioral_feedback_prompt(target_role, seniority, company, question, answer
     Evaluation input:
     - Question: "{question}"
     - Answer: "{answer}"
-
+    {pause_section}
+    
     You must provide structured feedback in valid JSON. Focus on:
 
     Provide structured feedback in valid JSON. Focus on:
     - Structure: Did they follow STAR format? Was it complete and clear?
     - Content: Was the story relevant and strong? Did they demonstrate useful skills or behaviors?
-    - Tone: Was the tone confident, professional, and concise? (Optional — only if speech data supports tone analysis.)
+    - Tone: Was the tone confident, professional, and concise? If speech analysis is provided, evaluate fluency and hesitation patterns.
     - Overall Assessment: A brief, 1–2 sentence summary of your evaluation.
     - Suggestions: Clear, actionable tips to improve future answers.
 
@@ -109,6 +125,7 @@ def behavioral_feedback_prompt(target_role, seniority, company, question, answer
       "tone": {{
         "confident": true,
         "issues": [],
+        "pauses": "Excellent fluency with minimal hesitation",
         "notes": ""
       }},
       "overall_assessment": "Strong answer with relevant content and structure, but could be improved by including a quantifiable result.",

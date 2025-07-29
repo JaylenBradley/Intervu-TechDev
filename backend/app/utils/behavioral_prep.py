@@ -29,8 +29,8 @@ def generate_behavioral_questions(target_role, seniority, company, num_questions
         questions = [q.strip("0123456789. ").strip() for q in text.strip().split("\n") if q.strip()]
     return questions
 
-def generate_behavioral_feedback(target_role, seniority, company, question, answer, difficulty):
-    prompt = behavioral_feedback_prompt(target_role, seniority, company, question, answer, difficulty)
+def generate_behavioral_feedback(target_role, seniority, company, question, answer, difficulty, pause_analysis=None):
+    prompt = behavioral_feedback_prompt(target_role, seniority, company, question, answer, difficulty, pause_analysis)
     res = client.models.generate_content(
         model="gemini-2.5-flash",
         config=types.GenerateContentConfig(
@@ -42,11 +42,11 @@ def generate_behavioral_feedback(target_role, seniority, company, question, answ
     try:
         json.loads(feedback)
         return feedback
-    except Exception:
+    except Exception as e:
         return json.dumps({
             "structure": {"star_used": False, "missing_parts": [], "notes": ""},
             "content": {"relevance": False, "strengths": [], "weaknesses": []},
-            "tone": {"confident": False, "issues": [], "notes": ""},
+            "tone": {"confident": False, "issues": [], "pauses": "No speech analysis available", "notes": ""},
             "overall_assessment": "",
             "suggestions": []
         })

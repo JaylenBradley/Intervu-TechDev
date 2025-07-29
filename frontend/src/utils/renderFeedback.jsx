@@ -39,6 +39,7 @@ export const renderFeedback = (feedback) => {
             ? <ul className="list-disc ml-6">{data.tone.issues.map((issue, i) => <li key={i}>{issue}</li>)}</ul>
             : "None"}
         </li>
+        <li>Pauses: {data.tone?.pauses || "No speech analysis available"}</li>
         <li>Notes: {data.tone?.notes}</li>
       </ul>
       <h4 className="font-bold mt-3 mb-2">Overall Assessment</h4>

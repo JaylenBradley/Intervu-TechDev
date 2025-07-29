@@ -9,5 +9,8 @@ export async function uploadAudio(file) {
   });
   if (!res.ok) throw new Error("Failed to transcribe audio");
   const data = await res.json();
-  return data.transcript;
+  return {
+    transcript: data.transcript,
+    pause_analysis: data.pause_analysis
+  };
 }

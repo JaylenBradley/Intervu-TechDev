@@ -154,15 +154,16 @@ const BehavioralPrep = ({ user }) => {
     setLoading(true);
     setFeedback("");
     try {
-      const transcript = await uploadAudio(audioFile);
-      setAnswer(transcript);
+      const audioData = await uploadAudio(audioFile);
+      setAnswer(audioData.transcript);
       const fb = await getBehavioralFeedback({
         question: questions[selectedIdx],
-        answer: transcript,
+        answer: audioData.transcript,
         target_role: form.target_role,
         company: form.company,
         seniority: form.seniority,
         difficulty: form.difficulty,
+        pause_analysis: audioData.pause_analysis,
       });
       setAudioRecorded(true);
       setFeedback(fb);
@@ -246,6 +247,7 @@ const BehavioralPrep = ({ user }) => {
         company: form.company,
         seniority: form.seniority,
         difficulty: form.difficulty,
+        pause_analysis: null,
       });
       setFeedback(fb);
     } catch {
