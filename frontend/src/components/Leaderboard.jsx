@@ -43,22 +43,20 @@ const Leaderboard = () => {
       const isTemporaryError = error.message.includes('Failed to fetch') || 
                               error.message.includes('NetworkError') ||
                               error.message.includes('CORS') ||
-                              error.message.includes('502') ||
-                              error.message.includes('Bad Gateway') ||
-                              retryCount < 15; // Allow up to 15 retries for cold starts
+                              retryCount < 3; // Allow up to 3 retries
       
-      if (isTemporaryError && retryCount < 15) {
-        // Retry with exponential backoff, but cap at 8 seconds
-        const delay = Math.min(Math.pow(2, retryCount) * 1000, 8000); // 1s, 2s, 4s, 8s, 8s...
-        console.log(`Retrying in ${delay}ms... (Attempt ${retryCount + 1}/15)`);
+      if (isTemporaryError && retryCount < 3) {
+        // Retry with exponential backoff
+        const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+        console.log(`Retrying in ${delay}ms...`);
         setRetryCount(prev => prev + 1);
         setTimeout(() => {
           fetchLeaderboardData(true);
         }, delay);
         return; // Don't set error or stop loading yet
       } else {
-        // Give up after 15 retries or if it's a permanent error
-        setError("Failed to load leaderboard data after multiple attempts. The server may be experiencing issues.");
+        // Give up after 3 retries or if it's a permanent error
+        setError("Failed to load leaderboard data. Please try again later.");
       }
     } finally {
       setLoading(false);
@@ -191,18 +189,13 @@ const Leaderboard = () => {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-app-primary mx-auto"></div>
           <p className="text-gray-500 mt-2">
             {isRetrying 
-              ? `Loading leaderboard... (Retry ${retryCount}/15)`
+              ? `Loading leaderboard... (Retry ${retryCount}/3)`
               : "Loading leaderboard..."
             }
           </p>
           {isRetrying && (
             <p className="text-sm text-gray-400 mt-1">
-              {retryCount <= 5 
-                ? "Server is warming up, please wait..."
-                : retryCount <= 10
-                ? "Server is taking longer than usual to respond..."
-                : "Server may be experiencing high load, please wait..."
-              }
+              Server is warming up, please wait...
             </p>
           )}
         </div>

@@ -73,10 +73,6 @@ export async function getLeaderboardByStreaks(limit = 10) {
     if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
       throw new Error('CORS/Network error - server may be warming up');
     }
-    // Check for 502 Bad Gateway (server down)
-    if (error.message.includes('502') || error.message.includes('Bad Gateway')) {
-      throw new Error('502 Bad Gateway - server is starting up');
-    }
     throw error;
   }
 }
@@ -95,10 +91,6 @@ export async function getLeaderboardByPoints(limit = 10) {
     // Check if it's a CORS or network error
     if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
       throw new Error('CORS/Network error - server may be warming up');
-    }
-    // Check for 502 Bad Gateway (server down)
-    if (error.message.includes('502') || error.message.includes('Bad Gateway')) {
-      throw new Error('502 Bad Gateway - server is starting up');
     }
     throw error;
   }
