@@ -161,7 +161,7 @@ const UserProfile = ({ user: initialUser = defaultUser, isCurrentUser = true }) 
             
             {/* Career Goal Display */}
             {user.career_goal && (
-              <div className="flex items-center gap-3 pt-2 border-t border-gray-200">
+              <div className="flex items-center gap-3 pt-1">
                 <span className="font-semibold text-app-primary">Career Goal:</span>
                 <span className="inline-block bg-app-primary text-white px-3 py-1 rounded-full text-sm font-medium shadow-sm">
                   {user.career_goal}
