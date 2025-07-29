@@ -48,7 +48,9 @@ const TailorResume = ({ user }) => {
     setExporting(true);
     setExportFormat(format);
     try {
-      const blob = await exportTailoredResume(user.id, format, tailoredResume);
+      // Use the cleaned tailored data for export instead of raw JSON
+      const exportData = tailoredParsed ? JSON.stringify(tailoredParsed) : tailoredResume;
+      const blob = await exportTailoredResume(user.id, format, exportData);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -257,7 +259,7 @@ const TailorResume = ({ user }) => {
                   )}
                   {resume.parsed_data.leadership && resume.parsed_data.leadership.length > 0 && (
                     <div className="mb-4">
-                      <strong>Leadership:</strong>
+                      <strong>Leadership & Involvement:</strong>
                       <ul className="list-disc ml-6">
                         {resume.parsed_data.leadership.map((lead, i) => (
                           <li key={i}>
@@ -276,7 +278,7 @@ const TailorResume = ({ user }) => {
                   )}
                   {resume.parsed_data.skills && resume.parsed_data.skills.length > 0 && (
                     <div className="mb-4">
-                      <strong>Skills:</strong> {resume.parsed_data.skills.join(", ")}
+                      <strong>Technical Skills:</strong> {resume.parsed_data.skills.join(", ")}
                     </div>
                   )}
                   {resume.parsed_data.certifications && resume.parsed_data.certifications.length > 0 && (
