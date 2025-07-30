@@ -1,16 +1,16 @@
 # Intervu
 
 Intervu is an AI-powered career planning and interview preparation platform. 
-It features a React frontend and a Python backend, helping users generate personalized roadmaps, practice technical & behavioral interviews, and improve resumes.
+It features a React frontend and a FastAPI backend, helping users generate personalized roadmaps, practice technical & behavioral interviews, track jobs, and improve resumes
 
 ## Features
-- Modern React web interface
 - User authentication (Firebase)
-- Personalized career roadmap generation
+- User profile with the ability to follow friends, manage account, and view leaderboard
+- Personalized career & skill gap roadmap generation
 - Technical & behavioral interview prep with AI feedback
-- Resume improvement and feedback
-- Job tracking and milestone monitoring
-- Integration with Google Cloud Speech-to-Text and Google Sheets APIs
+- Job tracking and milestone monitoring with the ability to export data
+
+- Resume improvement, feedback and tailoring
 
 ## Prerequisites
 - Python 3.8 or higher
@@ -22,6 +22,7 @@ It features a React frontend and a Python backend, helping users generate person
 ## API Keys
 You will need API keys for:
 - [Firebase](https://console.firebase.google.com/u/0/)
+- [Firebase Admin SDK](https://firebase.google.com/docs/admin/setup)
 - [Gemini API](https://aistudio.google.com/prompts/new_chat)
 - [Google Cloud Speech-to-Text API](https://console.cloud.google.com/apis/api/speech.googleapis.com/metrics?inv=1&invt=Ab3Xzw&project=gen-lang-client-0080872580)
 - [Google Sheets API](https://console.cloud.google.com/apis/api/sheets.googleapis.com/metrics?inv=1&invt=Ab3Xzw&project=gen-lang-client-0080872580)
@@ -29,8 +30,9 @@ You will need API keys for:
 Create a `.env` file in the root of the backend directory with the following content:
 
 ```bash
+FIREBASE_CREDENTIALS=app/your_firebase_admin_sdk_credentials_json
 GENAI_API_KEY=your_gemini_api_key
-GOOGLE_APPLICATION_CREDENTIALS=your_google_speech_api_key
+GOOGLE_APPLICATION_CREDENTIALS=app/your_google_speech_credentials_json
 GOOGLE_CLIENT_ID=from_your_google_sheets_api_key
 GOOGLE_CLIENT_SECRET=from_your_google_sheets_api_key
 GOOGLE_PROJECT_ID=from_your_google_sheets_api_key
@@ -99,8 +101,8 @@ npm run dev
 ## Usage
 - Sign up and log in via the web interface
 - Complete the questionnaire to generate your personalized roadmap
-- Access interview prep, resume feedback, and job tracking features
+- Access interview prep, job tracking features, and resume tools
 
 ## Directory Structure
-- `backend/` — Python FastAPI backend, business logic, API integrations
+- `backend/` — FastAPI backend, business logic, API integrations
 - `frontend/` — React app, UI components, pages, services
