@@ -73,7 +73,7 @@ const FriendsListModal = ({ isOpen, onClose, currentUser, type = "following", on
             </div>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 p-2"
+              className="text-gray-500 hover:text-gray-700 p-2 cursor-pointer"
             >
               <FaTimes size={20} />
             </button>
@@ -122,7 +122,9 @@ const FriendsListModal = ({ isOpen, onClose, currentUser, type = "following", on
                       <button
                         onClick={() => handleUnfollow(friend.id)}
                         disabled={unfollowingId === friend.id}
-                        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                        className="
+                          flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-700
+                          hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
                       >
                         {unfollowingId === friend.id ? (
                           <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-600"></div>

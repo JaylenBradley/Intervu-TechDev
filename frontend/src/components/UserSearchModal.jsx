@@ -121,9 +121,9 @@ const UserSearchModal = ({ isOpen, onClose, currentUser, onFriendsUpdated }) => 
             <h3 className="text-xl font-bold text-app-primary">Find Users to Follow</h3>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 p-2"
+              className="text-gray-500 hover:text-gray-700 p-2 cursor-pointer"
             >
-              <FaTimes size={20} />
+              <FaTimes size={20}/>
             </button>
           </div>
 
@@ -155,7 +155,7 @@ const UserSearchModal = ({ isOpen, onClose, currentUser, onFriendsUpdated }) => 
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setSelectedCareerGoal("")}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors cursor-pointer ${
                       selectedCareerGoal === "" 
                         ? "bg-app-primary text-white" 
                         : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -167,7 +167,7 @@ const UserSearchModal = ({ isOpen, onClose, currentUser, onFriendsUpdated }) => 
                     <button
                       key={goal}
                       onClick={() => setSelectedCareerGoal(goal)}
-                      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors cursor-pointer ${
                         selectedCareerGoal === goal 
                           ? "bg-app-primary text-white" 
                           : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -232,7 +232,7 @@ const UserSearchModal = ({ isOpen, onClose, currentUser, onFriendsUpdated }) => 
                     <button
                       onClick={() => user.is_following ? handleUnfollow(user.id) : handleFollow(user.id)}
                       disabled={loading}
-                      className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 ${
+                      className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 cursor-pointer ${
                         user.is_following 
                           ? "bg-gray-200 text-gray-700 hover:bg-gray-300" 
                           : "btn-primary"

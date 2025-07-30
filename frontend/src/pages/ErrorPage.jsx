@@ -16,11 +16,11 @@ const ErrorPage = () => {
         <h1 className="text-6xl font-extrabold text-app-primary mb-2">404</h1>
         <p className="text-xl font-semibold mb-4 text-app-text">Page Not Found</p>
         <blockquote className="italic text-app-secondary mb-6 text-center">
-          "Mistakes are proof that you are trying." <br />
+          "Mistakes are proof that you are trying." <br/>
           <span className="text-sm text-app-text">— Unknown</span>
         </blockquote>
         <button
-          className="btn btn-primary w-full py-3 rounded-lg font-semibold mt-2 cursor-pointer"
+          className="btn btn-primary font-bold w-full py-3 rounded-lg font-semibold mt-2 cursor-pointer"
           onClick={() => navigate("/")}
         >
           Go Home

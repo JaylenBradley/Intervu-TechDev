@@ -149,7 +149,7 @@ const UserProfile = ({ user: initialUser = defaultUser, isCurrentUser = true }) 
           </div>
           
           {/* Bio & Education */}
-          <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary flex flex-col gap-4">
+          <div className="bg-white rounded-xl shadow p-6 border-2 border-app-primary flex flex-col gap-5">
             <div>
               <span className="font-semibold text-app-primary">Bio:</span>
               <span className="ml-2 text-gray-700">{user.bio || "Add a short bio about yourself"}</span>
@@ -158,19 +158,19 @@ const UserProfile = ({ user: initialUser = defaultUser, isCurrentUser = true }) 
               <span className="font-semibold text-app-primary">Education:</span>
               <span className="ml-2 text-gray-700">{user.education || "Add your education here"}</span>
             </div>
-            
+
             {/* Career Goal Display */}
             {user.career_goal && (
-              <div className="flex items-center gap-3 pt-1">
+              <div className="flex items-center gap-2">
                 <span className="font-semibold text-app-primary">Career Goal:</span>
-                <span className="inline-block bg-app-primary text-white px-3 py-1 rounded-full text-sm font-medium shadow-sm">
+                <span className="inline-block bg-app-primary text-white px-3 py-1 rounded-full text-sm shadow-sm">
                   {user.career_goal}
                 </span>
               </div>
             )}
 
             {user.linkedin && (
-              <div className="mt-4">
+              <div>
                 <a
                   href={formatUrl(user.linkedin)}
                   target="_blank"
@@ -183,7 +183,7 @@ const UserProfile = ({ user: initialUser = defaultUser, isCurrentUser = true }) 
             )}
 
             {user.github && (
-              <div className="mt-2">
+              <div>
                 <a
                   href={formatUrl(user.github)}
                   target="_blank"
@@ -214,7 +214,7 @@ const UserProfile = ({ user: initialUser = defaultUser, isCurrentUser = true }) 
               {isCurrentUser && (
                 <button
                   onClick={() => setSearchModalOpen(true)}
-                  className="btn-primary px-3 py-1 rounded-lg font-semibold text-sm flex items-center gap-1"
+                  className="btn-primary px-3 py-1 rounded-lg font-semibold text-sm flex items-center gap-1 cursor-pointer"
                 >
                   <FaUserPlus size={14} />
                   Add
@@ -236,7 +236,7 @@ const UserProfile = ({ user: initialUser = defaultUser, isCurrentUser = true }) 
                           setFriendsListType("following");
                           setFriendsListModalOpen(true);
                         }}
-                        className="text-app-primary hover:text-app-primary-dark text-xs font-medium flex items-center gap-1"
+                        className="text-app-primary hover:text-app-primary-dark text-xs font-medium flex items-center gap-1 cursor-pointer"
                       >
                         <FaEye size={12} />
                         View All
@@ -285,7 +285,7 @@ const UserProfile = ({ user: initialUser = defaultUser, isCurrentUser = true }) 
                           setFriendsListType("followers");
                           setFriendsListModalOpen(true);
                         }}
-                        className="text-app-primary hover:text-app-primary-dark text-xs font-medium flex items-center gap-1"
+                        className="text-app-primary hover:text-app-primary-dark text-xs font-medium flex items-center gap-1 cursor-pointer"
                       >
                         <FaEye size={12} />
                         View All
