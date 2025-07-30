@@ -10,9 +10,9 @@
   --danger: #ef4444;
 }
 
-/*body {*/
-/*  @apply bg-gradient-to-br from-cyan-300 via-gray-200 to-cyan-300;*/
-/*}*/
+body {
+  @apply bg-gradient-to-br from-cyan-400 via-blue-200 to-cyan-400;
+}
 
 .bg-app-background { background-color: var(--background); }
 .bg-app-primary { background-color: var(--primary); }
