@@ -358,7 +358,7 @@ const JobDashboard = ({ user }) => {
             <div key={status} className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
               <div className="text-2xl font-bold text-app-primary">{count}</div>
               <div className="text-sm text-app-text capitalize">{status}</div>
-              {stats.total > 0 && (
+              {stats.total > 0 && status !== 'total' && (
                 <div className="text-xs text-app-primary mt-1">{Math.round((count / stats.total) * 100)}% of total</div>
               )}
             </div>
