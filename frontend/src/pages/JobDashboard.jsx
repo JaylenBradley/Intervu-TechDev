@@ -317,12 +317,13 @@ const JobDashboard = ({ user }) => {
             <button
               className="btn-primary text-white px-6 py-3 rounded-lg transition-colors flex items-center gap-2 cursor-pointer"
               onClick={() => {
-                if (!user || !user.id) {
-                  showNotification("Please sign in to export to Google Sheets.", "error");
-                  return;
-                }
-                window.open(`${backendUrl}/api/jobs/export-to-sheets/${user.id}`, '_blank');
-              }}
+              //   if (!user || !user.id) {
+              //     showNotification("Please sign in to export to Google Sheets.", "error");
+              //     return;
+              //   }
+              //   window.open(`${backendUrl}/api/jobs/export-to-sheets/${user.id}`, '_blank');
+              showNotification("Export to Google Sheets is temporarily unavailable. We're working on a fix!");
+            }}
             >
               <span>
                 <CiExport/>

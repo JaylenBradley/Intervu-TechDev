@@ -42,7 +42,7 @@ const AuthForm = ({ isSignUp }) => {
 
             await createUser(data);
             showNotification("Sign up successful! Welcome", "success");
-            navigate("/");
+            window.location.href = "/";
 
         } catch (error) {
             if (error.code === "auth/email-already-in-use") {
@@ -80,7 +80,7 @@ const AuthForm = ({ isSignUp }) => {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             showNotification("Sign in successful! Welcome back", "success");
-            navigate("/");
+            window.location.href = "/";
         } catch (error) {
             if (error.code === "auth/user-not-found") {
                 setFormError("No user found with this email");
@@ -107,8 +107,9 @@ const AuthForm = ({ isSignUp }) => {
             const firebaseId = result.user.uid;
 
             try {
+                await getUserByFirebaseId(firebaseId);
                 showNotification("Sign in successful! Welcome back", "success");
-                navigate("/");
+                window.location.href = "/";
             } catch {
                 await createUser({
                     username,
@@ -117,7 +118,7 @@ const AuthForm = ({ isSignUp }) => {
                     firebase_id: firebaseId,
                 });
                 showNotification("Sign up successful! Welcome", "success");
-                navigate("/");
+                window.location.href = "/";
             }
         } catch (error) {
             showNotification("Google authentication failed: " + error.message, "error");
